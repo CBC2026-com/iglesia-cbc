@@ -154,6 +154,8 @@
       if (section === 'peticiones')   await loadPeticiones();
       if (section === 'ofrendas')     await loadOfrendas();
       if (section === 'ministerios')  await loadMinisterios();
+      if (section === 'reportes')     await loadReportes();
+      if (section === 'recursos')     await loadRecursos();
     };
 
     // ── DASHBOARD ──
@@ -479,6 +481,178 @@
     };
 
     // ══════════════════════════════════════════
+    // ── REPORTES ──
+    // ══════════════════════════════════════════
+    async function loadReportes() {
+      const [lidSnap,actSnap,petSnap,anSnap,ofSnap,minSnap] = await Promise.all([
+        getDocs(collection(db,"lideres")),
+        getDocs(collection(db,"actividades")),
+        getDocs(collection(db,"peticiones")),
+        getDocs(collection(db,"anuncios")),
+        getDocs(collection(db,"ofrendas")),
+        getDocs(collection(db,"ministerios"))
+      ]);
+      let totalOf=0, oradasCnt=0;
+      ofSnap.forEach(d=>totalOf+=parseFloat(d.data().monto||0));
+      petSnap.forEach(d=>{ if(d.data().orado) oradasCnt++; });
+
+      // Ofrendas por tipo
+      const ofTipo={};
+      ofSnap.forEach(d=>{ const t=d.data().tipo||'General'; ofTipo[t]=(ofTipo[t]||0)+parseFloat(d.data().monto||0); });
+
+      // Actividades por ministerio
+      const actMin={};
+      actSnap.forEach(d=>{ const m=d.data().ministerio||'General'; actMin[m]=(actMin[m]||0)+1; });
+
+      // Líderes por rol
+      const RLBL={pastor_principal:'Pastor Principal',pastor_asociado:'Pastor Asociado',
+        lider_ministerio:'Líder de Ministerio',servidor:'Servidor',administrador:'Administrador'};
+      const lidRol={};
+      lidSnap.forEach(d=>{ const r=d.data().rol||'otro'; lidRol[r]=(lidRol[r]||0)+1; });
+
+      // Render resumen
+      document.getElementById('rep-resumen').innerHTML = `
+        <div class="rep-stat"><span class="rep-icon">👥</span><span class="rep-num">${lidSnap.size}</span><span class="rep-lbl">Líderes</span></div>
+        <div class="rep-stat"><span class="rep-icon">📅</span><span class="rep-num">${actSnap.size}</span><span class="rep-lbl">Actividades</span></div>
+        <div class="rep-stat"><span class="rep-icon">🙏</span><span class="rep-num">${petSnap.size}</span><span class="rep-lbl">Peticiones</span></div>
+        <div class="rep-stat"><span class="rep-icon">✅</span><span class="rep-num">${oradasCnt}</span><span class="rep-lbl">Oradas</span></div>
+        <div class="rep-stat"><span class="rep-icon">📢</span><span class="rep-num">${anSnap.size}</span><span class="rep-lbl">Anuncios</span></div>
+        <div class="rep-stat"><span class="rep-icon">✝️</span><span class="rep-num">${minSnap.size}</span><span class="rep-lbl">Ministerios</span></div>
+        <div class="rep-stat rep-total"><span class="rep-icon">💝</span><span class="rep-num">$${totalOf.toLocaleString('es')}</span><span class="rep-lbl">Total Ofrendas</span></div>
+      `;
+
+      // Tabla ofrendas
+      let ofHtml='';
+      for(const[t,m] of Object.entries(ofTipo)){
+        const pct=totalOf?Math.round((m/totalOf)*100):0;
+        ofHtml+=`<tr>
+          <td>${t}</td>
+          <td style="font-weight:700;color:var(--green)">$${m.toLocaleString('es')}</td>
+          <td><div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;height:7px;background:#ece8f5;border-radius:8px;overflow:hidden">
+              <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#9b8ec4,#e8a0b4);border-radius:8px"></div>
+            </div><small style="color:var(--muted);min-width:28px">${pct}%</small>
+          </div></td>
+        </tr>`;
+      }
+      document.getElementById('rep-tabla-ofrendas').innerHTML = ofHtml||'<tr><td colspan="3" class="empty-msg">Sin datos</td></tr>';
+
+      // Tabla actividades
+      let actHtml='';
+      for(const[m,c] of Object.entries(actMin))
+        actHtml+=`<tr><td>${m}</td><td style="font-weight:700;color:var(--purple)">${c}</td></tr>`;
+      document.getElementById('rep-tabla-act').innerHTML = actHtml||'<tr><td colspan="2" class="empty-msg">Sin datos</td></tr>';
+
+      // Tabla roles
+      let rolHtml='';
+      for(const[r,c] of Object.entries(lidRol))
+        rolHtml+=`<tr><td>${RLBL[r]||r}</td><td style="font-weight:700;color:var(--blue)">${c}</td></tr>`;
+      document.getElementById('rep-tabla-roles').innerHTML = rolHtml||'<tr><td colspan="2" class="empty-msg">Sin datos</td></tr>';
+    }
+
+    window.exportarCSV = () => {
+      const fecha = new Date().toLocaleDateString('es');
+      let csv = `"REPORTE COMUNIDAD BÍBLICA CRISTIANA"\n"Generado:","${fecha}"\n\n`;
+      csv += '"RESUMEN GENERAL"\n';
+      document.querySelectorAll('#rep-resumen .rep-stat').forEach(c=>{
+        const lbl=c.querySelector('.rep-lbl')?.textContent||'';
+        const num=c.querySelector('.rep-num')?.textContent||'';
+        csv+=`"${lbl}","${num}"\n`;
+      });
+      csv+='\n"OFRENDAS POR TIPO","MONTO","PORCENTAJE"\n';
+      document.querySelectorAll('#rep-tabla-ofrendas tr').forEach(r=>{
+        const cells=[...r.querySelectorAll('td')];
+        if(cells[0]) csv+=`"${cells[0].textContent}","${cells[1]?.textContent||''}","${cells[2]?.textContent?.trim()||''}"\n`;
+      });
+      const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url;
+      a.download=`reporte-cbc-${new Date().toISOString().slice(0,10)}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+      showToast('📊 CSV exportado exitosamente','success');
+    };
+
+    window.imprimirReporte = () => window.print();
+
+    // ══════════════════════════════════════════
+    // ── RECURSOS (Prédicas, Guías, etc.) ──
+    // ══════════════════════════════════════════
+    async function loadRecursos(filtro='todos') {
+      const snap = await getDocs(query(collection(db,"recursos"),orderBy("creadoEn","desc")));
+      const list = document.getElementById('lista-recursos');
+      list.innerHTML='';
+      const iconos={predica:'🎤',guia:'📖',manual:'📋',video:'🎬',audio:'🎵',otro:'📄'};
+      let count=0;
+      snap.forEach(d=>{
+        const r=d.data();
+        if(filtro!=='todos' && r.tipo!==filtro) return;
+        count++;
+        const ico=iconos[r.tipo]||'📄';
+        const puedeAdmin=canAdmin()||canPastor();
+        list.innerHTML+=`
+          <div class="card-item recurso-card">
+            <div class="card-item-header">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:2rem;line-height:1">${ico}</span>
+                <div>
+                  <strong style="color:var(--dark)">${r.titulo}</strong>
+                  <div style="font-size:.76rem;color:var(--muted);margin-top:2px">
+                    👤 ${r.autor||'—'} &nbsp;·&nbsp; 📅 ${r.fecha||'—'}
+                    ${r.ministerio?` &nbsp;·&nbsp; ✝️ ${r.ministerio}`:''}
+                  </div>
+                </div>
+              </div>
+              <span class="tag-badge" style="background:var(--mint)50;color:#2d7a4f">${r.tipo||'recurso'}</span>
+            </div>
+            ${r.descripcion?`<p style="margin:10px 0 6px">${r.descripcion}</p>`:''}
+            <div class="card-item-footer">
+              <div class="rec-actions">
+                ${r.url?`<a href="${r.url}" target="_blank" class="btn-pray"><i class="fa fa-external-link-alt"></i> Abrir enlace</a>`:''}
+                ${r.archivo?`<a href="${r.archivo}" target="_blank" class="btn-pray"><i class="fa fa-download"></i> Descargar</a>`:''}
+              </div>
+              ${puedeAdmin?`<button class="btn-del" onclick="deleteRecurso('${d.id}')"><i class="fa fa-trash"></i> Eliminar</button>`:''}
+            </div>
+          </div>`;
+      });
+      if(!count) list.innerHTML='<p class="empty-msg">No hay recursos de este tipo aún</p>';
+    }
+
+    window.saveRecurso = async () => {
+      if(!canAdmin()&&!canPastor()){ showToast("⛔ Solo pastores y admin pueden subir recursos","error"); return; }
+      const titulo     =document.getElementById('recTitulo').value.trim();
+      const tipo       =document.getElementById('recTipo').value;
+      const autor      =document.getElementById('recAutor').value.trim();
+      const fecha      =document.getElementById('recFecha').value;
+      const ministerio =document.getElementById('recMinisterio').value;
+      const descripcion=document.getElementById('recDesc').value.trim();
+      const url        =document.getElementById('recUrl').value.trim();
+      const archivo    =document.getElementById('recArchivo').value.trim();
+      if(!titulo){ showToast("Escribe el título del recurso","error"); return; }
+      if(!url&&!archivo){ showToast("Agrega al menos un enlace o URL","error"); return; }
+      setLoading('btnRecurso',true);
+      await addDoc(collection(db,"recursos"),{
+        titulo,tipo,autor,fecha,ministerio,descripcion,url,archivo,
+        subidoPor:currentProfile.nombre, creadoEn:serverTimestamp()
+      });
+      showToast("📚 Recurso guardado correctamente","success");
+      document.getElementById('formRecurso').reset();
+      await loadRecursos();
+      setLoading('btnRecurso',false);
+    };
+
+    window.deleteRecurso = async (id) => {
+      if(!confirm("¿Eliminar este recurso?")) return;
+      await deleteDoc(doc(db,"recursos",id));
+      showToast("🗑️ Recurso eliminado","success");
+      loadRecursos(document.getElementById('filtroTipo')?.value||'todos');
+    };
+
+    window.filtrarRecursos = () => {
+      const v=document.getElementById('filtroTipo').value;
+      loadRecursos(v);
+    };
+
+    // ══════════════════════════════════════════
     // HELPERS DE ROLES
     // ══════════════════════════════════════════
     function canAdmin()  { return currentProfile?.rol === 'administrador'; }
@@ -740,6 +914,85 @@
       .menu-toggle { display:flex!important; }
     }
     .menu-toggle { display:none; position:fixed; top:16px; left:16px; z-index:200; width:42px; height:42px; border-radius:12px; background:var(--purple); color:#fff; border:none; font-size:1.1rem; cursor:pointer; align-items:center; justify-content:center; }
+
+    /* ── ACCESOS RÁPIDOS DASHBOARD ── */
+    .dash-accesos {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:16px; margin-bottom:28px;
+    }
+    .acceso-card {
+      border-radius:var(--radius); padding:22px 18px; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+      text-align:center; transition:.25s; box-shadow:var(--shadow);
+      border:none;
+    }
+    .acceso-card:hover { transform:translateY(-4px); box-shadow:0 10px 32px rgba(100,80,160,.2); }
+    .acceso-icon  { font-size:2.2rem; }
+    .acceso-title { font-weight:700; font-size:.95rem; color:var(--dark); }
+    .acceso-sub   { font-size:.75rem; color:var(--muted); }
+    .ac-purple { background:var(--lavender); }
+    .ac-green  { background:var(--mint); }
+    .ac-blue   { background:var(--sky); }
+    .ac-rose   { background:var(--blush); }
+
+    /* ── REPORTES ── */
+    .rep-resumen {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+      gap:16px; margin-bottom:28px;
+    }
+    .rep-stat {
+      background:#fff; border-radius:var(--radius); padding:20px 14px;
+      box-shadow:var(--shadow); text-align:center;
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+    }
+    .rep-stat.rep-total {
+      background:linear-gradient(135deg,var(--purple),var(--rose));
+      grid-column:span 2;
+    }
+    .rep-stat.rep-total .rep-num,
+    .rep-stat.rep-total .rep-lbl { color:#fff; }
+    .rep-icon { font-size:1.7rem; }
+    .rep-num  { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; color:var(--dark); line-height:1; }
+    .rep-lbl  { font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .rep-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:24px; }
+    @media(max-width:900px){ .rep-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:580px){ .rep-grid{grid-template-columns:1fr;} }
+    .rep-card { background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .rep-card h4 { font-family:'Playfair Display',serif; font-size:1rem; color:var(--dark); margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+    .rep-card table { width:100%; font-size:.84rem; border-collapse:collapse; }
+    .rep-card th { color:var(--muted); font-size:.72rem; text-transform:uppercase; padding:6px 4px; border-bottom:2px solid var(--blush); }
+    .rep-card td { padding:9px 4px; border-bottom:1px solid var(--blush)60; vertical-align:middle; }
+    .rep-card tr:last-child td { border:none; }
+    .rep-actions { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+    .btn-exp {
+      padding:10px 20px; border:none; border-radius:50px; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-weight:700; font-size:.85rem;
+      display:inline-flex; align-items:center; gap:7px; transition:.2s;
+    }
+    .btn-exp:hover { opacity:.85; transform:translateY(-1px); }
+    .btn-exp.green  { background:var(--mint);    color:#2d7a4f; }
+    .btn-exp.purple { background:var(--lavender);color:var(--purple); }
+    .btn-exp.dark   { background:var(--dark);    color:#fff; }
+
+    /* ── RECURSOS ── */
+    .filtro-select {
+      padding:9px 14px; border:2px solid var(--lavender); border-radius:12px;
+      font-family:'Nunito',sans-serif; font-size:.85rem; color:var(--text);
+      background:#fafaf8; outline:none; cursor:pointer; transition:.2s;
+    }
+    .filtro-select:focus { border-color:var(--purple); }
+    .recurso-card { border-left:4px solid var(--mint); }
+    .upload-hint {
+      background:var(--lavender); border-radius:12px; padding:14px 16px;
+      font-size:.83rem; color:var(--purple); margin-bottom:18px; line-height:1.6;
+    }
+    .upload-hint strong { display:block; margin-bottom:4px; font-size:.88rem; }
+    .rec-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+    @media print {
+      .sidebar,.rep-actions,.btn-del,.btn-pray,.menu-toggle,.acceso-card { display:none!important; }
+      .main-content { margin-left:0!important; }
+    }
   </style>
 </head>
 <body>
@@ -828,6 +1081,12 @@
       <div class="nav-item admin-only" data-section="registro" onclick="loadSection('registro')">
         <i class="fa fa-user-plus"></i> Registrar Líder
       </div>
+      <div class="nav-item admin-only" data-section="recursos" onclick="loadSection('recursos')">
+        <i class="fa fa-folder-open"></i> Prédicas & Guías
+      </div>
+      <div class="nav-item admin-only" data-section="reportes" onclick="loadSection('reportes')">
+        <i class="fa fa-chart-bar"></i> Reportes
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -866,6 +1125,30 @@
           <div class="dash-stat-icon">📢</div>
           <div class="dash-stat-num" id="dash-anuncios">—</div>
           <div class="dash-stat-label">Anuncios</div>
+        </div>
+      </div>
+
+      <!-- ── Accesos rápidos ── -->
+      <div class="dash-accesos">
+        <div class="acceso-card ac-purple" onclick="loadSection('reportes')">
+          <span class="acceso-icon">📊</span>
+          <span class="acceso-title">Reportes</span>
+          <span class="acceso-sub">Estadísticas & exportar</span>
+        </div>
+        <div class="acceso-card ac-green" onclick="loadSection('recursos')">
+          <span class="acceso-icon">🎤</span>
+          <span class="acceso-title">Prédicas & Guías</span>
+          <span class="acceso-sub">Biblioteca de recursos</span>
+        </div>
+        <div class="acceso-card ac-blue" onclick="loadSection('actividades')">
+          <span class="acceso-icon">📅</span>
+          <span class="acceso-title">Nueva Actividad</span>
+          <span class="acceso-sub">Programar evento</span>
+        </div>
+        <div class="acceso-card ac-rose" onclick="loadSection('peticiones')">
+          <span class="acceso-icon">🙏</span>
+          <span class="acceso-title">Peticiones</span>
+          <span class="acceso-sub">Ver & orar</span>
         </div>
       </div>
       <div class="dash-grid">
@@ -1099,6 +1382,147 @@
         <div>
           <h3 style="font-family:'Playfair Display',serif;color:var(--dark);margin-bottom:16px;">Registros de Ofrendas</h3>
           <div id="lista-ofrendas"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECCIÓN: REPORTES
+    ══════════════════════════════════════ -->
+    <div id="sec-reportes" class="section-content admin-only">
+      <div class="page-header">
+        <h1>📊 Reportes</h1>
+        <p>Estadísticas completas y exportación de datos</p>
+      </div>
+
+      <div class="rep-actions">
+        <button class="btn-exp green" onclick="exportarCSV()">
+          <i class="fa fa-file-csv"></i> Exportar a Excel / CSV
+        </button>
+        <button class="btn-exp purple" onclick="imprimirReporte()">
+          <i class="fa fa-print"></i> Imprimir Reporte
+        </button>
+        <button class="btn-exp dark" onclick="loadReportes()">
+          <i class="fa fa-sync-alt"></i> Actualizar datos
+        </button>
+      </div>
+
+      <!-- Tarjetas resumen -->
+      <div id="rep-resumen" class="rep-resumen">
+        <p class="empty-msg" style="grid-column:1/-1">Cargando datos...</p>
+      </div>
+
+      <!-- Tablas detalle -->
+      <div class="rep-grid">
+        <div class="rep-card">
+          <h4>💝 Ofrendas por Tipo</h4>
+          <table>
+            <thead><tr><th>Tipo</th><th>Monto</th><th>Porcentaje</th></tr></thead>
+            <tbody id="rep-tabla-ofrendas"></tbody>
+          </table>
+        </div>
+        <div class="rep-card">
+          <h4>📅 Actividades por Ministerio</h4>
+          <table>
+            <thead><tr><th>Ministerio</th><th>Cantidad</th></tr></thead>
+            <tbody id="rep-tabla-act"></tbody>
+          </table>
+        </div>
+        <div class="rep-card">
+          <h4>👥 Líderes por Rol</h4>
+          <table>
+            <thead><tr><th>Rol</th><th>Cantidad</th></tr></thead>
+            <tbody id="rep-tabla-roles"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         SECCIÓN: PRÉDICAS & GUÍAS
+    ══════════════════════════════════════ -->
+    <div id="sec-recursos" class="section-content">
+      <div class="page-header">
+        <h1>🎤 Prédicas & Guías</h1>
+        <p>Biblioteca digital de recursos espirituales</p>
+      </div>
+      <div class="two-col">
+
+        <!-- Formulario subir recurso (admin/pastor) -->
+        <div class="form-card">
+          <h3>📤 Subir Recurso</h3>
+          <div class="upload-hint">
+            <strong>💡 ¿Cómo subir archivos?</strong>
+            Sube tu PDF, audio o video a <strong>Google Drive</strong>, <strong>Dropbox</strong> o
+            <strong>YouTube</strong>, activa el enlace compartido y pégalo aquí.
+          </div>
+          <form id="formRecurso" onsubmit="event.preventDefault(); saveRecurso()">
+            <div class="form-group">
+              <label>Título del recurso *</label>
+              <input type="text" id="recTitulo" placeholder="Ej: Fe que mueve montañas — Ps. Juan"/>
+            </div>
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="recTipo">
+                <option value="predica">🎤 Prédica</option>
+                <option value="guia">📖 Guía de estudio</option>
+                <option value="manual">📋 Manual</option>
+                <option value="video">🎬 Video</option>
+                <option value="audio">🎵 Audio</option>
+                <option value="otro">📄 Otro</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Predicador / Autor</label>
+              <input type="text" id="recAutor" placeholder="Nombre del pastor o autor"/>
+            </div>
+            <div class="form-group">
+              <label>Fecha del mensaje</label>
+              <input type="date" id="recFecha"/>
+            </div>
+            <div class="form-group">
+              <label>Ministerio relacionado</label>
+              <select id="recMinisterio">
+                <option value="">General</option>
+                <option>Alabanza</option><option>Jóvenes</option><option>Damas</option>
+                <option>Caballeros</option><option>Niños</option><option>Misiones</option>
+                <option>Células</option><option>Pastoral</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Descripción / Pasaje bíblico</label>
+              <textarea id="recDesc" placeholder="Breve descripción o versículo base..."></textarea>
+            </div>
+            <div class="form-group">
+              <label>🔗 Enlace (YouTube, Drive, Dropbox...)</label>
+              <input type="url" id="recUrl" placeholder="https://youtube.com/watch?v=..."/>
+            </div>
+            <div class="form-group">
+              <label>📎 URL de descarga directa (PDF, MP3...)</label>
+              <input type="url" id="recArchivo" placeholder="https://drive.google.com/file/..."/>
+            </div>
+            <button type="submit" class="btn-main" id="btnRecurso"
+              data-label="📤 Guardar Recurso">
+              📤 Guardar Recurso
+            </button>
+          </form>
+        </div>
+
+        <!-- Lista de recursos -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <h3 style="font-family:'Playfair Display',serif;color:var(--dark)">Recursos Disponibles</h3>
+            <select id="filtroTipo" class="filtro-select" onchange="filtrarRecursos()">
+              <option value="todos">📂 Todos</option>
+              <option value="predica">🎤 Prédicas</option>
+              <option value="guia">📖 Guías</option>
+              <option value="manual">📋 Manuales</option>
+              <option value="video">🎬 Videos</option>
+              <option value="audio">🎵 Audios</option>
+              <option value="otro">📄 Otros</option>
+            </select>
+          </div>
+          <div id="lista-recursos"></div>
         </div>
       </div>
     </div>
