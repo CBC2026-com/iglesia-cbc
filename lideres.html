@@ -700,11 +700,74 @@
       document.getElementById('userRoleDisplay').textContent  = r.icon+' '+r.label;
       document.getElementById('userEmailDisplay').textContent = currentUser.email;
 
+      // Cargar foto de perfil si existe
+      const savedPhoto = currentProfile.foto || localStorage.getItem('userPhoto_'+currentUser.uid);
+      if(savedPhoto) {
+        const img = document.getElementById('userPhotoImg');
+        const fallback = document.getElementById('userPhotoFallback');
+        img.src = savedPhoto;
+        img.style.display = 'block';
+        fallback.style.display = 'none';
+      }
+
       // Ocultar registro si no es admin
       if (!canAdmin()&&!canPastor()) {
         document.querySelectorAll('.admin-only').forEach(e=>e.style.display='none');
       }
     }
+
+    // ── SUBIR FOTO DE USUARIO ──
+    window.uploadUserPhoto = async (input) => {
+      const file = input.files[0];
+      if(!file) return;
+      if(file.size > 2 * 1024 * 1024) {
+        showToast("⚠️ La foto debe ser menor a 2 MB","error"); return;
+      }
+      document.getElementById('photoUploading').style.display = 'block';
+
+      // Convertir a base64 y redimensionar
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const originalSrc = e.target.result;
+
+        // Redimensionar con canvas a 200x200
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 200; canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          // Crop cuadrado centrado
+          const size = Math.min(img.width, img.height);
+          const sx = (img.width - size) / 2;
+          const sy = (img.height - size) / 2;
+          ctx.beginPath();
+          ctx.arc(100, 100, 100, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+          const base64 = canvas.toDataURL('image/jpeg', 0.85);
+
+          // Guardar en Firestore y localStorage
+          try {
+            await updateDoc(doc(db, "lideres", currentUser.uid), { foto: base64 });
+            localStorage.setItem('userPhoto_'+currentUser.uid, base64);
+          } catch(err) {
+            // Si falla Firestore solo usa localStorage
+            localStorage.setItem('userPhoto_'+currentUser.uid, base64);
+          }
+
+          // Mostrar foto en sidebar
+          const photoImg = document.getElementById('userPhotoImg');
+          const fallback = document.getElementById('userPhotoFallback');
+          photoImg.src = base64;
+          photoImg.style.display = 'block';
+          fallback.style.display = 'none';
+          document.getElementById('photoUploading').style.display = 'none';
+          showToast("✅ Foto de perfil actualizada","success");
+        };
+        img.src = originalSrc;
+      };
+      reader.readAsDataURL(file);
+    };
 
     window.showToast = (msg, type='success') => {
       const t = document.getElementById('toast');
@@ -823,6 +886,33 @@
     .user-name  { font-weight:700; color:#fff; font-size:.95rem; }
     .user-role  { font-size:.78rem; color:var(--rose); margin-top:2px; }
     .user-email { font-size:.72rem; color:rgba(255,255,255,.4); margin-top:2px; }
+
+    /* ── FOTO DE USUARIO ── */
+    .user-photo-wrap {
+      display:flex; flex-direction:column; align-items:center; margin-bottom:14px;
+    }
+    .user-photo-ring {
+      width:72px; height:72px; border-radius:50%;
+      border:3px solid rgba(255,255,255,.2); padding:2px;
+      cursor:pointer; position:relative; transition:.25s;
+    }
+    .user-photo-ring:hover { border-color:var(--rose); }
+    .user-photo-ring:hover .photo-overlay { opacity:1; }
+    .user-photo-img {
+      width:100%; height:100%; border-radius:50%; object-fit:cover;
+      background:linear-gradient(135deg,var(--lavender),var(--blush));
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.8rem;
+    }
+    .photo-overlay {
+      position:absolute; inset:0; border-radius:50%;
+      background:rgba(0,0,0,.5); display:flex; align-items:center;
+      justify-content:center; opacity:0; transition:.2s; cursor:pointer;
+    }
+    .photo-overlay i { color:#fff; font-size:.9rem; }
+    .photo-overlay span { color:#fff; font-size:.6rem; font-weight:700; margin-top:2px; display:block; text-align:center; }
+    .photo-upload-input { display:none; }
+    .photo-uploading { font-size:.68rem; color:var(--rose); margin-top:6px; display:none; }
     .sidebar-nav { padding:16px 12px; flex:1; }
     .sidebar-section-title { font-size:.68rem; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:2px; padding:8px 12px 4px; }
     .nav-item {
@@ -925,8 +1015,8 @@
     }
     .btn-pagos:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(15,52,96,.45); }
     .btn-pagos i:first-child { font-size:1.8rem; color:#f7d060; flex-shrink:0; }
-    .btn-pagos-title { display:block; font-size:1rem; font-weight:700; color:#fff; margin-bottom:3px; }
-    .btn-pagos-sub { display:block; font-size:.78rem; color:rgba(255,255,255,.55); }
+    .btn-pagos-title { display:block; font-size:1rem; font-weight:600; color:#fff; margin-bottom:3px; }
+    .btn-pagos-sub { display:block; font-size:.78rem; color:rgba(255,255,255,.55); font-weight:400; }
     .btn-pagos-arrow { margin-left:auto; color:rgba(255,255,255,.3); font-size:1rem; flex-shrink:0; }
 
     /* ── MODAL ── */
@@ -1143,6 +1233,26 @@
         <div class="sidebar-logo-text">CBC <span>Panel de Líderes</span></div>
       </div>
       <div class="user-card">
+        <!-- Foto de usuario -->
+        <div class="user-photo-wrap">
+          <div class="user-photo-ring" onclick="document.getElementById('photoInput').click()" title="Cambiar foto">
+            <img src="" alt="Foto" class="user-photo-img" id="userPhotoImg"
+                 onerror="this.src=''" style="display:none"/>
+            <div class="user-photo-img" id="userPhotoFallback" style="display:flex">👤</div>
+            <div class="photo-overlay">
+              <div style="text-align:center">
+                <i class="fa fa-camera"></i>
+                <span>Cambiar</span>
+              </div>
+            </div>
+          </div>
+          <input type="file" id="photoInput" class="photo-upload-input"
+                 accept="image/png,image/jpeg,image/webp"
+                 onchange="uploadUserPhoto(this)"/>
+          <div class="photo-uploading" id="photoUploading">
+            <i class="fa fa-spinner fa-spin"></i> Guardando foto...
+          </div>
+        </div>
         <div class="user-name" id="userNameDisplay">—</div>
         <div class="user-role" id="userRoleDisplay">—</div>
         <div class="user-email" id="userEmailDisplay">—</div>
