@@ -174,13 +174,18 @@
       // Últimas peticiones
       const petList = document.getElementById('dash-peticiones-list');
       petList.innerHTML = '';
-      petSnap.forEach(d => {
-        const p = d.data();
+      const petDocs = [];
+      petSnap.forEach(d => petDocs.push({ id: d.id, ...d.data() }));
+      petDocs.sort((a,b) => (b.creadoEn?.seconds||0) - (a.creadoEn?.seconds||0));
+      petDocs.slice(0,5).forEach(p => {
+        const nombre = p.nombre || p.name || 'Anónimo';
+        const tipo   = p.tipo   || p.category || 'General';
+        const fecha  = p.fecha  || (p.creadoEn?.toDate ? p.creadoEn.toDate().toLocaleDateString('es') : '');
         petList.innerHTML += `
           <div class="dash-list-item">
             <span class="dash-list-icon">🙏</span>
-            <div><strong>${p.nombre||'Anónimo'}</strong><br>
-            <small>${p.tipo||''} · ${p.fecha||''}</small></div>
+            <div><strong>${nombre}</strong><br>
+            <small>${tipo} · ${fecha}</small></div>
           </div>`;
       });
       if (!petSnap.size) petList.innerHTML = '<p class="empty-msg">No hay peticiones aún</p>';
@@ -337,30 +342,65 @@
 
     // ── PETICIONES DE ORACIÓN ──
     async function loadPeticiones() {
-      const snap = await getDocs(query(collection(db,"peticiones"), orderBy("fecha","desc")));
       const list = document.getElementById('lista-peticiones');
+      list.innerHTML = '<p class="empty-msg"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>';
+
+      // Sin orderBy para evitar problemas de índice — ordenamos en el cliente
+      const snap = await getDocs(collection(db,"peticiones"));
+
       list.innerHTML = '';
-      snap.forEach(d => {
-        const p = d.data();
+
+      if (!snap || snap.empty) {
+        list.innerHTML = '<p class="empty-msg">No hay peticiones de oración aún</p>';
+        return;
+      }
+
+      // Ordenar en el cliente por fecha de creación (más reciente primero)
+      const docs = [];
+      snap.forEach(d => docs.push({ id: d.id, ...d.data() }));
+      docs.sort((a,b) => {
+        const ta = a.creadoEn?.seconds || 0;
+        const tb = b.creadoEn?.seconds || 0;
+        return tb - ta;
+      });
+
+      docs.forEach(p => {
+        const texto  = p.peticion || p.mensaje || p.contenido || '—';
+        const nombre = p.nombre   || p.name    || 'Anónimo';
+        const tipo   = p.tipo     || p.category || 'General';
+        const correo = p.correo   || p.email   || '';
+        const origen = p.origen   || 'Panel';
+        const fecha  = p.fecha    ||
+          (p.creadoEn?.toDate ? p.creadoEn.toDate().toLocaleDateString('es',
+            {day:'2-digit',month:'2-digit',year:'numeric'}) : '—');
+
         list.innerHTML += `
           <div class="card-item prayer-card">
             <div class="card-item-header">
-              <strong>🙏 ${p.nombre||'Anónimo'}</strong>
-              <span class="tag-badge" style="background:#dcd4f550;color:#6a5aad">${p.tipo||'General'}</span>
+              <div>
+                <strong>🙏 ${nombre}</strong>
+                ${correo ? `<div style="font-size:.75rem;color:var(--muted);margin-top:2px">✉️ ${correo}</div>` : ''}
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+                <span class="tag-badge" style="background:#dcd4f550;color:#6a5aad">${tipo}</span>
+                <span class="tag-badge" style="background:#c9e8f550;color:#2a6a8a;font-size:.68rem">${origen}</span>
+              </div>
             </div>
-            <p>${p.peticion||p.mensaje||''}</p>
+            <p style="margin:10px 0;line-height:1.6">${texto}</p>
             <div class="card-item-footer">
-              <small>📅 ${p.fecha||''}</small>
+              <small style="color:var(--muted)">📅 ${fecha}</small>
               <div style="display:flex;gap:8px">
-                <button class="btn-pray" onclick="markPrayed('${d.id}','${p.orado}')">
-                  ${p.orado?'✅ Orado':'🙏 Marcar orado'}</button>
-                ${canAdmin()||canPastor()?`<button class="btn-del" onclick="deletePeticion('${d.id}')">
-                  <i class="fa fa-trash"></i></button>`:''}
+                <button class="btn-pray" onclick="markPrayed('${p.id}',${!!p.orado})">
+                  ${p.orado ? '✅ Orado' : '🙏 Marcar orado'}
+                </button>
+                ${canAdmin()||canPastor() ? `
+                  <button class="btn-del" onclick="deletePeticion('${p.id}')">
+                    <i class="fa fa-trash"></i>
+                  </button>` : ''}
               </div>
             </div>
           </div>`;
       });
-      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay peticiones de oración</p>';
     }
 
     window.markPrayed = async (id, current) => {
