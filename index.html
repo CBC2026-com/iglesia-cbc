@@ -4,6 +4,59 @@
   <title>Comunidad Bíblica Cristiana | Iglesia Evangélica</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Nunito:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- ══ FIREBASE — Peticiones de Oración ══ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
+      authDomain:        "iglesia-cbc.firebaseapp.com",
+      projectId:         "iglesia-cbc",
+      storageBucket:     "iglesia-cbc.firebasestorage.app",
+      messagingSenderId: "365457083043",
+      appId:             "1:365457083043:web:b12ecdd14e17fa2a864d16"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // ── NÚMERO WHATSAPP DEL PASTOR ──
+    // Cambia este número por el real (solo dígitos, con código de país)
+    const WA_PASTOR = "584245206320";
+
+    window._savePrayer = async (nombre, correo, tipo, peticion) => {
+      const fecha = new Date().toLocaleDateString('es', {
+        day:'2-digit', month:'2-digit', year:'numeric',
+        hour:'2-digit', minute:'2-digit'
+      });
+
+      // 1️⃣ Guardar en Firebase Firestore
+      try {
+        await addDoc(collection(db, "peticiones"), {
+          nombre, correo, tipo, peticion,
+          fecha, orado: false,
+          origen: "Sitio Web",
+          creadoEn: serverTimestamp()
+        });
+      } catch(e) {
+        console.warn("Firebase error:", e.message);
+      }
+
+      // 2️⃣ Notificar al pastor por WhatsApp
+      const msg = encodeURIComponent(
+        `🙏 *NUEVA PETICIÓN DE ORACIÓN*\n\n` +
+        `👤 *Nombre:* ${nombre}\n` +
+        `📋 *Tipo:* ${tipo}\n` +
+        `📅 *Fecha:* ${fecha}\n\n` +
+        `💬 *Petición:*\n${peticion}\n\n` +
+        `_Enviado desde el sitio web de la Iglesia CBC_`
+      );
+      window.open(`https://wa.me/${WA_PASTOR}?text=${msg}`, '_blank');
+    };
+  </script>
   <style>
     :root {
       --blush:    #f7d9e3;
@@ -68,13 +121,6 @@
       color:#fff !important; border-radius:30px; padding:8px 20px !important;
     }
     .nav-cta:hover { opacity:.9; background: linear-gradient(135deg, var(--purple), var(--rose)) !important; }
-    .nav-lideres {
-      background: var(--dark) !important;
-      color:#fff !important; border-radius:30px; padding:8px 16px !important;
-      font-size:.82rem !important; display:flex; align-items:center; gap:6px;
-      border: 1px solid rgba(155,142,196,.4);
-    }
-    .nav-lideres:hover { background: #2d2550 !important; opacity:1 !important; }
     .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:5px; }
     .hamburger span { display:block; width:24px; height:2px; background:var(--dark); border-radius:2px; transition:.3s; }
     .mobile-menu { display:none; position:fixed; top:68px; left:0; right:0; background:var(--white); border-bottom:1px solid var(--blush); padding:20px 30px; z-index:998; flex-direction:column; gap:10px; }
@@ -486,8 +532,7 @@
     <li><a href="#peticiones"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Oración</font></font></a></li>
     <li><a href="#ofrendas"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ofrendas</font></font></a></li>
     <li><a href="#contacto"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Contacto</font></font></a></li>
-    <li><a href="#peticiones" class="nav-cta">🙏 Orar</a></li>
-    <li><a href="lideres.html" class="nav-lideres" target="_blank">🔐 Panel Líderes</a></li>
+    <li><a href="#peticiones" class="nav-cta"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏 Orar</font></font></a></li>
   </ul>
   <div class="hamburger" onclick="toggleMenu()">
     <span></span><span></span><span></span>
@@ -502,8 +547,7 @@
   <a href="#actividades" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📅 </font></font></a>
   <a href="#peticiones" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏 Peticiones </font></font></a>
   <a href="#ofrendas" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💝 Ofrendas </font></font></a>
-  <a href="#contacto" onclick="toggleMenu()">📩 Contacto</a>
-  <a href="lideres.html" target="_blank" style="background:linear-gradient(135deg,#9b8ec4,#e8a0b4);color:#fff;border-radius:10px;padding:12px 16px;font-weight:700;border-bottom:none;">🔐 Panel de Líderes</a>
+  <a href="#contacto" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📩 Contacto</font></font></a>
 </div>
 
 <!-- ────────────── HERO ────────────── -->
@@ -823,30 +867,32 @@
         <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Envía tu Petición</font></font></h2>
         <form onsubmit="submitPrayer(event)">
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Tu nombre</font></font></label>
-            <input type="text" placeholder="¿Cómo te llamas?" required="">
+            <label>Tu nombre</label>
+            <input type="text" id="prayNombre" placeholder="¿Cómo te llamas?" required>
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Correo electrónico</font></font></label>
-            <input type="email" placeholder="tucorreo@ejemplo.com">
+            <label>Correo electrónico</label>
+            <input type="email" id="prayCorreo" placeholder="tucorreo@ejemplo.com">
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Tipo de petición</font></font></label>
-            <select>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Salud y sanidad</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Familia y relaciones</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Provisión económica</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Salvación de un ser querido</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Trabajo y vocación</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Paz y dirección</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Otra petición</font></font></option>
+            <label>Tipo de petición</label>
+            <select id="prayTipo">
+              <option>Salud y sanidad</option>
+              <option>Familia y relaciones</option>
+              <option>Provisión económica</option>
+              <option>Salvación de un ser querido</option>
+              <option>Trabajo y vocación</option>
+              <option>Paz y dirección</option>
+              <option>Otra petición</option>
             </select>
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comparte tu petición</font></font></label>
-            <textarea placeholder="Cuéntanos por qué necesitas oración..." required=""></textarea>
+            <label>Comparte tu petición</label>
+            <textarea id="prayPeticion" placeholder="Cuéntanos por qué necesitas oración..." required></textarea>
           </div>
-          <button type="submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Enviar Petición de Oración</font></font></button>
+          <button type="submit" class="btn-submit" id="btnPrayer">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Petición de Oración
+          </button>
         </form>
       </div>
 
@@ -1189,11 +1235,31 @@
     setTimeout(()=>t.classList.remove('show'), 3200);
   }
 
-  // Prayer form
-  function submitPrayer(e){
+  // Prayer form — Firebase + WhatsApp
+  async function submitPrayer(e){
     e.preventDefault();
-    showToast('🙏 ¡Petición enviada! Oraremos por ti.');
-    e.target.reset();
+    const nombre   = document.getElementById('prayNombre').value.trim();
+    const correo   = document.getElementById('prayCorreo').value.trim();
+    const tipo     = document.getElementById('prayTipo').value;
+    const peticion = document.getElementById('prayPeticion').value.trim();
+
+    const btn = document.getElementById('btnPrayer');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+      // Llama a la función del módulo Firebase
+      if(window._savePrayer) {
+        await window._savePrayer(nombre, correo, tipo, peticion);
+      }
+      showToast('🙏 ¡Petición enviada! El pastor fue notificado.');
+      e.target.reset();
+    } catch(err) {
+      showToast('⚠️ Error al enviar. Intenta de nuevo.');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Petición de Oración';
   }
 
   // Contact form
