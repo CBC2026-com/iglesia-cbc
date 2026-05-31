@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel de Líderes | Comunidad Bíblica Cristiana</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+             signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, addDoc,
+             getDocs, updateDoc, deleteDoc, query, orderBy, serverTimestamp }
+             from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // ══════════════════════════════════════════
+    // ✅ CONFIGURACIÓN FIREBASE — IGLESIA CBC
+    // ══════════════════════════════════════════
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
+      authDomain:        "iglesia-cbc.firebaseapp.com",
+      projectId:         "iglesia-cbc",
+      storageBucket:     "iglesia-cbc.firebasestorage.app",
+      messagingSenderId: "365457083043",
+      appId:             "1:365457083043:web:b12ecdd14e17fa2a864d16",
+      measurementId:     "G-JZPCFYSYYX"
+    };
+
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // ── Roles disponibles ──
+    const ROLES = {
+      pastor_principal:  { label: "Pastor Principal",   icon: "✝️",  color: "#9b8ec4" },
+      pastor_asociado:   { label: "Pastor Asociado",    icon: "🙏",  color: "#e8a0b4" },
+      lider_ministerio:  { label: "Líder de Ministerio",icon: "🌟",  color: "#6bbf8e" },
+      servidor:          { label: "Servidor",            icon: "🤝",  color: "#6aaccc" },
+      administrador:     { label: "Administrador",       icon: "⚙️",  color: "#d4a84b" }
+    };
+
+    // ── Estado global ──
+    let currentUser   = null;
+    let currentProfile= null;
+    let activeSection = 'dashboard';
+
+    // ══════════════════════════════════════════
+    // AUTH OBSERVER
+    // ══════════════════════════════════════════
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+        const snap = await getDoc(doc(db, "lideres", user.uid));
+        if (snap.exists()) {
+          currentProfile = snap.data();
+          showPanel();
+          loadSection('dashboard');
+        } else {
+          showToast("⚠️ Usuario no registrado en el sistema.", "error");
+          await signOut(auth);
+          showLogin();
+        }
+      } else {
+        currentUser  = null;
+        currentProfile = null;
+        showLogin();
+      }
+    });
+
+    // ══════════════════════════════════════════
+    // LOGIN
+    // ══════════════════════════════════════════
+    window.doLogin = async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass  = document.getElementById('loginPass').value;
+      if (!email || !pass) { showToast("Completa todos los campos", "error"); return; }
+      setLoading('btnLogin', true);
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        showToast("✅ Bienvenido al panel", "success");
+      } catch(e) {
+        showToast("❌ Correo o contraseña incorrectos", "error");
+      }
+      setLoading('btnLogin', false);
+    };
+
+    // ══════════════════════════════════════════
+    // REGISTRO DE NUEVO LÍDER
+    // ══════════════════════════════════════════
+    window.doRegister = async () => {
+      const nombre   = document.getElementById('regNombre').value.trim();
+      const email    = document.getElementById('regEmail').value.trim();
+      const pass     = document.getElementById('regPass').value;
+      const rol      = document.getElementById('regRol').value;
+      const telefono = document.getElementById('regTel').value.trim();
+      const ministerio = document.getElementById('regMinisterio').value.trim();
+
+      if (!nombre||!email||!pass||!rol) { showToast("Completa todos los campos obligatorios","error"); return; }
+      if (pass.length < 6) { showToast("La contraseña debe tener al menos 6 caracteres","error"); return; }
+
+      // Solo admin y pastor principal pueden registrar
+      if (!['administrador','pastor_principal'].includes(currentProfile?.rol)) {
+        showToast("⛔ Solo el administrador puede crear usuarios","error"); return;
+      }
+
+      setLoading('btnRegister', true);
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "lideres", cred.user.uid), {
+          nombre, email, rol, telefono, ministerio,
+          activo: true,
+          creadoPor: currentUser.uid,
+          creadoEn: serverTimestamp()
+        });
+        // Volver a logear al admin (Firebase cambia el usuario activo al crear)
+        showToast(`✅ Líder "${nombre}" registrado exitosamente`, "success");
+        document.getElementById('formRegister').reset();
+        loadSection('miembros');
+      } catch(e) {
+        if (e.code === 'auth/email-already-in-use')
+          showToast("❌ Ese correo ya está registrado","error");
+        else
+          showToast("❌ Error al registrar: "+e.message,"error");
+      }
+      setLoading('btnRegister', false);
+    };
+
+    // ══════════════════════════════════════════
+    // CERRAR SESIÓN
+    // ══════════════════════════════════════════
+    window.doLogout = async () => {
+      await signOut(auth);
+      showToast("👋 Sesión cerrada", "success");
+    };
+
+    // ══════════════════════════════════════════
+    // CARGAR SECCIONES
+    // ══════════════════════════════════════════
+    window.loadSection = async (section) => {
+      activeSection = section;
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      const navEl = document.querySelector(`[data-section="${section}"]`);
+      if (navEl) navEl.classList.add('active');
+      document.querySelectorAll('.section-content').forEach(s => s.style.display = 'none');
+      const sec = document.getElementById('sec-'+section);
+      if (sec) sec.style.display = 'block';
+
+      if (section === 'dashboard')    await loadDashboard();
+      if (section === 'miembros')     await loadMiembros();
+      if (section === 'anuncios')     await loadAnuncios();
+      if (section === 'actividades')  await loadActividades();
+      if (section === 'peticiones')   await loadPeticiones();
+      if (section === 'ofrendas')     await loadOfrendas();
+      if (section === 'ministerios')  await loadMinisterios();
+    };
+
+    // ── DASHBOARD ──
+    async function loadDashboard() {
+      const [lidSnap, actSnap, petSnap, anSnap] = await Promise.all([
+        getDocs(collection(db,"lideres")),
+        getDocs(collection(db,"actividades")),
+        getDocs(collection(db,"peticiones")),
+        getDocs(collection(db,"anuncios"))
+      ]);
+      document.getElementById('dash-lideres').textContent    = lidSnap.size;
+      document.getElementById('dash-actividades').textContent= actSnap.size;
+      document.getElementById('dash-peticiones').textContent = petSnap.size;
+      document.getElementById('dash-anuncios').textContent   = anSnap.size;
+
+      // Últimas peticiones
+      const petList = document.getElementById('dash-peticiones-list');
+      petList.innerHTML = '';
+      petSnap.forEach(d => {
+        const p = d.data();
+        petList.innerHTML += `
+          <div class="dash-list-item">
+            <span class="dash-list-icon">🙏</span>
+            <div><strong>${p.nombre||'Anónimo'}</strong><br>
+            <small>${p.tipo||''} · ${p.fecha||''}</small></div>
+          </div>`;
+      });
+      if (!petSnap.size) petList.innerHTML = '<p class="empty-msg">No hay peticiones aún</p>';
+
+      // Próximas actividades
+      const actList = document.getElementById('dash-act-list');
+      actList.innerHTML = '';
+      actSnap.forEach(d => {
+        const a = d.data();
+        actList.innerHTML += `
+          <div class="dash-list-item">
+            <span class="dash-list-icon">📅</span>
+            <div><strong>${a.titulo||''}</strong><br>
+            <small>${a.fecha||''} · ${a.ministerio||'General'}</small></div>
+          </div>`;
+      });
+      if (!actSnap.size) actList.innerHTML = '<p class="empty-msg">No hay actividades programadas</p>';
+    }
+
+    // ── MIEMBROS / LÍDERES ──
+    async function loadMiembros() {
+      const snap = await getDocs(collection(db,"lideres"));
+      const tbody = document.getElementById('tabla-miembros');
+      tbody.innerHTML = '';
+      snap.forEach(d => {
+        const l = d.data();
+        const r = ROLES[l.rol] || { label: l.rol, icon: '👤', color: '#999' };
+        tbody.innerHTML += `
+          <tr>
+            <td><span class="role-badge" style="background:${r.color}20;color:${r.color}">${r.icon} ${r.label}</span></td>
+            <td><strong>${l.nombre}</strong></td>
+            <td>${l.email}</td>
+            <td>${l.telefono||'—'}</td>
+            <td>${l.ministerio||'—'}</td>
+            <td><span class="status-badge ${l.activo?'active':'inactive'}">${l.activo?'Activo':'Inactivo'}</span></td>
+            <td>
+              ${canAdmin()?`<button class="btn-table-del" onclick="deleteLider('${d.id}','${l.nombre}')">
+                <i class="fa fa-trash"></i></button>`:''}
+            </td>
+          </tr>`;
+      });
+      if (!snap.size) tbody.innerHTML = '<tr><td colspan="7" class="empty-msg">No hay líderes registrados</td></tr>';
+    }
+
+    window.deleteLider = async (uid, nombre) => {
+      if (!canAdmin()) { showToast("⛔ Sin permisos","error"); return; }
+      if (!confirm(`¿Eliminar a "${nombre}" del sistema?`)) return;
+      await deleteDoc(doc(db,"lideres",uid));
+      showToast(`🗑️ "${nombre}" eliminado`, "success");
+      loadMiembros();
+    };
+
+    // ── ANUNCIOS ──
+    async function loadAnuncios() {
+      const snap = await getDocs(query(collection(db,"anuncios"), orderBy("creadoEn","desc")));
+      const list = document.getElementById('lista-anuncios');
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const a = d.data();
+        list.innerHTML += `
+          <div class="card-item">
+            <div class="card-item-header">
+              <strong>${a.titulo}</strong>
+              <span class="tag-badge">${a.tipo||'General'}</span>
+            </div>
+            <p>${a.contenido}</p>
+            <div class="card-item-footer">
+              <small>📅 ${a.fecha||''} · ✍️ ${a.autor||''}</small>
+              ${canAdmin()||canPastor()?`<button class="btn-del" onclick="deleteAnuncio('${d.id}')">
+                <i class="fa fa-trash"></i> Eliminar</button>`:''}
+            </div>
+          </div>`;
+      });
+      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay anuncios publicados</p>';
+    }
+
+    window.saveAnuncio = async () => {
+      const titulo   = document.getElementById('anTitulo').value.trim();
+      const contenido= document.getElementById('anContenido').value.trim();
+      const tipo     = document.getElementById('anTipo').value;
+      const fecha    = document.getElementById('anFecha').value;
+      if (!titulo||!contenido) { showToast("Completa título y contenido","error"); return; }
+      setLoading('btnAnuncio',true);
+      await addDoc(collection(db,"anuncios"),{
+        titulo, contenido, tipo, fecha,
+        autor: currentProfile.nombre,
+        autorRol: currentProfile.rol,
+        creadoEn: serverTimestamp()
+      });
+      showToast("📢 Anuncio publicado","success");
+      document.getElementById('formAnuncio').reset();
+      await loadAnuncios();
+      setLoading('btnAnuncio',false);
+    };
+
+    window.deleteAnuncio = async (id) => {
+      if (!confirm("¿Eliminar este anuncio?")) return;
+      await deleteDoc(doc(db,"anuncios",id));
+      showToast("🗑️ Anuncio eliminado","success");
+      loadAnuncios();
+    };
+
+    // ── ACTIVIDADES ──
+    async function loadActividades() {
+      const snap = await getDocs(query(collection(db,"actividades"), orderBy("creadoEn","desc")));
+      const list = document.getElementById('lista-actividades');
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const a = d.data();
+        list.innerHTML += `
+          <div class="card-item">
+            <div class="card-item-header">
+              <strong>${a.titulo}</strong>
+              <span class="tag-badge" style="background:#c9edd850;color:#3a7a55">${a.ministerio||'General'}</span>
+            </div>
+            <p>${a.descripcion||''}</p>
+            <div class="card-item-footer">
+              <small>📅 ${a.fecha||''} ${a.hora?'· ⏰ '+a.hora:''} · 📍 ${a.lugar||''}</small>
+              ${canAdmin()||canPastor()||canLider()?`<button class="btn-del" onclick="deleteActividad('${d.id}')">
+                <i class="fa fa-trash"></i> Eliminar</button>`:''}
+            </div>
+          </div>`;
+      });
+      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay actividades programadas</p>';
+    }
+
+    window.saveActividad = async () => {
+      const titulo     = document.getElementById('actTitulo').value.trim();
+      const descripcion= document.getElementById('actDesc').value.trim();
+      const fecha      = document.getElementById('actFecha').value;
+      const hora       = document.getElementById('actHora').value;
+      const lugar      = document.getElementById('actLugar').value.trim();
+      const ministerio = document.getElementById('actMinisterio').value;
+      const red        = document.getElementById('actRed').value.trim();
+      if (!titulo||!fecha) { showToast("Completa título y fecha","error"); return; }
+      setLoading('btnActividad',true);
+      await addDoc(collection(db,"actividades"),{
+        titulo, descripcion, fecha, hora, lugar, ministerio, red,
+        creadoPor: currentProfile.nombre,
+        creadoEn: serverTimestamp()
+      });
+      showToast("📅 Actividad programada","success");
+      document.getElementById('formActividad').reset();
+      await loadActividades();
+      setLoading('btnActividad',false);
+    };
+
+    window.deleteActividad = async (id) => {
+      if (!confirm("¿Eliminar esta actividad?")) return;
+      await deleteDoc(doc(db,"actividades",id));
+      showToast("🗑️ Actividad eliminada","success");
+      loadActividades();
+    };
+
+    // ── PETICIONES DE ORACIÓN ──
+    async function loadPeticiones() {
+      const snap = await getDocs(query(collection(db,"peticiones"), orderBy("fecha","desc")));
+      const list = document.getElementById('lista-peticiones');
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const p = d.data();
+        list.innerHTML += `
+          <div class="card-item prayer-card">
+            <div class="card-item-header">
+              <strong>🙏 ${p.nombre||'Anónimo'}</strong>
+              <span class="tag-badge" style="background:#dcd4f550;color:#6a5aad">${p.tipo||'General'}</span>
+            </div>
+            <p>${p.peticion||p.mensaje||''}</p>
+            <div class="card-item-footer">
+              <small>📅 ${p.fecha||''}</small>
+              <div style="display:flex;gap:8px">
+                <button class="btn-pray" onclick="markPrayed('${d.id}','${p.orado}')">
+                  ${p.orado?'✅ Orado':'🙏 Marcar orado'}</button>
+                ${canAdmin()||canPastor()?`<button class="btn-del" onclick="deletePeticion('${d.id}')">
+                  <i class="fa fa-trash"></i></button>`:''}
+              </div>
+            </div>
+          </div>`;
+      });
+      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay peticiones de oración</p>';
+    }
+
+    window.markPrayed = async (id, current) => {
+      await updateDoc(doc(db,"peticiones",id),{ orado: !current });
+      showToast(current?"↩️ Marcado como pendiente":"✅ Marcado como orado","success");
+      loadPeticiones();
+    };
+
+    window.deletePeticion = async (id) => {
+      if (!confirm("¿Eliminar esta petición?")) return;
+      await deleteDoc(doc(db,"peticiones",id));
+      showToast("🗑️ Petición eliminada","success");
+      loadPeticiones();
+    };
+
+    // ── OFRENDAS ──
+    async function loadOfrendas() {
+      const snap = await getDocs(query(collection(db,"ofrendas"), orderBy("creadoEn","desc")));
+      const list = document.getElementById('lista-ofrendas');
+      let total  = 0;
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const o = d.data();
+        total += parseFloat(o.monto||0);
+        list.innerHTML += `
+          <div class="card-item">
+            <div class="card-item-header">
+              <strong>💝 ${o.tipo||'Ofrenda'}</strong>
+              <span class="monto-badge">$${parseFloat(o.monto||0).toLocaleString('es')}</span>
+            </div>
+            <p>${o.descripcion||''}</p>
+            <div class="card-item-footer">
+              <small>📅 ${o.fecha||''} · 👤 ${o.registradoPor||''}</small>
+              ${canAdmin()?`<button class="btn-del" onclick="deleteOfrenda('${d.id}')">
+                <i class="fa fa-trash"></i> Eliminar</button>`:''}
+            </div>
+          </div>`;
+      });
+      document.getElementById('total-ofrendas').textContent = '$'+total.toLocaleString('es');
+      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay registros de ofrendas</p>';
+    }
+
+    window.saveOfrenda = async () => {
+      const tipo      = document.getElementById('ofTipo').value;
+      const monto     = document.getElementById('ofMonto').value;
+      const fecha     = document.getElementById('ofFecha').value;
+      const descripcion= document.getElementById('ofDesc').value.trim();
+      if (!monto||!fecha) { showToast("Completa monto y fecha","error"); return; }
+      if (!canAdmin()&&!canPastor()) { showToast("⛔ Sin permisos para registrar ofrendas","error"); return; }
+      setLoading('btnOfrenda',true);
+      await addDoc(collection(db,"ofrendas"),{
+        tipo, monto: parseFloat(monto), fecha, descripcion,
+        registradoPor: currentProfile.nombre,
+        creadoEn: serverTimestamp()
+      });
+      showToast("💝 Ofrenda registrada","success");
+      document.getElementById('formOfrenda').reset();
+      await loadOfrendas();
+      setLoading('btnOfrenda',false);
+    };
+
+    window.deleteOfrenda = async (id) => {
+      if (!confirm("¿Eliminar este registro?")) return;
+      await deleteDoc(doc(db,"ofrendas",id));
+      showToast("🗑️ Registro eliminado","success");
+      loadOfrendas();
+    };
+
+    // ── MINISTERIOS Y REDES ──
+    async function loadMinisterios() {
+      const snap = await getDocs(query(collection(db,"ministerios"), orderBy("creadoEn","desc")));
+      const list = document.getElementById('lista-ministerios');
+      list.innerHTML = '';
+      snap.forEach(d => {
+        const m = d.data();
+        list.innerHTML += `
+          <div class="card-item min-card-item">
+            <div class="card-item-header">
+              <strong>${m.icono||'✝️'} ${m.nombre}</strong>
+              <span class="tag-badge" style="background:#fde4c850;color:#b86a10">${m.tipo||'Ministerio'}</span>
+            </div>
+            <p>${m.descripcion||''}</p>
+            <div class="card-item-footer">
+              <small>👤 Líder: ${m.lider||'—'} · 📅 Reunión: ${m.reunion||'—'}</small>
+              ${canAdmin()||canPastor()?`<button class="btn-del" onclick="deleteMinisterio('${d.id}')">
+                <i class="fa fa-trash"></i> Eliminar</button>`:''}
+            </div>
+          </div>`;
+      });
+      if (!snap.size) list.innerHTML = '<p class="empty-msg">No hay ministerios registrados</p>';
+    }
+
+    window.saveMinisterio = async () => {
+      const nombre     = document.getElementById('minNombre').value.trim();
+      const tipo       = document.getElementById('minTipo').value;
+      const descripcion= document.getElementById('minDesc').value.trim();
+      const lider      = document.getElementById('minLider').value.trim();
+      const reunion    = document.getElementById('minReunion').value.trim();
+      const icono      = document.getElementById('minIcono').value.trim()||'✝️';
+      if (!nombre) { showToast("Escribe el nombre del ministerio","error"); return; }
+      setLoading('btnMinisterio',true);
+      await addDoc(collection(db,"ministerios"),{
+        nombre, tipo, descripcion, lider, reunion, icono,
+        creadoPor: currentProfile.nombre,
+        creadoEn: serverTimestamp()
+      });
+      showToast("✝️ Ministerio/Red guardado","success");
+      document.getElementById('formMinisterio').reset();
+      await loadMinisterios();
+      setLoading('btnMinisterio',false);
+    };
+
+    window.deleteMinisterio = async (id) => {
+      if (!confirm("¿Eliminar este ministerio/red?")) return;
+      await deleteDoc(doc(db,"ministerios",id));
+      showToast("🗑️ Eliminado","success");
+      loadMinisterios();
+    };
+
+    // ══════════════════════════════════════════
+    // HELPERS DE ROLES
+    // ══════════════════════════════════════════
+    function canAdmin()  { return currentProfile?.rol === 'administrador'; }
+    function canPastor() { return ['pastor_principal','pastor_asociado'].includes(currentProfile?.rol); }
+    function canLider()  { return currentProfile?.rol === 'lider_ministerio'; }
+
+    // ══════════════════════════════════════════
+    // UI HELPERS
+    // ══════════════════════════════════════════
+    function showLogin() {
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('panelScreen').style.display = 'none';
+    }
+
+    function showPanel() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('panelScreen').style.display = 'flex';
+      const r = ROLES[currentProfile.rol]||{label:currentProfile.rol,icon:'👤'};
+      document.getElementById('userNameDisplay').textContent  = currentProfile.nombre;
+      document.getElementById('userRoleDisplay').textContent  = r.icon+' '+r.label;
+      document.getElementById('userEmailDisplay').textContent = currentUser.email;
+
+      // Ocultar registro si no es admin
+      if (!canAdmin()&&!canPastor()) {
+        document.querySelectorAll('.admin-only').forEach(e=>e.style.display='none');
+      }
+    }
+
+    window.showToast = (msg, type='success') => {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(()=>t.classList.remove('show'), 3500);
+    };
+
+    window.setLoading = (btnId, loading) => {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? '<i class="fa fa-spinner fa-spin"></i> Procesando...'
+        : btn.dataset.label || btn.innerHTML;
+    };
+
+    // Enter key on login
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('loginPass')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') window.doLogin();
+      });
+    });
+  </script>
+
+  <style>
+    :root {
+      --blush:    #f7d9e3;
+      --lavender: #dcd4f5;
+      --mint:     #c9edd8;
+      --sky:      #c9e8f5;
+      --peach:    #fde4c8;
+      --yellow:   #fdf3c8;
+      --rose:     #e8a0b4;
+      --purple:   #9b8ec4;
+      --green:    #6bbf8e;
+      --blue:     #6aaccc;
+      --gold:     #d4a84b;
+      --white:    #fffcf8;
+      --dark:     #3a3055;
+      --text:     #4a4465;
+      --muted:    #8b85a0;
+      --shadow:   0 4px 24px rgba(100,80,160,0.10);
+      --radius:   16px;
+      --sidebar:  260px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Nunito',sans-serif; background:var(--white); color:var(--text); min-height:100vh; }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      display:flex; align-items:center; justify-content:center;
+      min-height:100vh;
+      background:linear-gradient(160deg, var(--lavender) 0%, var(--blush) 50%, var(--peach) 100%);
+    }
+    .login-card {
+      background:#fff; border-radius:24px; padding:48px 40px;
+      box-shadow:0 16px 60px rgba(100,80,160,.18); width:100%; max-width:420px;
+    }
+    .login-logo {
+      text-align:center; margin-bottom:28px;
+    }
+    .login-logo-icon {
+      width:70px; height:70px; border-radius:50%;
+      background:linear-gradient(135deg,var(--lavender),var(--blush));
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:2rem; color:var(--purple); margin-bottom:12px;
+    }
+    .login-logo h2 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); }
+    .login-logo p  { font-size:.8rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:4px; }
+    .login-badge {
+      background:linear-gradient(135deg,var(--purple),var(--rose));
+      color:#fff; padding:6px 18px; border-radius:30px; font-size:.78rem;
+      font-weight:700; letter-spacing:1px; text-transform:uppercase;
+      display:inline-block; margin-bottom:24px;
+    }
+    .form-group { margin-bottom:16px; }
+    .form-group label { display:block; font-size:.83rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%; padding:12px 16px; border:2px solid #ece8f5;
+      border-radius:12px; font-family:'Nunito',sans-serif; font-size:.92rem;
+      color:var(--text); background:#fafaf8; outline:none; transition:.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--purple); }
+    .form-group textarea { resize:vertical; min-height:90px; }
+    .btn-main {
+      width:100%; padding:13px; border:none; border-radius:50px; cursor:pointer;
+      background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff;
+      font-family:'Nunito',sans-serif; font-weight:700; font-size:1rem; transition:.2s;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-main:hover { opacity:.9; transform:translateY(-1px); }
+    .btn-main:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+    .login-back { display:block; text-align:center; margin-top:16px; color:var(--purple); font-size:.85rem; font-weight:600; text-decoration:none; cursor:pointer; }
+    .login-back:hover { text-decoration:underline; }
+
+    /* ── PANEL ── */
+    #panelScreen { display:none; min-height:100vh; flex-direction:row; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width:var(--sidebar); background:linear-gradient(180deg, var(--dark) 0%, #2d2550 100%);
+      display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0;
+      z-index:100; overflow-y:auto;
+    }
+    .sidebar-header { padding:28px 24px 20px; border-bottom:1px solid rgba(255,255,255,.08); }
+    .sidebar-logo { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+    .sidebar-logo-icon {
+      width:40px; height:40px; border-radius:50%;
+      background:linear-gradient(135deg,var(--lavender),var(--blush));
+      display:flex; align-items:center; justify-content:center; font-size:1.2rem; color:var(--purple);
+    }
+    .sidebar-logo-text { font-family:'Playfair Display',serif; font-size:.95rem; color:#fff; font-weight:700; line-height:1.2; }
+    .sidebar-logo-text span { display:block; font-family:'Nunito',sans-serif; font-size:.68rem; color:rgba(255,255,255,.4); font-weight:400; letter-spacing:1px; text-transform:uppercase; }
+    .user-card { background:rgba(255,255,255,.07); border-radius:12px; padding:14px 16px; }
+    .user-name  { font-weight:700; color:#fff; font-size:.95rem; }
+    .user-role  { font-size:.78rem; color:var(--rose); margin-top:2px; }
+    .user-email { font-size:.72rem; color:rgba(255,255,255,.4); margin-top:2px; }
+    .sidebar-nav { padding:16px 12px; flex:1; }
+    .sidebar-section-title { font-size:.68rem; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:2px; padding:8px 12px 4px; }
+    .nav-item {
+      display:flex; align-items:center; gap:12px; padding:11px 14px;
+      border-radius:12px; cursor:pointer; margin-bottom:3px; transition:.2s;
+      color:rgba(255,255,255,.6); font-size:.9rem; font-weight:600;
+    }
+    .nav-item:hover { background:rgba(255,255,255,.08); color:#fff; }
+    .nav-item.active { background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff; }
+    .nav-item i { width:18px; text-align:center; }
+    .sidebar-footer { padding:16px 12px; border-top:1px solid rgba(255,255,255,.08); }
+    .btn-logout {
+      width:100%; padding:10px; border:1px solid rgba(255,255,255,.15);
+      border-radius:12px; background:transparent; color:rgba(255,255,255,.6);
+      cursor:pointer; font-family:'Nunito',sans-serif; font-size:.88rem;
+      display:flex; align-items:center; justify-content:center; gap:8px; transition:.2s;
+    }
+    .btn-logout:hover { background:rgba(255,80,80,.15); color:#ff8080; border-color:rgba(255,80,80,.3); }
+
+    /* MAIN */
+    .main-content {
+      margin-left:var(--sidebar); flex:1; padding:32px;
+      min-height:100vh; background:#f8f6ff;
+    }
+    .page-header { margin-bottom:28px; }
+    .page-header h1 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--dark); }
+    .page-header p  { color:var(--muted); font-size:.9rem; margin-top:4px; }
+    .section-content { display:none; }
+
+    /* DASHBOARD CARDS */
+    .dash-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:18px; margin-bottom:28px; }
+    .dash-stat-card {
+      background:#fff; border-radius:var(--radius); padding:22px 20px;
+      box-shadow:var(--shadow); text-align:center;
+    }
+    .dash-stat-icon { font-size:2rem; margin-bottom:8px; }
+    .dash-stat-num  { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:var(--dark); }
+    .dash-stat-label{ font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
+    .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+    @media(max-width:800px){ .dash-grid{grid-template-columns:1fr;} }
+    .dash-widget { background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); }
+    .dash-widget h3 { font-size:.92rem; font-weight:700; color:var(--dark); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .dash-list-item { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--blush); font-size:.86rem; }
+    .dash-list-item:last-child { border:none; }
+    .dash-list-icon { font-size:1.3rem; flex-shrink:0; }
+
+    /* CARDS */
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
+    @media(max-width:800px){ .two-col{grid-template-columns:1fr;} }
+    .form-card { background:#fff; border-radius:var(--radius); padding:28px; box-shadow:var(--shadow); }
+    .form-card h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--dark); margin-bottom:20px; display:flex; align-items:center; gap:8px; }
+    .card-item {
+      background:#fff; border-radius:var(--radius); padding:20px 22px;
+      box-shadow:var(--shadow); margin-bottom:14px; transition:.2s;
+    }
+    .card-item:hover { box-shadow:0 8px 32px rgba(100,80,160,.15); }
+    .card-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
+    .card-item-footer { display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px; }
+    .card-item p { font-size:.88rem; color:var(--muted); line-height:1.5; }
+    .empty-msg { text-align:center; color:var(--muted); font-style:italic; padding:20px; }
+
+    /* BADGES */
+    .tag-badge { padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:700; background:var(--lavender); color:var(--purple); }
+    .role-badge { padding:4px 12px; border-radius:20px; font-size:.78rem; font-weight:700; }
+    .status-badge { padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:700; }
+    .status-badge.active   { background:#c9edd8; color:#2d7a4f; }
+    .status-badge.inactive { background:#f7d9e3; color:#a0325a; }
+    .monto-badge { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--green); }
+
+    /* TABLA */
+    .table-wrapper { background:#fff; border-radius:var(--radius); padding:22px; box-shadow:var(--shadow); overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:.86rem; }
+    th { text-align:left; padding:10px 14px; border-bottom:2px solid var(--blush); color:var(--muted); font-size:.75rem; text-transform:uppercase; letter-spacing:.5px; }
+    td { padding:12px 14px; border-bottom:1px solid var(--blush); }
+    tr:last-child td { border:none; }
+    tr:hover td { background:var(--lavender)30; }
+
+    /* BTNS */
+    .btn-table-del { background:var(--blush); border:none; border-radius:8px; width:32px; height:32px; cursor:pointer; color:var(--rose); transition:.2s; }
+    .btn-table-del:hover { background:var(--rose); color:#fff; }
+    .btn-del { background:var(--blush); border:none; border-radius:8px; padding:6px 12px; cursor:pointer; color:var(--rose); font-size:.8rem; font-weight:700; transition:.2s; font-family:'Nunito',sans-serif; }
+    .btn-del:hover { background:var(--rose); color:#fff; }
+    .btn-pray { background:var(--lavender); border:none; border-radius:8px; padding:6px 14px; cursor:pointer; color:var(--purple); font-size:.82rem; font-weight:700; transition:.2s; font-family:'Nunito',sans-serif; }
+    .btn-pray:hover { background:var(--purple); color:#fff; }
+    .btn-secondary { padding:11px 22px; border:2px solid var(--purple); border-radius:50px; background:transparent; color:var(--purple); font-family:'Nunito',sans-serif; font-weight:700; font-size:.9rem; cursor:pointer; transition:.2s; }
+    .btn-secondary:hover { background:var(--lavender); }
+
+    /* TOTAL OFRENDAS */
+    .total-card { background:linear-gradient(135deg,var(--purple),var(--rose)); border-radius:var(--radius); padding:24px 28px; color:#fff; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; }
+    .total-card h3 { font-size:.9rem; opacity:.8; margin-bottom:4px; }
+    .total-card .total-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:28px; right:28px; z-index:9999;
+      padding:14px 22px; border-radius:14px; font-size:.9rem; font-weight:700;
+      box-shadow:0 6px 24px rgba(0,0,0,.15); transform:translateY(20px);
+      opacity:0; transition:.4s; pointer-events:none; font-family:'Nunito',sans-serif;
+    }
+    .toast.show { opacity:1; transform:translateY(0); }
+    .toast.success { background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff; }
+    .toast.error   { background:linear-gradient(135deg,#e53e3e,#c53030); color:#fff; }
+
+    /* RESPONSIVE */
+    @media(max-width:768px){
+      .sidebar { width:220px; }
+      .main-content { margin-left:220px; padding:20px 16px; }
+      :root { --sidebar:220px; }
+    }
+    @media(max-width:580px){
+      .sidebar { transform:translateX(-100%); transition:.3s; }
+      .sidebar.open { transform:translateX(0); }
+      .main-content { margin-left:0; }
+      .menu-toggle { display:flex!important; }
+    }
+    .menu-toggle { display:none; position:fixed; top:16px; left:16px; z-index:200; width:42px; height:42px; border-radius:12px; background:var(--purple); color:#fff; border:none; font-size:1.1rem; cursor:pointer; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA DE LOGIN
+══════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">✝️</div>
+      <h2>Comunidad Bíblica Cristiana</h2>
+      <p>Panel de Líderes</p>
+    </div>
+    <div style="text-align:center; margin-bottom:24px;">
+      <span class="login-badge">🔐 Acceso Exclusivo</span>
+    </div>
+
+    <div id="loginForm">
+      <div class="form-group">
+        <label><i class="fa fa-envelope"></i> Correo electrónico</label>
+        <input type="email" id="loginEmail" placeholder="tu@correo.com"/>
+      </div>
+      <div class="form-group">
+        <label><i class="fa fa-lock"></i> Contraseña</label>
+        <input type="password" id="loginPass" placeholder="••••••••"/>
+      </div>
+      <button class="btn-main" id="btnLogin" data-label="<i class='fa fa-sign-in-alt'></i> Ingresar al Panel" onclick="doLogin()">
+        <i class="fa fa-sign-in-alt"></i> Ingresar al Panel
+      </button>
+      <a class="login-back" href="index.html">← Volver al sitio web</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PANEL PRINCIPAL
+══════════════════════════════════════════ -->
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+  <i class="fa fa-bars"></i>
+</button>
+
+<div id="panelScreen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">✝️</div>
+        <div class="sidebar-logo-text">CBC <span>Panel de Líderes</span></div>
+      </div>
+      <div class="user-card">
+        <div class="user-name" id="userNameDisplay">—</div>
+        <div class="user-role" id="userRoleDisplay">—</div>
+        <div class="user-email" id="userEmailDisplay">—</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">Principal</div>
+      <div class="nav-item active" data-section="dashboard" onclick="loadSection('dashboard')">
+        <i class="fa fa-chart-pie"></i> Dashboard
+      </div>
+      <div class="nav-item" data-section="miembros" onclick="loadSection('miembros')">
+        <i class="fa fa-users"></i> Líderes & Servidores
+      </div>
+
+      <div class="sidebar-section-title" style="margin-top:12px">Gestión</div>
+      <div class="nav-item" data-section="anuncios" onclick="loadSection('anuncios')">
+        <i class="fa fa-bullhorn"></i> Anuncios
+      </div>
+      <div class="nav-item" data-section="actividades" onclick="loadSection('actividades')">
+        <i class="fa fa-calendar-check"></i> Actividades
+      </div>
+      <div class="nav-item" data-section="ministerios" onclick="loadSection('ministerios')">
+        <i class="fa fa-church"></i> Ministerios & Redes
+      </div>
+      <div class="nav-item" data-section="peticiones" onclick="loadSection('peticiones')">
+        <i class="fa fa-hands-praying"></i> Peticiones de Oración
+      </div>
+      <div class="nav-item" data-section="ofrendas" onclick="loadSection('ofrendas')">
+        <i class="fa fa-hand-holding-heart"></i> Ofrendas
+      </div>
+
+      <div class="sidebar-section-title admin-only" style="margin-top:12px">Administración</div>
+      <div class="nav-item admin-only" data-section="registro" onclick="loadSection('registro')">
+        <i class="fa fa-user-plus"></i> Registrar Líder
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">
+        <i class="fa fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard" class="section-content">
+      <div class="page-header">
+        <h1>📊 Dashboard</h1>
+        <p>Resumen general de la congregación</p>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">👥</div>
+          <div class="dash-stat-num" id="dash-lideres">—</div>
+          <div class="dash-stat-label">Líderes</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">📅</div>
+          <div class="dash-stat-num" id="dash-actividades">—</div>
+          <div class="dash-stat-label">Actividades</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">🙏</div>
+          <div class="dash-stat-num" id="dash-peticiones">—</div>
+          <div class="dash-stat-label">Peticiones</div>
+        </div>
+        <div class="dash-stat-card">
+          <div class="dash-stat-icon">📢</div>
+          <div class="dash-stat-num" id="dash-anuncios">—</div>
+          <div class="dash-stat-label">Anuncios</div>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-widget">
+          <h3>🙏 Últimas Peticiones</h3>
+          <div id="dash-peticiones-list"></div>
+        </div>
+        <div class="dash-widget">
+          <h3>📅 Próximas Actividades</h3>
+          <div id="dash-act-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIEMBROS -->
+    <div id="sec-miembros" class="section-content">
+      <div class="page-header">
+        <h1>👥 Líderes & Servidores</h1>
+        <p>Listado completo del equipo de liderazgo</p>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rol</th><th>Nombre</th><th>Correo</th>
+              <th>Teléfono</th><th>Ministerio</th><th>Estado</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tabla-miembros">
+            <tr><td colspan="7" class="empty-msg">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANUNCIOS -->
+    <div id="sec-anuncios" class="section-content">
+      <div class="page-header">
+        <h1>📢 Anuncios</h1>
+        <p>Publica y gestiona los anuncios de la iglesia</p>
+      </div>
+      <div class="two-col">
+        <div class="form-card">
+          <h3>✍️ Publicar Anuncio</h3>
+          <form id="formAnuncio" onsubmit="event.preventDefault(); saveAnuncio()">
+            <div class="form-group">
+              <label>Título del anuncio *</label>
+              <input type="text" id="anTitulo" placeholder="Ej: Culto especial de sanidad"/>
+            </div>
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="anTipo">
+                <option>General</option><option>Urgente</option>
+                <option>Evento</option><option>Ministerio</option><option>Misiones</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="date" id="anFecha"/>
+            </div>
+            <div class="form-group">
+              <label>Contenido *</label>
+              <textarea id="anContenido" placeholder="Descripción del anuncio..."></textarea>
+            </div>
+            <button type="submit" class="btn-main" id="btnAnuncio" data-label="📢 Publicar Anuncio">
+              📢 Publicar Anuncio
+            </button>
+          </form>
+        </div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--dark);margin-bottom:16px;">Anuncios Publicados</h3>
+          <div id="lista-anuncios"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVIDADES -->
+    <div id="sec-actividades" class="section-content">
+      <div class="page-header">
+        <h1>📅 Actividades</h1>
+        <p>Programa actividades por ministerio y redes</p>
+      </div>
+      <div class="two-col">
+        <div class="form-card">
+          <h3>➕ Programar Actividad</h3>
+          <form id="formActividad" onsubmit="event.preventDefault(); saveActividad()">
+            <div class="form-group">
+              <label>Título *</label>
+              <input type="text" id="actTitulo" placeholder="Ej: Retiro de jóvenes 2025"/>
+            </div>
+            <div class="form-group">
+              <label>Ministerio / Red</label>
+              <select id="actMinisterio">
+                <option>General</option><option>Alabanza</option><option>Jóvenes</option>
+                <option>Damas</option><option>Caballeros</option><option>Niños</option>
+                <option>Misiones</option><option>Células</option><option>Pastoral</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Red (si aplica)</label>
+              <input type="text" id="actRed" placeholder="Ej: Red Norte, Red Centro..."/>
+            </div>
+            <div class="form-group">
+              <label>Fecha *</label>
+              <input type="date" id="actFecha"/>
+            </div>
+            <div class="form-group">
+              <label>Hora</label>
+              <input type="time" id="actHora"/>
+            </div>
+            <div class="form-group">
+              <label>Lugar</label>
+              <input type="text" id="actLugar" placeholder="Ej: Templo principal, Salón 1..."/>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="actDesc" placeholder="Detalles de la actividad..."></textarea>
+            </div>
+            <button type="submit" class="btn-main" id="btnActividad" data-label="📅 Guardar Actividad">
+              📅 Guardar Actividad
+            </button>
+          </form>
+        </div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--dark);margin-bottom:16px;">Actividades Programadas</h3>
+          <div id="lista-actividades"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINISTERIOS & REDES -->
+    <div id="sec-ministerios" class="section-content">
+      <div class="page-header">
+        <h1>✝️ Ministerios & Redes</h1>
+        <p>Gestiona los ministerios y redes de la iglesia</p>
+      </div>
+      <div class="two-col">
+        <div class="form-card">
+          <h3>➕ Registrar Ministerio / Red</h3>
+          <form id="formMinisterio" onsubmit="event.preventDefault(); saveMinisterio()">
+            <div class="form-group">
+              <label>Nombre *</label>
+              <input type="text" id="minNombre" placeholder="Ej: Ministerio de Alabanza"/>
+            </div>
+            <div class="form-group">
+              <label>Tipo</label>
+              <select id="minTipo">
+                <option>Ministerio</option><option>Red</option>
+                <option>Célula</option><option>Grupo</option><option>Departamento</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Emoji / Ícono</label>
+              <input type="text" id="minIcono" placeholder="Ej: 🎵 🙏 🌟 ✝️"/>
+            </div>
+            <div class="form-group">
+              <label>Líder responsable</label>
+              <input type="text" id="minLider" placeholder="Nombre del líder"/>
+            </div>
+            <div class="form-group">
+              <label>Día y hora de reunión</label>
+              <input type="text" id="minReunion" placeholder="Ej: Viernes 7:00 PM"/>
+            </div>
+            <div class="form-group">
+              <label>Descripción</label>
+              <textarea id="minDesc" placeholder="¿De qué trata este ministerio?"></textarea>
+            </div>
+            <button type="submit" class="btn-main" id="btnMinisterio" data-label="✝️ Guardar">
+              ✝️ Guardar
+            </button>
+          </form>
+        </div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--dark);margin-bottom:16px;">Ministerios Registrados</h3>
+          <div id="lista-ministerios"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PETICIONES -->
+    <div id="sec-peticiones" class="section-content">
+      <div class="page-header">
+        <h1>🙏 Peticiones de Oración</h1>
+        <p>Administra y ora por las peticiones recibidas</p>
+      </div>
+      <div id="lista-peticiones"></div>
+    </div>
+
+    <!-- OFRENDAS -->
+    <div id="sec-ofrendas" class="section-content">
+      <div class="page-header">
+        <h1>💝 Ofrendas & Diezmos</h1>
+        <p>Registro y control de las ofrendas de la congregación</p>
+      </div>
+      <div class="total-card">
+        <div>
+          <h3>Total registrado</h3>
+          <div class="total-num" id="total-ofrendas">$0</div>
+        </div>
+        <i class="fa fa-hand-holding-heart" style="font-size:2.5rem;opacity:.5"></i>
+      </div>
+      <div class="two-col">
+        <div class="form-card">
+          <h3>➕ Registrar Ofrenda</h3>
+          <form id="formOfrenda" onsubmit="event.preventDefault(); saveOfrenda()">
+            <div class="form-group">
+              <label>Tipo de ofrenda</label>
+              <select id="ofTipo">
+                <option>Diezmo</option><option>Ofrenda general</option>
+                <option>Ofrenda misionera</option><option>Ofrenda especial</option>
+                <option>Primicias</option><option>Construcción</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Monto *</label>
+              <input type="number" id="ofMonto" placeholder="0.00" step="0.01" min="0"/>
+            </div>
+            <div class="form-group">
+              <label>Fecha *</label>
+              <input type="date" id="ofFecha"/>
+            </div>
+            <div class="form-group">
+              <label>Descripción / Observaciones</label>
+              <textarea id="ofDesc" placeholder="Notas adicionales..."></textarea>
+            </div>
+            <button type="submit" class="btn-main" id="btnOfrenda" data-label="💝 Registrar Ofrenda">
+              💝 Registrar Ofrenda
+            </button>
+          </form>
+        </div>
+        <div>
+          <h3 style="font-family:'Playfair Display',serif;color:var(--dark);margin-bottom:16px;">Registros de Ofrendas</h3>
+          <div id="lista-ofrendas"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGISTRO DE LÍDER (solo admin) -->
+    <div id="sec-registro" class="section-content admin-only">
+      <div class="page-header">
+        <h1>👤 Registrar Nuevo Líder</h1>
+        <p>Crea acceso para un nuevo líder o servidor</p>
+      </div>
+      <div style="max-width:560px">
+        <div class="form-card">
+          <h3>✝️ Nuevo Usuario</h3>
+          <form id="formRegister" onsubmit="event.preventDefault(); doRegister()">
+            <div class="form-group">
+              <label>Nombre completo *</label>
+              <input type="text" id="regNombre" placeholder="Nombre y apellido"/>
+            </div>
+            <div class="form-group">
+              <label>Correo electrónico *</label>
+              <input type="email" id="regEmail" placeholder="correo@ejemplo.com"/>
+            </div>
+            <div class="form-group">
+              <label>Contraseña inicial * (mín. 6 caracteres)</label>
+              <input type="password" id="regPass" placeholder="Contraseña segura"/>
+            </div>
+            <div class="form-group">
+              <label>Rol *</label>
+              <select id="regRol">
+                <option value="pastor_principal">✝️ Pastor Principal</option>
+                <option value="pastor_asociado">🙏 Pastor Asociado</option>
+                <option value="lider_ministerio">🌟 Líder de Ministerio</option>
+                <option value="servidor">🤝 Servidor</option>
+                <option value="administrador">⚙️ Administrador</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Teléfono</label>
+              <input type="tel" id="regTel" placeholder="+1 000 000 0000"/>
+            </div>
+            <div class="form-group">
+              <label>Ministerio que lidera</label>
+              <input type="text" id="regMinisterio" placeholder="Ej: Alabanza, Jóvenes..."/>
+            </div>
+            <button type="submit" class="btn-main" id="btnRegister" data-label="<i class='fa fa-user-plus'></i> Crear Líder">
+              <i class="fa fa-user-plus"></i> Crear Líder
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+</body>
+</html>
