@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Comunidad Bíblica Cristiana | Iglesia Evangélica</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --blush:    #f7d9e3;
+      --lavender: #dcd4f5;
+      --mint:     #c9edd8;
+      --sky:      #c9e8f5;
+      --peach:    #fde4c8;
+      --yellow:   #fdf3c8;
+      --rose:     #e8a0b4;
+      --purple:   #9b8ec4;
+      --green:    #6bbf8e;
+      --blue:     #6aaccc;
+      --gold:     #d4a84b;
+      --white:    #fffcf8;
+      --dark:     #3a3055;
+      --text:     #4a4465;
+      --muted:    #8b85a0;
+      --shadow:   0 4px 24px rgba(100,80,160,0.10);
+      --radius:   18px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--white);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+      background: rgba(255,252,248,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--blush);
+      padding: 0 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 68px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, var(--lavender), var(--blush));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; color: var(--purple);
+    }
+    .nav-logo-text { font-family:'Playfair Display', serif; font-weight:700; font-size:1.05rem; color:var(--dark); line-height:1.1; }
+    .nav-logo-text span { display:block; font-family:'Nunito',sans-serif; font-weight:400; font-size:.72rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+    .nav-links { display:flex; gap:6px; list-style:none; }
+    .nav-links a {
+      text-decoration:none; padding:7px 15px; border-radius:30px;
+      font-size:.88rem; font-weight:600; color:var(--text);
+      transition: background .2s, color .2s;
+    }
+    .nav-links a:hover { background:var(--lavender); color:var(--purple); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--purple), var(--rose));
+      color:#fff !important; border-radius:30px; padding:8px 20px !important;
+    }
+    .nav-cta:hover { opacity:.9; background: linear-gradient(135deg, var(--purple), var(--rose)) !important; }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:5px; }
+    .hamburger span { display:block; width:24px; height:2px; background:var(--dark); border-radius:2px; transition:.3s; }
+    .mobile-menu { display:none; position:fixed; top:68px; left:0; right:0; background:var(--white); border-bottom:1px solid var(--blush); padding:20px 30px; z-index:998; flex-direction:column; gap:10px; }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu a { text-decoration:none; font-weight:600; color:var(--text); padding:10px 0; border-bottom:1px solid var(--blush); }
+
+    /* ── HERO ── */
+    #inicio {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--lavender) 0%, var(--blush) 40%, var(--peach) 100%);
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 100px 20px 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero-circles {
+      position: absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:0;
+    }
+    .hero-circles span {
+      position:absolute; border-radius:50%; opacity:.18;
+      animation: float 8s ease-in-out infinite;
+    }
+    .hero-circles span:nth-child(1) { width:500px; height:500px; background:var(--lavender); top:-120px; left:-140px; animation-delay:0s; }
+    .hero-circles span:nth-child(2) { width:380px; height:380px; background:var(--blush); bottom:-80px; right:-80px; animation-delay:2s; }
+    .hero-circles span:nth-child(3) { width:260px; height:260px; background:var(--mint); top:60%; left:10%; animation-delay:4s; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-24px)} }
+    .hero-content { position:relative; z-index:1; max-width:780px; }
+    .hero-badge {
+      display:inline-block; background:rgba(255,255,255,.6); border:1px solid var(--rose);
+      color:var(--rose); padding:6px 18px; border-radius:30px; font-size:.8rem;
+      font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:24px;
+      backdrop-filter:blur(8px);
+    }
+    .hero-title {
+      font-family:'Playfair Display', serif; font-size:clamp(2.4rem,6vw,4.2rem);
+      font-weight:700; color:var(--dark); line-height:1.15; margin-bottom:20px;
+    }
+    .hero-title em { font-style:normal; color:var(--purple); }
+    .hero-subtitle { font-size:1.1rem; color:var(--text); line-height:1.7; max-width:560px; margin:0 auto 36px; }
+    .hero-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--rose));
+      color:#fff; padding:14px 32px; border-radius:50px; font-weight:700;
+      font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+      box-shadow:0 6px 24px rgba(155,142,196,.35); transition:.25s;
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(155,142,196,.45); }
+    .btn-secondary {
+      background:rgba(255,255,255,.7); border:2px solid var(--purple);
+      color:var(--purple); padding:13px 28px; border-radius:50px; font-weight:700;
+      font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+      backdrop-filter:blur(8px); transition:.25s;
+    }
+    .btn-secondary:hover { background:var(--lavender); }
+    .hero-scroll { margin-top:52px; color:var(--muted); font-size:.82rem; letter-spacing:1px; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:8px; }
+    .hero-scroll i { font-size:1.2rem; animation:bounce 2s infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+
+    /* ── SECTIONS SHARED ── */
+    section { padding: 80px 20px; }
+    .section-label {
+      font-size:.78rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
+      color:var(--purple); margin-bottom:10px;
+    }
+    .section-title {
+      font-family:'Playfair Display', serif; font-size:clamp(1.8rem,4vw,2.6rem);
+      font-weight:700; color:var(--dark); line-height:1.25; margin-bottom:14px;
+    }
+    .section-sub { font-size:1rem; color:var(--muted); max-width:520px; line-height:1.7; margin-bottom:48px; }
+    .container { max-width:1140px; margin:0 auto; }
+    .text-center { text-align:center; }
+    .text-center .section-sub { margin-left:auto; margin-right:auto; }
+
+    /* ── DASHBOARD STATS ── */
+    #dashboard {
+      background: linear-gradient(135deg, var(--dark) 0%, #2d2550 100%);
+      color:#fff; padding:60px 20px;
+    }
+    .dashboard-header { text-align:center; margin-bottom:50px; }
+    .dashboard-header .section-label { color:var(--rose); }
+    .dashboard-header .section-title { color:#fff; }
+    .dashboard-header .section-sub { color:rgba(255,255,255,.65); margin:0 auto; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:50px; }
+    .stat-card {
+      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radius); padding:28px 22px; text-align:center;
+      transition:.3s; cursor:default;
+    }
+    .stat-card:hover { background:rgba(255,255,255,.13); transform:translateY(-4px); }
+    .stat-icon { font-size:2rem; margin-bottom:12px; }
+    .stat-number {
+      font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700;
+      color:#fff; line-height:1;
+    }
+    .stat-label { font-size:.82rem; color:rgba(255,255,255,.55); margin-top:6px; letter-spacing:.5px; text-transform:uppercase; }
+    .dash-widgets { display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; }
+    @media(max-width:900px){ .dash-widgets{grid-template-columns:1fr 1fr;} }
+    @media(max-width:580px){ .dash-widgets{grid-template-columns:1fr;} }
+    .dash-widget {
+      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+      border-radius:var(--radius); padding:26px 24px;
+    }
+    .dash-widget h3 { font-size:.95rem; font-weight:700; color:rgba(255,255,255,.9); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+    .dash-widget h3 i { color:var(--rose); }
+    .progress-item { margin-bottom:14px; }
+    .progress-label { display:flex; justify-content:space-between; font-size:.82rem; color:rgba(255,255,255,.6); margin-bottom:5px; }
+    .progress-bar { height:8px; background:rgba(255,255,255,.1); border-radius:10px; overflow:hidden; }
+    .progress-fill { height:100%; border-radius:10px; background:linear-gradient(90deg, var(--lavender), var(--rose)); transition:width 1.5s ease; }
+    .event-list { list-style:none; }
+    .event-list li { padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); font-size:.88rem; display:flex; align-items:flex-start; gap:10px; }
+    .event-list li:last-child { border:none; }
+    .event-dot { width:8px; height:8px; border-radius:50%; background:var(--rose); margin-top:5px; flex-shrink:0; }
+    .event-text { color:rgba(255,255,255,.75); line-height:1.4; }
+    .event-text strong { color:#fff; display:block; }
+    .announcement-item { padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); font-size:.85rem; color:rgba(255,255,255,.7); }
+    .announcement-item:last-child { border:none; }
+    .announcement-item strong { color:var(--yellow); }
+
+    /* ── HORARIOS ── */
+    #horarios { background: var(--yellow); }
+    .schedule-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; }
+    .schedule-card {
+      background:#fff; border-radius:var(--radius); padding:28px 24px;
+      box-shadow:var(--shadow); border-top:4px solid transparent; transition:.3s;
+    }
+    .schedule-card:hover { transform:translateY(-4px); }
+    .schedule-card:nth-child(1){ border-color:var(--purple); }
+    .schedule-card:nth-child(2){ border-color:var(--rose); }
+    .schedule-card:nth-child(3){ border-color:var(--green); }
+    .schedule-card:nth-child(4){ border-color:var(--blue); }
+    .schedule-card:nth-child(5){ border-color:var(--gold); }
+    .schedule-icon { font-size:2rem; margin-bottom:14px; }
+    .schedule-day { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:4px; }
+    .schedule-time { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
+    .schedule-name { font-weight:700; color:var(--text); margin-bottom:6px; }
+    .schedule-desc { font-size:.85rem; color:var(--muted); line-height:1.5; }
+
+    /* ── VIDEO EN VIVO ── */
+    #envivo {
+      background: linear-gradient(160deg, var(--blush) 0%, var(--lavender) 100%);
+      text-align:center;
+    }
+    .live-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:#ff4757; color:#fff; padding:6px 18px; border-radius:30px;
+      font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+      margin-bottom:20px;
+    }
+    .live-dot { width:8px; height:8px; background:#fff; border-radius:50%; animation:pulse 1.2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+    .video-wrapper {
+      max-width:820px; margin:0 auto 40px;
+      border-radius:var(--radius); overflow:hidden;
+      box-shadow:0 16px 60px rgba(100,80,160,.2);
+    }
+    .video-wrapper iframe { width:100%; aspect-ratio:16/9; border:none; display:block; }
+    .video-fallback {
+      background:linear-gradient(135deg, var(--dark), #2d2550);
+      aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; gap:16px; color:#fff; cursor:pointer;
+    }
+    .video-fallback i { font-size:4rem; color:var(--rose); opacity:.8; }
+    .video-fallback p { font-size:1.1rem; color:rgba(255,255,255,.7); }
+    .video-tabs { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px; }
+    .video-tab {
+      padding:10px 22px; border-radius:30px; border:2px solid var(--purple);
+      background:transparent; color:var(--purple); font-weight:700; cursor:pointer;
+      font-family:'Nunito',sans-serif; font-size:.9rem; transition:.2s;
+    }
+    .video-tab.active, .video-tab:hover { background:var(--purple); color:#fff; }
+
+    /* ── MINISTERIOS ── */
+    #ministerios { background:var(--white); }
+    .ministerios-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; }
+    .min-card {
+      border-radius:var(--radius); padding:30px 24px; text-align:center;
+      box-shadow:var(--shadow); transition:.3s; cursor:default;
+    }
+    .min-card:hover { transform:translateY(-5px); box-shadow:0 12px 40px rgba(100,80,160,.15); }
+    .min-card:nth-child(1){ background:var(--lavender); }
+    .min-card:nth-child(2){ background:var(--blush); }
+    .min-card:nth-child(3){ background:var(--mint); }
+    .min-card:nth-child(4){ background:var(--sky); }
+    .min-card:nth-child(5){ background:var(--peach); }
+    .min-card:nth-child(6){ background:var(--yellow); }
+    .min-icon { font-size:2.6rem; margin-bottom:14px; }
+    .min-title { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:8px; }
+    .min-desc { font-size:.85rem; color:var(--text); line-height:1.55; }
+
+    /* ── VERSÍCULO DEL DÍA ── */
+    .versiculo-banner {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--rose) 100%);
+      color:#fff; padding:50px 20px; text-align:center;
+    }
+    .versiculo-banner blockquote {
+      max-width:700px; margin:0 auto;
+      font-family:'Playfair Display',serif; font-size:clamp(1.25rem,3vw,1.75rem);
+      font-style:italic; line-height:1.6; opacity:.95;
+    }
+    .versiculo-banner cite { display:block; margin-top:16px; font-size:.9rem; opacity:.75; font-style:normal; font-family:'Nunito',sans-serif; letter-spacing:1px; }
+
+    /* ── ACTIVIDADES ── */
+    #actividades { background: var(--mint); }
+    .activities-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; }
+    .act-card {
+      background:#fff; border-radius:var(--radius); overflow:hidden;
+      box-shadow:var(--shadow); transition:.3s;
+    }
+    .act-card:hover { transform:translateY(-5px); }
+    .act-header { height:120px; display:flex; align-items:center; justify-content:center; font-size:3rem; }
+    .act-header.bg1 { background:linear-gradient(135deg,var(--lavender),var(--blush)); }
+    .act-header.bg2 { background:linear-gradient(135deg,var(--mint),var(--sky)); }
+    .act-header.bg3 { background:linear-gradient(135deg,var(--peach),var(--yellow)); }
+    .act-header.bg4 { background:linear-gradient(135deg,var(--blush),var(--peach)); }
+    .act-header.bg5 { background:linear-gradient(135deg,var(--sky),var(--lavender)); }
+    .act-header.bg6 { background:linear-gradient(135deg,var(--yellow),var(--mint)); }
+    .act-body { padding:22px 24px; }
+    .act-date { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--purple); margin-bottom:6px; }
+    .act-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--dark); margin-bottom:8px; }
+    .act-desc { font-size:.86rem; color:var(--muted); line-height:1.55; margin-bottom:14px; }
+    .act-tag { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:700; background:var(--lavender); color:var(--purple); }
+
+    /* ── PETICIONES ── */
+    #peticiones { background:var(--blush); }
+    .prayer-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
+    @media(max-width:720px){ .prayer-grid{grid-template-columns:1fr;} }
+    .prayer-form-box { background:#fff; border-radius:var(--radius); padding:36px 32px; box-shadow:var(--shadow); }
+    .form-group { margin-bottom:18px; }
+    .form-group label { display:block; font-size:.85rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width:100%; padding:12px 16px; border:2px solid #ece8f5;
+      border-radius:12px; font-family:'Nunito',sans-serif; font-size:.92rem;
+      color:var(--text); background:#fafaf8; outline:none; transition:border .2s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--purple); }
+    .form-group textarea { resize:vertical; min-height:110px; }
+    .btn-submit {
+      width:100%; padding:13px; border:none; border-radius:50px; cursor:pointer;
+      background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff;
+      font-family:'Nunito',sans-serif; font-weight:700; font-size:1rem; transition:.2s;
+    }
+    .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
+    .prayer-info h3 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--dark); margin-bottom:16px; }
+    .prayer-info p { color:var(--text); line-height:1.7; margin-bottom:20px; }
+    .promise-card {
+      background:linear-gradient(135deg,var(--purple),var(--rose));
+      border-radius:var(--radius); padding:28px 26px; color:#fff; margin-top:20px;
+    }
+    .promise-card i { font-size:2rem; margin-bottom:10px; opacity:.8; }
+    .promise-card p { font-family:'Playfair Display',serif; font-style:italic; font-size:1.05rem; line-height:1.6; }
+    .promise-card cite { display:block; font-size:.82rem; opacity:.7; margin-top:10px; font-style:normal; }
+
+    /* ── DIEZMOS Y OFRENDAS ── */
+    #ofrendas { background:var(--white); }
+    .ofrendas-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; }
+    .ofrenda-card {
+      border-radius:var(--radius); padding:30px 28px; text-align:center;
+      box-shadow:var(--shadow); border:2px solid transparent; transition:.3s;
+    }
+    .ofrenda-card:hover { transform:translateY(-4px); border-color:var(--purple); }
+    .ofrenda-card.bg1 { background:var(--lavender); }
+    .ofrenda-card.bg2 { background:var(--mint); }
+    .ofrenda-card.bg3 { background:var(--peach); }
+    .ofrenda-card i { font-size:2.8rem; color:var(--purple); margin-bottom:16px; display:block; }
+    .ofrenda-card h3 { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--dark); margin-bottom:8px; }
+    .ofrenda-card p { font-size:.86rem; color:var(--muted); line-height:1.5; margin-bottom:16px; }
+    .ofrenda-card .bank-info { background:rgba(255,255,255,.6); border-radius:10px; padding:14px; font-size:.82rem; text-align:left; }
+    .ofrenda-card .bank-info strong { color:var(--dark); display:block; margin-bottom:4px; }
+
+    /* ── GALERÍA ── */
+    #galeria { background:var(--sky); }
+    .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
+    .gallery-item {
+      border-radius:14px; overflow:hidden; aspect-ratio:1/1;
+      display:flex; align-items:center; justify-content:center;
+      font-size:3rem; cursor:pointer; transition:.3s;
+      box-shadow:var(--shadow);
+    }
+    .gallery-item:hover { transform:scale(1.05); }
+    .gallery-item.g1 { background:linear-gradient(135deg,var(--lavender),var(--blush)); grid-column:span 2; grid-row:span 2; font-size:5rem; }
+    .gallery-item.g2 { background:linear-gradient(135deg,var(--mint),var(--sky)); }
+    .gallery-item.g3 { background:linear-gradient(135deg,var(--peach),var(--yellow)); }
+    .gallery-item.g4 { background:linear-gradient(135deg,var(--blush),var(--lavender)); }
+    .gallery-item.g5 { background:linear-gradient(135deg,var(--sky),var(--mint)); }
+    .gallery-item.g6 { background:linear-gradient(135deg,var(--yellow),var(--peach)); }
+
+    /* ── LIDERAZGO ── */
+    #liderazgo { background:var(--peach); }
+    .leaders-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; }
+    .leader-card {
+      background:#fff; border-radius:var(--radius); padding:30px 22px; text-align:center;
+      box-shadow:var(--shadow); transition:.3s;
+    }
+    .leader-card:hover { transform:translateY(-4px); }
+    .leader-avatar {
+      width:80px; height:80px; border-radius:50%; margin:0 auto 16px;
+      display:flex; align-items:center; justify-content:center; font-size:2.2rem;
+    }
+    .av1 { background:linear-gradient(135deg,var(--lavender),var(--purple)); }
+    .av2 { background:linear-gradient(135deg,var(--blush),var(--rose)); }
+    .av3 { background:linear-gradient(135deg,var(--mint),var(--green)); }
+    .av4 { background:linear-gradient(135deg,var(--sky),var(--blue)); }
+    .leader-name { font-family:'Playfair Display',serif; font-weight:700; font-size:1.05rem; color:var(--dark); }
+    .leader-role { font-size:.8rem; color:var(--purple); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin:4px 0 10px; }
+    .leader-bio { font-size:.83rem; color:var(--muted); line-height:1.5; }
+
+    /* ── CONTACTO ── */
+    #contacto { background: linear-gradient(160deg, var(--lavender) 0%, var(--blush) 100%); }
+    .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
+    @media(max-width:720px){ .contact-grid{grid-template-columns:1fr;} }
+    .contact-info h3 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--dark); margin-bottom:24px; }
+    .contact-item { display:flex; gap:16px; align-items:flex-start; margin-bottom:22px; }
+    .contact-item-icon {
+      width:46px; height:46px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+    }
+    .ci1 { background:var(--lavender); color:var(--purple); }
+    .ci2 { background:var(--blush); color:var(--rose); }
+    .ci3 { background:var(--mint); color:var(--green); }
+    .ci4 { background:var(--sky); color:var(--blue); }
+    .contact-item-text strong { display:block; font-weight:700; color:var(--dark); margin-bottom:2px; }
+    .contact-item-text span { color:var(--muted); font-size:.9rem; }
+    .social-links { display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
+    .social-btn {
+      width:46px; height:46px; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; text-decoration:none; font-size:1.1rem; transition:.2s;
+      color:#fff;
+    }
+    .sb-fb { background:#1877f2; } .sb-yt { background:#ff0000; }
+    .sb-ig { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+    .sb-wa { background:#25d366; } .sb-tg { background:#0088cc; }
+    .social-btn:hover { transform:translateY(-3px); opacity:.9; }
+    .contact-form-box { background:#fff; border-radius:var(--radius); padding:36px 32px; box-shadow:var(--shadow); }
+
+    /* ── MAPA / UBICACIÓN ── */
+    .map-section { background:var(--white); padding:60px 20px; }
+    .map-wrapper { max-width:1140px; margin:0 auto; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); height:380px; background:linear-gradient(135deg,var(--lavender),var(--blush)); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; color:var(--dark); }
+    .map-wrapper i { font-size:3.5rem; color:var(--purple); }
+    .map-wrapper p { font-size:1rem; color:var(--muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      background:var(--dark); color:#fff;
+      padding:60px 20px 30px;
+    }
+    .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; max-width:1140px; margin:0 auto 40px; }
+    @media(max-width:860px){ .footer-grid{grid-template-columns:1fr 1fr;} }
+    @media(max-width:500px){ .footer-grid{grid-template-columns:1fr;} }
+    .footer-brand-name { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:10px; }
+    .footer-brand-sub { font-size:.8rem; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:2px; margin-bottom:16px; }
+    .footer-desc { font-size:.88rem; color:rgba(255,255,255,.55); line-height:1.7; margin-bottom:20px; }
+    .footer-col h4 { font-weight:700; color:rgba(255,255,255,.85); margin-bottom:14px; font-size:.92rem; text-transform:uppercase; letter-spacing:.5px; }
+    .footer-col ul { list-style:none; }
+    .footer-col ul li { margin-bottom:8px; }
+    .footer-col ul li a { color:rgba(255,255,255,.5); text-decoration:none; font-size:.88rem; transition:.2s; }
+    .footer-col ul li a:hover { color:var(--rose); }
+    .footer-bottom { max-width:1140px; margin:0 auto; padding-top:28px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+    .footer-bottom p { font-size:.82rem; color:rgba(255,255,255,.35); }
+    .footer-bottom a { color:var(--rose); text-decoration:none; }
+
+    /* ── FLOATING WHATSAPP ── */
+    .wa-float {
+      position:fixed; bottom:28px; right:28px; z-index:990;
+      width:58px; height:58px; border-radius:50%; background:#25d366;
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:1.7rem; text-decoration:none;
+      box-shadow:0 6px 24px rgba(37,211,102,.4); transition:.3s;
+      animation:wa-pulse 2.5s infinite;
+    }
+    @keyframes wa-pulse { 0%,100%{box-shadow:0 6px 24px rgba(37,211,102,.4)} 50%{box-shadow:0 6px 40px rgba(37,211,102,.7)} }
+    .wa-float:hover { transform:scale(1.12); }
+
+    /* ── TOAST ── */
+    #toast {
+      position:fixed; bottom:100px; right:28px; z-index:1000;
+      background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff;
+      padding:14px 22px; border-radius:14px; font-size:.9rem; font-weight:600;
+      box-shadow:0 6px 24px rgba(100,80,160,.3); transform:translateY(20px);
+      opacity:0; transition:.4s; pointer-events:none;
+    }
+    #toast.show { opacity:1; transform:translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:860px){
+      nav { padding:0 20px; }
+      .nav-links { display:none; }
+      .hamburger { display:flex; }
+    }
+    @media(max-width:600px){
+      .stats-grid { grid-template-columns:1fr 1fr; }
+      .hero-btns { flex-direction:column; align-items:center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ────────────── NAVBAR ────────────── -->
+<nav>
+  <a href="#inicio" class="nav-logo">
+    <div class="nav-logo-icon"><i class="fa-solid fa-cross"></i></div>
+    <div class="nav-logo-text">Comunidad Bíblica Cristiana <span>Iglesia Evangélica</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#dashboard">Panel</a></li>
+    <li><a href="#envivo">En Vivo</a></li>
+    <li><a href="#horarios">Horarios</a></li>
+    <li><a href="#ministerios">Ministerios</a></li>
+    <li><a href="#actividades">Actividades</a></li>
+    <li><a href="#peticiones">Oración</a></li>
+    <li><a href="#ofrendas">Ofrendas</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+    <li><a href="#peticiones" class="nav-cta">🙏 Orar</a></li>
+  </ul>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#inicio" onclick="toggleMenu()">🏠 Inicio</a>
+  <a href="#dashboard" onclick="toggleMenu()">📊 Panel</a>
+  <a href="#envivo" onclick="toggleMenu()">📺 En Vivo</a>
+  <a href="#horarios" onclick="toggleMenu()">🕐 Horarios</a>
+  <a href="#ministerios" onclick="toggleMenu()">✝️ Ministerios</a>
+  <a href="#actividades" onclick="toggleMenu()">📅 Actividades</a>
+  <a href="#peticiones" onclick="toggleMenu()">🙏 Peticiones</a>
+  <a href="#ofrendas" onclick="toggleMenu()">💝 Ofrendas</a>
+  <a href="#contacto" onclick="toggleMenu()">📩 Contacto</a>
+</div>
+
+<!-- ────────────── HERO ────────────── -->
+<section id="inicio">
+  <div class="hero-circles">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">✝ Bienvenido a nuestra comunidad</div>
+    <h1 class="hero-title">
+      Comunidad<br><em>Bíblica Cristiana</em>
+    </h1>
+    <p class="hero-subtitle">
+      Un lugar donde cada persona es bienvenida, la Palabra de Dios transforma vidas y la comunidad florece en amor, fe y esperanza.
+    </p>
+    <div class="hero-btns">
+      <a href="#envivo" class="btn-primary"><i class="fa-solid fa-circle-play"></i> Ver en Vivo</a>
+      <a href="#horarios" class="btn-secondary"><i class="fa-solid fa-calendar"></i> Nuestros Horarios</a>
+    </div>
+    <div class="hero-scroll">
+      <i class="fa-solid fa-chevron-down"></i>
+      <span>Descubre más</span>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── DASHBOARD ────────────── -->
+<section id="dashboard">
+  <div class="container">
+    <div class="dashboard-header">
+      <div class="section-label">Panel de la iglesia</div>
+      <h2 class="section-title">Nuestra Comunidad en Números</h2>
+      <p class="section-sub">Un resumen en tiempo real del crecimiento y actividad de nuestra congregación.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👨‍👩‍👧‍👦</div>
+        <div class="stat-number" id="cnt-miembros">0</div>
+        <div class="stat-label">Miembros</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🙏</div>
+        <div class="stat-number" id="cnt-peticiones">0</div>
+        <div class="stat-label">Peticiones este mes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-number" id="cnt-actividades">0</div>
+        <div class="stat-label">Actividades 2025</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-number" id="cnt-celulas">0</div>
+        <div class="stat-label">Células activas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎵</div>
+        <div class="stat-number" id="cnt-ministerios">0</div>
+        <div class="stat-label">Ministerios</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌍</div>
+        <div class="stat-number" id="cnt-misiones">0</div>
+        <div class="stat-label">Misiones</div>
+      </div>
+    </div>
+
+    <div class="dash-widgets">
+      <!-- Crecimiento -->
+      <div class="dash-widget">
+        <h3><i class="fa-solid fa-chart-line"></i> Crecimiento por Área</h3>
+        <div class="progress-item">
+          <div class="progress-label"><span>Asistencia Dominical</span><span>87%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" data-target="87"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Estudio Bíblico</span><span>72%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" data-target="72"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Células</span><span>91%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" data-target="91"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Jóvenes</span><span>65%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" data-target="65"></div></div>
+        </div>
+        <div class="progress-item">
+          <div class="progress-label"><span>Damas</span><span>78%</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:0%" data-target="78"></div></div>
+        </div>
+      </div>
+
+      <!-- Próximos eventos -->
+      <div class="dash-widget">
+        <h3><i class="fa-solid fa-calendar-check"></i> Próximas Actividades</h3>
+        <ul class="event-list">
+          <li><span class="event-dot"></span><div class="event-text"><strong>Noche de Alabanza</strong>Viernes 6 Jun · 7:00 PM</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Retiro de Jóvenes</strong>Sáb 7 Jun · Todo el día</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Culto de Domingo</strong>Dom 8 Jun · 10:00 AM</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Estudio Bíblico</strong>Mié 11 Jun · 7:30 PM</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Conferencia Familiar</strong>Sáb 14 Jun · 3:00 PM</div></li>
+        </ul>
+      </div>
+
+      <!-- Anuncios -->
+      <div class="dash-widget">
+        <h3><i class="fa-solid fa-bullhorn"></i> Anuncios Importantes</h3>
+        <div class="announcement-item"><strong>🔴 ESTE DOMINGO</strong> Culto especial de sanidad y restauración. ¡No faltes!</div>
+        <div class="announcement-item"><strong>📦 COLECTA</strong> Donaciones de alimentos para familias necesitadas hasta el 15 de junio.</div>
+        <div class="announcement-item"><strong>🎓 INSCRIPCIONES</strong> Escuela Bíblica de Verano abierta. Inscríbete antes del 20 de junio.</div>
+        <div class="announcement-item"><strong>🎶 AUDICIONES</strong> El ministerio de alabanza busca nuevos integrantes. Habla con el pastor.</div>
+        <div class="announcement-item"><strong>💒 MATRIMONIOS</strong> Taller pre-matrimonial próximo sábado 14 de junio a las 9:00 AM.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── VERSÍCULO ────────────── -->
+<div class="versiculo-banner">
+  <blockquote id="vsBannerQuote">
+    "Porque yo sé los planes que tengo para ustedes, planes para su bienestar y no para hacerles daño, para darles un futuro y una esperanza."
+    <cite>— Jeremías 29:11</cite>
+  </blockquote>
+</div>
+
+<!-- ────────────── EN VIVO ────────────── -->
+<section id="envivo">
+  <div class="container">
+    <div class="text-center">
+      <div class="live-badge"><span class="live-dot"></span> Transmisión en Vivo</div>
+      <div class="section-label">YouTube Live</div>
+      <h2 class="section-title">Únete a Nuestro Servicio</h2>
+      <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 10:00 AM.</p>
+    </div>
+
+    <div class="video-wrapper">
+      <!-- Reemplaza CHANNEL_ID con el ID real de tu canal de YouTube -->
+      <div class="video-fallback" id="livePlayer" onclick="loadLive()">
+        <i class="fa-brands fa-youtube"></i>
+        <p>Haz clic para ver la transmisión en vivo</p>
+        <small style="color:rgba(255,255,255,.5)">Canal: Comunidad Bíblica Cristiana</small>
+      </div>
+    </div>
+
+    <div class="video-tabs">
+      <button class="video-tab active" onclick="setTab(this,'live')">🔴 En Vivo</button>
+      <button class="video-tab" onclick="setTab(this,'sermon')">📖 Sermones</button>
+      <button class="video-tab" onclick="setTab(this,'alabanza')">🎵 Alabanza</button>
+      <button class="video-tab" onclick="setTab(this,'ninos')">👶 Niños</button>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── HORARIOS ────────────── -->
+<section id="horarios">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Nuestros Tiempos</div>
+      <h2 class="section-title">Horarios de Servicios</h2>
+      <p class="section-sub">Todos son bienvenidos. Ven y experimenta la presencia de Dios con nosotros.</p>
+    </div>
+    <div class="schedule-grid">
+      <div class="schedule-card">
+        <div class="schedule-icon">🙌</div>
+        <div class="schedule-day">Domingo</div>
+        <div class="schedule-time">10:00 AM</div>
+        <div class="schedule-name">Culto Principal</div>
+        <div class="schedule-desc">Servicio de adoración con predicación de la Palabra, alabanza y comunión.</div>
+      </div>
+      <div class="schedule-card">
+        <div class="schedule-icon">📖</div>
+        <div class="schedule-day">Miércoles</div>
+        <div class="schedule-time">7:30 PM</div>
+        <div class="schedule-name">Estudio Bíblico</div>
+        <div class="schedule-desc">Profundiza en la Palabra de Dios en un ambiente íntimo y de comunión.</div>
+      </div>
+      <div class="schedule-card">
+        <div class="schedule-icon">🔥</div>
+        <div class="schedule-day">Viernes</div>
+        <div class="schedule-time">7:00 PM</div>
+        <div class="schedule-name">Noche de Oración</div>
+        <div class="schedule-desc">Un tiempo poderoso de intercesión, alabanza y búsqueda del Espíritu.</div>
+      </div>
+      <div class="schedule-card">
+        <div class="schedule-icon">🌱</div>
+        <div class="schedule-day">Sábado</div>
+        <div class="schedule-time">3:00 PM</div>
+        <div class="schedule-name">Células Familiares</div>
+        <div class="schedule-desc">Reuniones en hogares para compartir, orar y crecer juntos en comunidad.</div>
+      </div>
+      <div class="schedule-card">
+        <div class="schedule-icon">👶</div>
+        <div class="schedule-day">Domingo</div>
+        <div class="schedule-time">10:00 AM</div>
+        <div class="schedule-name">Escuela Dominical</div>
+        <div class="schedule-desc">Programa especial para niños y jóvenes con enseñanza adaptada a su edad.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── MINISTERIOS ────────────── -->
+<section id="ministerios">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Área de Servicio</div>
+      <h2 class="section-title">Nuestros Ministerios</h2>
+      <p class="section-sub">Cada ministerio es una oportunidad de servir a Dios con tus talentos y dones.</p>
+    </div>
+    <div class="ministerios-grid">
+      <div class="min-card">
+        <div class="min-icon">🎵</div>
+        <div class="min-title">Ministerio de Alabanza</div>
+        <div class="min-desc">Líderes de adoración que llevan a la congregación a la presencia de Dios con música y canto.</div>
+      </div>
+      <div class="min-card">
+        <div class="min-icon">👶</div>
+        <div class="min-title">Ministerio Infantil</div>
+        <div class="min-desc">Enseñamos a los niños a conocer y amar a Dios mediante actividades creativas y lúdicas.</div>
+      </div>
+      <div class="min-card">
+        <div class="min-icon">🔥</div>
+        <div class="min-title">Ministerio de Jóvenes</div>
+        <div class="min-desc">Un espacio para que los jóvenes encuentren propósito, identidad y comunidad en Cristo.</div>
+      </div>
+      <div class="min-card">
+        <div class="min-icon">💒</div>
+        <div class="min-title">Ministerio Familiar</div>
+        <div class="min-desc">Fortalecemos matrimonios y familias con consejería, talleres y retiros especiales.</div>
+      </div>
+      <div class="min-card">
+        <div class="min-icon">🌍</div>
+        <div class="min-title">Misiones</div>
+        <div class="min-desc">Llevamos el Evangelio a comunidades locales e internacionales con acciones concretas de amor.</div>
+      </div>
+      <div class="min-card">
+        <div class="min-icon">🤝</div>
+        <div class="min-title">Ministerio Social</div>
+        <div class="min-desc">Servimos a los más necesitados con alimentos, ropa y apoyo emocional en el nombre de Jesús.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── ACTIVIDADES ────────────── -->
+<section id="actividades">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Calendario</div>
+      <h2 class="section-title">Actividades Generales</h2>
+      <p class="section-sub">Participa en nuestra agenda de eventos y vive la comunidad al máximo.</p>
+    </div>
+    <div class="activities-grid">
+      <div class="act-card">
+        <div class="act-header bg1">🌟</div>
+        <div class="act-body">
+          <div class="act-date">Viernes 6 Jun 2025 · 7:00 PM</div>
+          <div class="act-title">Noche de Alabanza y Adoración</div>
+          <div class="act-desc">Una noche especial de adoración y alabanza para exaltar el nombre de Dios. Música en vivo, testimonios y oración.</div>
+          <span class="act-tag">Adoración</span>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-header bg2">⛺</div>
+        <div class="act-body">
+          <div class="act-date">Sáb–Dom 7–8 Jun 2025</div>
+          <div class="act-title">Retiro de Jóvenes 2025</div>
+          <div class="act-desc">Dos días llenos de dinámicas, predicación, campamento y crecimiento espiritual para nuestros jóvenes.</div>
+          <span class="act-tag">Jóvenes</span>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-header bg3">📦</div>
+        <div class="act-body">
+          <div class="act-date">Sáb 14 Jun 2025 · 9:00 AM</div>
+          <div class="act-title">Jornada de Servicio Comunitario</div>
+          <div class="act-desc">Saldremos a repartir alimentos y ropa a familias en vulnerabilidad. Únete y marca una diferencia.</div>
+          <span class="act-tag">Misiones</span>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-header bg4">💒</div>
+        <div class="act-body">
+          <div class="act-date">Sáb 14 Jun 2025 · 3:00 PM</div>
+          <div class="act-title">Taller Pre-Matrimonial</div>
+          <div class="act-desc">Preparamos a las parejas para una vida conyugal sólida, basada en principios bíblicos y amor genuino.</div>
+          <span class="act-tag">Familia</span>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-header bg5">🎓</div>
+        <div class="act-body">
+          <div class="act-date">Lun 23 Jun 2025</div>
+          <div class="act-title">Escuela Bíblica de Verano</div>
+          <div class="act-desc">Programa de formación bíblica para niños. 4 semanas de aprendizaje, juegos y fe. ¡Inscripciones abiertas!</div>
+          <span class="act-tag">Niños</span>
+        </div>
+      </div>
+      <div class="act-card">
+        <div class="act-header bg6">🎉</div>
+        <div class="act-body">
+          <div class="act-date">Dom 29 Jun 2025 · 10:00 AM</div>
+          <div class="act-title">Aniversario de la Iglesia</div>
+          <div class="act-desc">Celebramos juntos un año más de gracia y crecimiento. Culto especial, almuerzo comunitario y sorpresas.</div>
+          <span class="act-tag">Celebración</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── PETICIONES ────────────── -->
+<section id="peticiones">
+  <div class="container">
+    <div class="prayer-grid">
+      <div class="prayer-form-box">
+        <div class="section-label">Formulario</div>
+        <h2 class="section-title">Envía tu Petición</h2>
+        <form onsubmit="submitPrayer(event)">
+          <div class="form-group">
+            <label>Tu nombre</label>
+            <input type="text" placeholder="¿Cómo te llamas?" required />
+          </div>
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" placeholder="tucorreo@ejemplo.com" />
+          </div>
+          <div class="form-group">
+            <label>Tipo de petición</label>
+            <select>
+              <option>Salud y sanidad</option>
+              <option>Familia y relaciones</option>
+              <option>Provisión económica</option>
+              <option>Salvación de un ser querido</option>
+              <option>Trabajo y vocación</option>
+              <option>Paz y dirección</option>
+              <option>Otra petición</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Comparte tu petición</label>
+            <textarea placeholder="Cuéntanos por qué necesitas oración..." required></textarea>
+          </div>
+          <button type="submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Enviar Petición de Oración</button>
+        </form>
+      </div>
+
+      <div class="prayer-info">
+        <h3>Estamos aquí para orar contigo</h3>
+        <p>En la Comunidad Bíblica Cristiana creemos en el poder de la oración. Cada petición que recibimos es llevada ante Dios con fe, amor y dedicación.</p>
+        <p>Nuestro equipo de intercesores ora por cada solicitud. Nadie enfrenta sus batallas solo cuando pertenece a la familia de Dios.</p>
+
+        <div class="promise-card">
+          <i class="fa-solid fa-hands-praying"></i>
+          <p>"Pedid, y se os dará; buscad, y hallaréis; llamad, y se os abrirá."</p>
+          <cite>— Mateo 7:7</cite>
+        </div>
+
+        <div style="margin-top:28px; background:#fff; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+          <h4 style="font-family:'Playfair Display',serif; color:var(--dark); margin-bottom:14px; font-size:1.1rem;">También puedes contactarnos</h4>
+          <p style="font-size:.88rem; color:var(--muted); margin-bottom:10px;"><i class="fa-brands fa-whatsapp" style="color:#25d366"></i> <strong>WhatsApp pastoral:</strong> +1 (555) 000-0000</p>
+          <p style="font-size:.88rem; color:var(--muted);"><i class="fa-solid fa-phone" style="color:var(--purple)"></i> <strong>Teléfono iglesia:</strong> +1 (555) 000-0001</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── OFRENDAS ────────────── -->
+<section id="ofrendas">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Diezmos y Ofrendas</div>
+      <h2 class="section-title">Sembrar con Alegría</h2>
+      <p class="section-sub">"Cada uno dé como propuso en su corazón, no con tristeza ni por necesidad, porque Dios ama al dador alegre." — 2 Corintios 9:7</p>
+    </div>
+    <div class="ofrendas-grid">
+      <div class="ofrenda-card bg1">
+        <i class="fa-solid fa-building-columns"></i>
+        <h3>Transferencia Bancaria</h3>
+        <p>Realiza tu ofrenda de forma segura directamente a la cuenta de la iglesia.</p>
+        <div class="bank-info">
+          <strong>Banco: [Nombre del Banco]</strong>
+          <strong>Cuenta: [Número de cuenta]</strong>
+          <strong>Titular: Iglesia CBC</strong>
+          <strong>Concepto: Diezmo / Ofrenda</strong>
+        </div>
+      </div>
+      <div class="ofrenda-card bg2">
+        <i class="fa-brands fa-paypal"></i>
+        <h3>PayPal</h3>
+        <p>Dona en línea de forma rápida y segura desde cualquier parte del mundo.</p>
+        <div class="bank-info">
+          <strong>Email PayPal:</strong>
+          ofrendas@iglesiacbc.org<br/><br/>
+          <a href="#" style="color:var(--purple); font-weight:700; font-size:.9rem;">→ Ir a PayPal</a>
+        </div>
+      </div>
+      <div class="ofrenda-card bg3">
+        <i class="fa-solid fa-mobile-screen"></i>
+        <h3>Transferencia Móvil</h3>
+        <p>Envía tu ofrenda desde tu teléfono usando servicios de pago móvil.</p>
+        <div class="bank-info">
+          <strong>Nequi / Daviplata:</strong>
+          300 000 0000<br/>
+          <strong>Zelle:</strong>
+          ofrendas@iglesiacbc.org<br/>
+          <strong>Titular: Iglesia CBC</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── LIDERAZGO ────────────── -->
+<section id="liderazgo">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Nuestro Equipo</div>
+      <h2 class="section-title">Liderazgo Pastoral</h2>
+      <p class="section-sub">Siervos de Dios comprometidos con la visión y el crecimiento de nuestra comunidad.</p>
+    </div>
+    <div class="leaders-grid">
+      <div class="leader-card">
+        <div class="leader-avatar av1">✝</div>
+        <div class="leader-name">Ps. Juan García</div>
+        <div class="leader-role">Pastor Principal</div>
+        <div class="leader-bio">Con más de 20 años de ministerio, lidera la visión y el crecimiento espiritual de nuestra congregación.</div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-avatar av2">🌸</div>
+        <div class="leader-name">Hna. María García</div>
+        <div class="leader-role">Pastora de Damas</div>
+        <div class="leader-bio">Dedicada al fortalecimiento espiritual y emocional de las mujeres de la congregación.</div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-avatar av3">🔥</div>
+        <div class="leader-name">Ps. Carlos Mora</div>
+        <div class="leader-role">Pastor de Jóvenes</div>
+        <div class="leader-bio">Apasionado por conectar a las nuevas generaciones con el propósito de Dios para sus vidas.</div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-avatar av4">🎵</div>
+        <div class="leader-name">Lic. Ana Ruiz</div>
+        <div class="leader-role">Directora de Alabanza</div>
+        <div class="leader-bio">Conduce al pueblo de Dios a Su presencia mediante la adoración y la música ungida.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── GALERÍA ────────────── -->
+<section id="galeria" style="background:var(--sky);">
+  <div class="container">
+    <div class="text-center">
+      <div class="section-label">Momentos</div>
+      <h2 class="section-title">Galería de la Comunidad</h2>
+      <p class="section-sub">Recuerdos de nuestros momentos especiales juntos como familia de fe.</p>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item g1">🙏</div>
+      <div class="gallery-item g2">🎵</div>
+      <div class="gallery-item g3">✝️</div>
+      <div class="gallery-item g4">💒</div>
+      <div class="gallery-item g5">🌟</div>
+      <div class="gallery-item g6">📖</div>
+      <div class="gallery-item g2">👶</div>
+      <div class="gallery-item g3">🤝</div>
+    </div>
+    <div style="text-align:center; margin-top:32px;">
+      <a href="https://www.youtube.com/@TuCanal" target="_blank" class="btn-primary" style="display:inline-flex;">
+        <i class="fa-brands fa-youtube"></i> Ver más en YouTube
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── CONTACTO ────────────── -->
+<section id="contacto">
+  <div class="container">
+    <div class="text-center" style="margin-bottom:52px;">
+      <div class="section-label">Estamos aquí</div>
+      <h2 class="section-title">Contáctanos</h2>
+      <p class="section-sub">No estás solo. Nuestra familia está para recibirte con los brazos abiertos.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h3>¡Nos encantaría conocerte!</h3>
+        <div class="contact-item">
+          <div class="contact-item-icon ci1"><i class="fa-solid fa-location-dot"></i></div>
+          <div class="contact-item-text">
+            <strong>Dirección</strong>
+            <span>Calle Principal #123, Ciudad, País</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon ci2"><i class="fa-solid fa-phone"></i></div>
+          <div class="contact-item-text">
+            <strong>Teléfono</strong>
+            <span>+1 (555) 000-0001</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon ci3"><i class="fa-solid fa-envelope"></i></div>
+          <div class="contact-item-text">
+            <strong>Correo</strong>
+            <span>info@iglesiacbc.org</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon ci4"><i class="fa-solid fa-clock"></i></div>
+          <div class="contact-item-text">
+            <strong>Horario de atención</strong>
+            <span>Lunes–Viernes: 9:00 AM – 6:00 PM</span>
+          </div>
+        </div>
+
+        <div class="social-links">
+          <a href="#" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-btn sb-wa"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="#" class="social-btn sb-tg"><i class="fa-brands fa-telegram"></i></a>
+        </div>
+      </div>
+
+      <div class="contact-form-box">
+        <form onsubmit="submitContact(event)">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Correo electrónico</label>
+            <input type="email" placeholder="tu@correo.com" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono (opcional)</label>
+            <input type="tel" placeholder="+1 000 000 0000" />
+          </div>
+          <div class="form-group">
+            <label>Asunto</label>
+            <select>
+              <option>Información general</option>
+              <option>Quiero visitar la iglesia</option>
+              <option>Unirme a un ministerio</option>
+              <option>Consejería pastoral</option>
+              <option>Eventos y actividades</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Mensaje</label>
+            <textarea placeholder="¿En qué podemos ayudarte?" required></textarea>
+          </div>
+          <button type="submit" class="btn-submit">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ────────────── MAPA ────────────── -->
+<div class="map-section">
+  <div class="map-wrapper">
+    <i class="fa-solid fa-map-location-dot"></i>
+    <p style="font-size:1.1rem; font-weight:700; color:var(--dark);">Calle Principal #123, Ciudad, País</p>
+    <p>Incrusta aquí tu mapa de Google Maps copiando el código iframe de Google Maps</p>
+    <a href="https://maps.google.com" target="_blank" class="btn-primary" style="margin-top:8px;">
+      <i class="fa-solid fa-directions"></i> Cómo llegar
+    </a>
+  </div>
+</div>
+
+<!-- ────────────── FOOTER ────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">Comunidad Bíblica Cristiana</div>
+      <div class="footer-brand-sub">Iglesia Evangélica</div>
+      <p class="footer-desc">Un lugar de fe, amor y esperanza donde cada persona importa y puede encontrar su propósito en Cristo Jesús.</p>
+      <div class="social-links">
+        <a href="#" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="social-btn sb-wa"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Navegación</h4>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#dashboard">Panel</a></li>
+        <li><a href="#envivo">En Vivo</a></li>
+        <li><a href="#horarios">Horarios</a></li>
+        <li><a href="#ministerios">Ministerios</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Comunidad</h4>
+      <ul>
+        <li><a href="#actividades">Actividades</a></li>
+        <li><a href="#liderazgo">Liderazgo</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#peticiones">Peticiones</a></li>
+        <li><a href="#ofrendas">Ofrendas</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Horarios</h4>
+      <ul>
+        <li><a href="#">Dom 10:00 AM – Culto</a></li>
+        <li><a href="#">Mié 7:30 PM – Biblia</a></li>
+        <li><a href="#">Vie 7:00 PM – Oración</a></li>
+        <li><a href="#">Sáb 3:00 PM – Células</a></li>
+        <li><a href="#contacto">Contáctanos</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Comunidad Bíblica Cristiana. Todos los derechos reservados. Con ❤️ para la gloria de Dios.</p>
+    <p>Hecho con amor · <a href="#">Política de privacidad</a></p>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOATING -->
+<a href="https://wa.me/15550000000" class="wa-float" target="_blank" title="Escríbenos por WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ────────────── SCRIPTS ────────────── -->
+<script>
+  // Mobile menu
+  function toggleMenu(){
+    document.getElementById('mobileMenu').classList.toggle('open');
+  }
+
+  // Animate counters
+  function animateCounter(id, end, duration){
+    const el = document.getElementById(id);
+    let start = 0, step = end / (duration / 16);
+    const timer = setInterval(()=>{
+      start += step;
+      if(start >= end){ start = end; clearInterval(timer); }
+      el.textContent = Math.floor(start).toLocaleString();
+    }, 16);
+  }
+
+  // Progress bars
+  function animateProgress(){
+    document.querySelectorAll('.progress-fill').forEach(bar=>{
+      const target = bar.dataset.target;
+      bar.style.width = target + '%';
+    });
+  }
+
+  // Intersection observer for dashboard
+  const dashObs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        animateCounter('cnt-miembros', 342, 1200);
+        animateCounter('cnt-peticiones', 87, 1000);
+        animateCounter('cnt-actividades', 24, 900);
+        animateCounter('cnt-celulas', 18, 800);
+        animateCounter('cnt-ministerios', 8, 700);
+        animateCounter('cnt-misiones', 5, 600);
+        setTimeout(animateProgress, 400);
+        dashObs.disconnect();
+      }
+    });
+  }, {threshold:0.2});
+  dashObs.observe(document.getElementById('dashboard'));
+
+  // Toast
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 3200);
+  }
+
+  // Prayer form
+  function submitPrayer(e){
+    e.preventDefault();
+    showToast('🙏 ¡Petición enviada! Oraremos por ti.');
+    e.target.reset();
+  }
+
+  // Contact form
+  function submitContact(e){
+    e.preventDefault();
+    showToast('✉️ ¡Mensaje enviado! Te responderemos pronto.');
+    e.target.reset();
+  }
+
+  // Video tabs
+  function setTab(btn, type){
+    document.querySelectorAll('.video-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const player = document.getElementById('livePlayer');
+    const labels = {
+      live: { icon:'fa-circle-play', text:'Ver Transmisión en Vivo', note:'Domingos 10:00 AM' },
+      sermon: { icon:'fa-book-open', text:'Ver Sermones y Predicaciones', note:'Archivo de mensajes' },
+      alabanza: { icon:'fa-music', text:'Ver Videos de Alabanza', note:'Playlist de adoración' },
+      ninos: { icon:'fa-child', text:'Contenido para Niños', note:'Escuela dominical virtual' }
+    };
+    const l = labels[type];
+    player.innerHTML = `
+      <i class="fa-solid ${l.icon}" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+      <p>${l.text}</p>
+      <small style="color:rgba(255,255,255,.5)">${l.note}</small>
+    `;
+  }
+
+  // Load live video (replace with actual YouTube channel/video ID)
+  function loadLive(){
+    const player = document.getElementById('livePlayer');
+    // Replace UCxxxxxxxxxxxxxxxx with your real YouTube channel ID
+    player.outerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxxxxxxxxxx&autoplay=1" allowfullscreen allow="autoplay"></iframe>';
+  }
+
+  // Versiculo rotator
+  const versiculos = [
+    { text: '"Porque yo sé los planes que tengo para ustedes, planes para su bienestar y no para hacerles daño, para darles un futuro y una esperanza."', ref: '— Jeremías 29:11' },
+    { text: '"Todo lo puedo en Cristo que me fortalece."', ref: '— Filipenses 4:13' },
+    { text: '"El Señor es mi pastor; nada me falta."', ref: '— Salmos 23:1' },
+    { text: '"Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna."', ref: '— Juan 3:16' },
+    { text: '"Confía en el Señor con todo tu corazón, y no te apoyes en tu propio entendimiento."', ref: '— Proverbios 3:5' },
+  ];
+  let vsIdx = 0;
+  function rotateVersiculo(){
+    vsIdx = (vsIdx + 1) % versiculos.length;
+    const v = versiculos[vsIdx];
+    const el = document.getElementById('vsBannerQuote');
+    el.style.opacity = '0';
+    setTimeout(()=>{
+      el.innerHTML = `${v.text}<cite>${v.ref}</cite>`;
+      el.style.opacity = '1';
+    }, 500);
+  }
+  document.getElementById('vsBannerQuote').style.transition = 'opacity .5s';
+  setInterval(rotateVersiculo, 7000);
+
+  // Smooth close nav on mobile link click
+  document.querySelectorAll('.mobile-menu a').forEach(a=>{
+    a.addEventListener('click', ()=>{
+      document.getElementById('mobileMenu').classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>
