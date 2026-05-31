@@ -1533,73 +1533,58 @@
           </div>
           <div class="modal-body">
 
-            <!-- Pago Móvil -->
+            <!-- Pago Móvil #1 — Mercantil -->
             <div class="pago-card pago-movil">
               <div class="pago-header">
                 <span class="pago-icon">📱</span>
                 <div>
-                  <div class="pago-titulo">Pago Móvil</div>
-                  <div class="pago-subtitulo">Transferencia bancaria inmediata</div>
+                  <div class="pago-titulo">Pago Móvil #1</div>
+                  <div class="pago-subtitulo">Banco Mercantil</div>
                 </div>
               </div>
               <div class="pago-datos">
                 <div class="dato-row">
                   <span class="dato-lbl">Banco</span>
-                  <span class="dato-val" id="pmBanco">Banco Provincial</span>
+                  <span class="dato-val" id="pmBanco">Banco Mercantil</span>
                   <button class="btn-copy" onclick="copiar('pmBanco')"><i class="fa fa-copy"></i></button>
                 </div>
                 <div class="dato-row">
                   <span class="dato-lbl">Teléfono</span>
-                  <span class="dato-val" id="pmTelefono">0412-000-0000</span>
+                  <span class="dato-val" id="pmTelefono">0424-520-6320</span>
                   <button class="btn-copy" onclick="copiar('pmTelefono')"><i class="fa fa-copy"></i></button>
                 </div>
                 <div class="dato-row">
-                  <span class="dato-lbl">Cédula / RIF</span>
-                  <span class="dato-val" id="pmCedula">V-00.000.000</span>
+                  <span class="dato-lbl">Cédula</span>
+                  <span class="dato-val" id="pmCedula">V-3.964.833</span>
                   <button class="btn-copy" onclick="copiar('pmCedula')"><i class="fa fa-copy"></i></button>
-                </div>
-                <div class="dato-row">
-                  <span class="dato-lbl">Titular</span>
-                  <span class="dato-val" id="pmTitular">Iglesia CBC</span>
-                  <button class="btn-copy" onclick="copiar('pmTitular')"><i class="fa fa-copy"></i></button>
                 </div>
               </div>
             </div>
 
-            <!-- Transferencia Bancaria -->
+            <!-- Pago Móvil #2 — Banesco -->
             <div class="pago-card pago-transferencia">
               <div class="pago-header">
-                <span class="pago-icon">🏦</span>
+                <span class="pago-icon">📲</span>
                 <div>
-                  <div class="pago-titulo">Transferencia Bancaria</div>
-                  <div class="pago-subtitulo">Cuenta corriente / ahorro</div>
+                  <div class="pago-titulo">Pago Móvil #2</div>
+                  <div class="pago-subtitulo">Banco Banesco</div>
                 </div>
               </div>
               <div class="pago-datos">
                 <div class="dato-row">
                   <span class="dato-lbl">Banco</span>
-                  <span class="dato-val" id="trBanco">Banco Mercantil</span>
-                  <button class="btn-copy" onclick="copiar('trBanco')"><i class="fa fa-copy"></i></button>
+                  <span class="dato-val" id="pm2Banco">Banco Banesco</span>
+                  <button class="btn-copy" onclick="copiar('pm2Banco')"><i class="fa fa-copy"></i></button>
                 </div>
                 <div class="dato-row">
-                  <span class="dato-lbl">Tipo</span>
-                  <span class="dato-val" id="trTipo">Cuenta Corriente</span>
-                  <button class="btn-copy" onclick="copiar('trTipo')"><i class="fa fa-copy"></i></button>
+                  <span class="dato-lbl">Teléfono</span>
+                  <span class="dato-val" id="pm2Telefono">0412-504-0096</span>
+                  <button class="btn-copy" onclick="copiar('pm2Telefono')"><i class="fa fa-copy"></i></button>
                 </div>
                 <div class="dato-row">
-                  <span class="dato-lbl">N° Cuenta</span>
-                  <span class="dato-val" id="trCuenta">0105-0000-00-0000000000</span>
-                  <button class="btn-copy" onclick="copiar('trCuenta')"><i class="fa fa-copy"></i></button>
-                </div>
-                <div class="dato-row">
-                  <span class="dato-lbl">RIF</span>
-                  <span class="dato-val" id="trRif">J-00.000.000-0</span>
-                  <button class="btn-copy" onclick="copiar('trRif')"><i class="fa fa-copy"></i></button>
-                </div>
-                <div class="dato-row">
-                  <span class="dato-lbl">Titular</span>
-                  <span class="dato-val" id="trTitular">Iglesia Comunidad Bíblica Cristiana</span>
-                  <button class="btn-copy" onclick="copiar('trTitular')"><i class="fa fa-copy"></i></button>
+                  <span class="dato-lbl">Cédula</span>
+                  <span class="dato-val" id="pm2Cedula">V-3.964.833</span>
+                  <button class="btn-copy" onclick="copiar('pm2Cedula')"><i class="fa fa-copy"></i></button>
                 </div>
               </div>
             </div>
@@ -1644,7 +1629,7 @@
 
           <div class="modal-footer">
             <small style="color:var(--muted)">
-              ✏️ Para actualizar estos datos edita el archivo <code>lideres.html</code> y busca los IDs <code>pmBanco</code>, <code>trCuenta</code>, <code>bnWallet</code>, etc.
+              ✏️ Para actualizar estos datos edita el archivo <code>lideres.html</code> y busca los IDs <code>pmBanco</code>, <code>pm2Banco</code>, <code>bnWallet</code>, etc.
             </small>
           </div>
         </div>
