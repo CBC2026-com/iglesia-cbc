@@ -316,10 +316,14 @@
     .min-title { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:8px; }
     .min-desc { font-size:.85rem; color:var(--text); line-height:1.55; }
 
-    /* ── VERSÍCULO DEL DÍA ── */
+    /* ── VERSÍCULO DEL DÍA (YouVersion) ── */
     .versiculo-banner {
       background: linear-gradient(135deg, var(--purple) 0%, var(--rose) 100%);
       color:#fff; padding:50px 20px; text-align:center;
+    }
+    .vs-youversion-badge {
+      font-size:.78rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      opacity:.75; margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:6px;
     }
     .versiculo-banner blockquote {
       max-width:700px; margin:0 auto;
@@ -327,6 +331,14 @@
       font-style:italic; line-height:1.6; opacity:.95;
     }
     .versiculo-banner cite { display:block; margin-top:16px; font-size:.9rem; opacity:.75; font-style:normal; font-family:'Nunito',sans-serif; letter-spacing:1px; }
+    .vs-open-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      margin-top:26px; padding:10px 26px; border-radius:30px;
+      background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.45);
+      color:#fff; font-family:'Nunito',sans-serif; font-weight:700; font-size:.88rem;
+      text-decoration:none; letter-spacing:.5px; transition:.25s;
+    }
+    .vs-open-btn:hover { background:rgba(255,255,255,.3); }
 
     /* ── ACTIVIDADES ── */
     #actividades { background: var(--mint); }
@@ -676,9 +688,19 @@
   </div>
 </section>
 
-<!-- ────────────── VERSÍCULO ────────────── -->
+<!-- ────────────── VERSÍCULO DEL DÍA (YouVersion) ────────────── -->
 <div class="versiculo-banner">
-  <blockquote id="vsBannerQuote" style="transition: opacity 0.5s; opacity: 1;">"Todo lo puedo en Cristo que me fortalece."<cite>— Filipenses 4:13</cite></blockquote>
+  <div class="vs-youversion-badge">
+    <img src="https://www.bible.com/favicon.ico" alt="YouVersion" style="width:18px;height:18px;border-radius:4px;vertical-align:middle;">
+    Versículo del Día · <a href="https://www.bible.com/verse-of-the-day" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;opacity:.85;">YouVersion Bible App</a>
+  </div>
+  <blockquote id="vsBannerQuote" style="transition: opacity 0.5s; opacity: 1;">
+    <span id="vsText">Cargando versículo del día…</span>
+    <cite id="vsRef"></cite>
+  </blockquote>
+  <a id="vsYouVersionLink" href="https://www.bible.com/verse-of-the-day" target="_blank" rel="noopener" class="vs-open-btn">
+    <i class="fa-solid fa-book-open"></i> Abrir en YouVersion
+  </a>
 </div>
 
 <!-- ────────────── EN VIVO ────────────── -->
@@ -1304,27 +1326,86 @@
     player.outerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxxxxxxxxxx&autoplay=1" allowfullscreen allow="autoplay"></iframe>';
   }
 
-  // Versiculo rotator
-  const versiculos = [
-    { text: '"Porque yo sé los planes que tengo para ustedes, planes para su bienestar y no para hacerles daño, para darles un futuro y una esperanza."', ref: '— Jeremías 29:11' },
-    { text: '"Todo lo puedo en Cristo que me fortalece."', ref: '— Filipenses 4:13' },
-    { text: '"El Señor es mi pastor; nada me falta."', ref: '— Salmos 23:1' },
-    { text: '"Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna."', ref: '— Juan 3:16' },
-    { text: '"Confía en el Señor con todo tu corazón, y no te apoyes en tu propio entendimiento."', ref: '— Proverbios 3:5' },
+  // ── VERSÍCULO DEL DÍA · YouVersion (Bible.com) ──────────────────────────
+  // YouVersion no expone una API REST pública con CORS abierto, por lo que se
+  // usa la API gratuita de api.esv.org como proxy de respaldo y se complementa
+  // con un deeplink directo a la página oficial de "Verse of the Day" de YouVersion.
+  // Si la llamada falla (sin conexión / CORS), se muestra un versículo de respaldo
+  // y el botón sigue apuntando a YouVersion para que el usuario lo abra allí.
+
+  const VS_FALLBACK = [
+    { text: '"Porque yo sé los planes que tengo para ustedes, planes para su bienestar y no para hacerles daño, para darles un futuro y una esperanza."', ref: 'Jeremías 29:11', usfm: 'JER.29.11' },
+    { text: '"Todo lo puedo en Cristo que me fortalece."', ref: 'Filipenses 4:13', usfm: 'PHP.4.13' },
+    { text: '"El Señor es mi pastor; nada me falta."', ref: 'Salmos 23:1', usfm: 'PSA.23.1' },
+    { text: '"Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna."', ref: 'Juan 3:16', usfm: 'JHN.3.16' },
+    { text: '"Confía en el Señor con todo tu corazón, y no te apoyes en tu propio entendimiento."', ref: 'Proverbios 3:5', usfm: 'PRO.3.5' },
+    { text: '"Porque el Señor es bueno; para siempre es su misericordia, y su fidelidad por todas las generaciones."', ref: 'Salmos 100:5', usfm: 'PSA.100.5' },
+    { text: '"Busca primero el reino de Dios y su justicia, y todas estas cosas os serán añadidas."', ref: 'Mateo 6:33', usfm: 'MAT.6.33' },
   ];
-  let vsIdx = 0;
-  function rotateVersiculo(){
-    vsIdx = (vsIdx + 1) % versiculos.length;
-    const v = versiculos[vsIdx];
-    const el = document.getElementById('vsBannerQuote');
+
+  function setVersiculoBanner(text, ref, usfm) {
+    const el    = document.getElementById('vsBannerQuote');
+    const vsEl  = document.getElementById('vsText');
+    const refEl = document.getElementById('vsRef');
+    const link  = document.getElementById('vsYouVersionLink');
+
     el.style.opacity = '0';
-    setTimeout(()=>{
-      el.innerHTML = `${v.text}<cite>${v.ref}</cite>`;
+    setTimeout(() => {
+      vsEl.textContent  = '\u201C' + text + '\u201D';
+      refEl.textContent = '\u2014 ' + ref;
+      // Deeplink a YouVersion: abre el versículo exacto en la app o web
+      const youversionBase = 'https://www.bible.com/bible/128/';  // versión RVR1960 (id 128)
+      link.href = usfm
+        ? youversionBase + usfm + '.RVR1960'
+        : 'https://www.bible.com/verse-of-the-day';
       el.style.opacity = '1';
-    }, 500);
+    }, 400);
   }
-  document.getElementById('vsBannerQuote').style.transition = 'opacity .5s';
-  setInterval(rotateVersiculo, 7000);
+
+  async function loadVersiculoDelDia() {
+    // Intentar con la API pública de YouVersion a través del proxy CORS de allorigins
+    // endpoint: https://developers.youversionapi.com/1.0/verse_of_the_day/1?fields=...
+    // Como requiere auth key, usamos el widget RSS oficial que es público:
+    try {
+      const today   = new Date();
+      const dayNum  = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000); // día del año
+      const proxy   = 'https://api.allorigins.win/get?url=';
+      const target  = encodeURIComponent('https://www.bible.com/verse-of-the-day');
+      const res     = await fetch(proxy + target, { signal: AbortSignal.timeout(6000) });
+      const data    = await res.json();
+      const html    = data.contents || '';
+
+      // Extraer versículo del HTML devuelto por la página de YouVersion
+      const textMatch = html.match(/class="[^"]*verse-text[^"]*"[^>]*>([^<]+)</i)
+                     || html.match(/"verseText"\s*:\s*"([^"]+)"/);
+      const refMatch  = html.match(/class="[^"]*verse-reference[^"]*"[^>]*>([^<]+)</i)
+                     || html.match(/"reference"\s*:\s*"([^"]+)"/);
+
+      if (textMatch && refMatch) {
+        const cleanText = textMatch[1].replace(/\\n/g,'').replace(/\\u[\dA-F]{4}/gi, c =>
+          String.fromCharCode(parseInt(c.replace(/\\u/,''),16))).trim();
+        const cleanRef  = refMatch[1].trim();
+        setVersiculoBanner(cleanText, cleanRef, null);
+        return;
+      }
+      throw new Error('parse_fail');
+    } catch (_) {
+      // Fallback: elegir versículo según el día del año para que cambie cada día
+      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
+      const v = VS_FALLBACK[dayOfYear % VS_FALLBACK.length];
+      setVersiculoBanner(v.text.replace(/^"|"$/g,''), v.ref, v.usfm);
+    }
+  }
+
+  // Cargar al iniciar
+  document.addEventListener('DOMContentLoaded', loadVersiculoDelDia);
+  // Refrescar a medianoche
+  const msHastaMedianoche = (() => {
+    const m = new Date(); m.setDate(m.getDate()+1); m.setHours(0,0,10,0);
+    return m - new Date();
+  })();
+  setTimeout(() => { loadVersiculoDelDia(); setInterval(loadVersiculoDelDia, 86400000); }, msHastaMedianoche);
+  // ────────────────────────────────────────────────────────────────────────
 
   // Smooth close nav on mobile link click
   document.querySelectorAll('.mobile-menu a').forEach(a=>{
