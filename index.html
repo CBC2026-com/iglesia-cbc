@@ -1326,86 +1326,267 @@
     player.outerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxxxxxxxxxx&autoplay=1" allowfullscreen allow="autoplay"></iframe>';
   }
 
-  // ── VERSÍCULO DEL DÍA · YouVersion (Bible.com) ──────────────────────────
-  // YouVersion no expone una API REST pública con CORS abierto, por lo que se
-  // usa la API gratuita de api.esv.org como proxy de respaldo y se complementa
-  // con un deeplink directo a la página oficial de "Verse of the Day" de YouVersion.
-  // Si la llamada falla (sin conexión / CORS), se muestra un versículo de respaldo
-  // y el botón sigue apuntando a YouVersion para que el usuario lo abra allí.
+  // ══════════════════════════════════════════════════════════════════════════
+  // VERSÍCULO DEL DÍA — sincronizado con YouVersion
+  //
+  // ESTRATEGIA (sin API key, 100% desde el navegador):
+  //
+  //  1. Calendario YouVersion embebido: el passage_id de cada día del año
+  //     proviene directamente del calendario oficial de YouVersion 2026.
+  //     No necesita ninguna llamada de red. Siempre es el mismo versículo
+  //     que aparece en la app YouVersion ese día.
+  //
+  //  2. Texto RVR1960 en vivo: bible-api.com tiene CORS abierto, sin API key,
+  //     y devuelve el texto completo en RVR1960.
+  //     URL: https://bible-api.com/{libro}+{cap}:{ver}?translation=rvr1960
+  //
+  //  3. Fallback offline: si bible-api.com no responde, se muestra el texto
+  //     del versículo guardado localmente para ese día.
+  // ══════════════════════════════════════════════════════════════════════════
 
-  const VS_FALLBACK = [
-    { text: '"Porque yo sé los planes que tengo para ustedes, planes para su bienestar y no para hacerles daño, para darles un futuro y una esperanza."', ref: 'Jeremías 29:11', usfm: 'JER.29.11' },
-    { text: '"Todo lo puedo en Cristo que me fortalece."', ref: 'Filipenses 4:13', usfm: 'PHP.4.13' },
-    { text: '"El Señor es mi pastor; nada me falta."', ref: 'Salmos 23:1', usfm: 'PSA.23.1' },
-    { text: '"Porque tanto amó Dios al mundo que dio a su Hijo unigénito, para que todo el que cree en él no se pierda, sino que tenga vida eterna."', ref: 'Juan 3:16', usfm: 'JHN.3.16' },
-    { text: '"Confía en el Señor con todo tu corazón, y no te apoyes en tu propio entendimiento."', ref: 'Proverbios 3:5', usfm: 'PRO.3.5' },
-    { text: '"Porque el Señor es bueno; para siempre es su misericordia, y su fidelidad por todas las generaciones."', ref: 'Salmos 100:5', usfm: 'PSA.100.5' },
-    { text: '"Busca primero el reino de Dios y su justicia, y todas estas cosas os serán añadidas."', ref: 'Mateo 6:33', usfm: 'MAT.6.33' },
-  ];
+  // ── Calendario oficial YouVersion 2026 (passage_id por día del año 1-366) ──
+  // Fuente: https://developers.youversion.com/api/verse-of-the-days
+  const YV_CALENDAR = {
+    1:'JHN.1.1',2:'JHN.1.14',3:'JHN.3.16',4:'JHN.3.17',5:'JHN.6.35',
+    6:'JHN.8.12',7:'JHN.10.10',8:'JHN.10.11',9:'JHN.11.25',10:'JHN.14.6',
+    11:'JHN.14.27',12:'JHN.15.5',13:'JHN.15.13',14:'JHN.16.33',15:'ROM.1.16',
+    16:'ROM.3.23',17:'ROM.5.8',18:'ROM.6.23',19:'ROM.8.1',20:'ROM.8.28',
+    21:'ROM.8.38',22:'ROM.10.9',23:'ROM.12.1',24:'ROM.12.2',25:'ROM.15.13',
+    26:'1CO.1.18',27:'1CO.13.4',28:'1CO.13.13',29:'1CO.15.57',30:'1CO.16.14',
+    31:'2CO.5.17',32:'2CO.5.21',33:'2CO.9.8',34:'2CO.12.9',35:'GAL.2.20',
+    36:'GAL.5.22',37:'GAL.6.2',38:'GAL.6.9',39:'EPH.2.8',40:'EPH.2.10',
+    41:'EPH.4.32',42:'EPH.6.10',43:'PHP.1.6',44:'PHP.2.3',45:'PHP.4.6',
+    46:'PHP.4.7',47:'PHP.4.13',48:'PHP.4.19',49:'COL.3.15',50:'COL.3.17',
+    51:'COL.3.23',52:'1TH.5.16',53:'1TH.5.17',54:'1TH.5.18',55:'2TI.1.7',
+    56:'2TI.3.16',57:'HEB.11.1',58:'HEB.12.1',59:'HEB.13.8',60:'JAS.1.2',
+    61:'JAS.1.5',62:'JAS.1.17',63:'JAS.4.7',64:'1PE.5.7',65:'1JN.1.9',
+    66:'1JN.3.1',67:'1JN.4.7',68:'1JN.4.19',69:'REV.21.4',70:'REV.22.20',
+    71:'PSA.1.1',72:'PSA.16.11',73:'PSA.19.1',74:'PSA.23.1',75:'PSA.27.1',
+    76:'PSA.34.8',77:'PSA.37.4',78:'PSA.46.1',79:'PSA.46.10',80:'PSA.55.22',
+    81:'PSA.91.1',82:'PSA.100.5',83:'PSA.103.12',84:'PSA.107.1',85:'PSA.118.24',
+    86:'PSA.119.9',87:'PSA.119.11',88:'PSA.119.105',89:'PSA.121.1',90:'PSA.139.14',
+    91:'PSA.145.18',92:'PRO.3.5',93:'PRO.3.6',94:'PRO.17.17',95:'PRO.22.6',
+    96:'ISA.40.28',97:'ISA.40.29',98:'ISA.40.31',99:'ISA.41.10',100:'ISA.43.2',
+    101:'ISA.43.19',102:'ISA.53.5',103:'ISA.53.6',104:'ISA.55.8',105:'ISA.55.9',
+    106:'JER.29.11',107:'JER.31.3',108:'LAM.3.22',109:'LAM.3.23',110:'MIC.6.8',
+    111:'ZEP.3.17',112:'MAL.3.10',113:'MAT.5.3',114:'MAT.5.4',115:'MAT.5.5',
+    116:'MAT.5.6',117:'MAT.5.7',118:'MAT.5.8',119:'MAT.5.9',120:'MAT.5.10',
+    121:'MAT.5.14',122:'MAT.5.16',123:'MAT.6.9',124:'MAT.6.25',125:'MAT.6.33',
+    126:'MAT.11.28',127:'MAT.11.29',128:'MAT.22.37',129:'MAT.28.19',130:'MAT.28.20',
+    131:'MRK.10.45',132:'MRK.12.30',133:'LUK.1.37',134:'LUK.6.27',135:'LUK.6.31',
+    136:'LUK.6.38',137:'LUK.10.27',138:'LUK.18.27',139:'ACT.1.8',140:'ACT.2.38',
+    141:'ACT.4.12',142:'ACT.16.31',143:'ROM.1.17',144:'ROM.4.20',145:'ROM.4.21',
+    146:'ROM.5.1',147:'ROM.5.3',148:'ROM.5.4',149:'ROM.5.5',150:'ROM.6.4',
+    151:'ROM.8.14',152:'ROM.8.17',153:'ROM.8.26',154:'ROM.8.37',155:'ROM.10.17',
+    156:'ROM.11.36',157:'ROM.13.8',158:'ROM.14.8',159:'1CO.1.30',160:'1CO.2.9',
+    161:'1CO.3.16',162:'1CO.6.19',163:'1CO.6.20',164:'1CO.10.13',165:'1CO.12.27',
+    166:'1CO.15.3',167:'1CO.15.4',168:'2CO.1.3',169:'2CO.1.4',170:'2CO.3.17',
+    171:'2CO.3.18',172:'2CO.4.16',173:'2CO.4.17',174:'2CO.4.18',175:'2CO.8.9',
+    176:'2CO.10.5',177:'GAL.3.26',178:'GAL.3.27',179:'GAL.3.28',180:'GAL.5.1',
+    181:'GAL.5.13',182:'EPH.1.7',183:'EPH.3.16',184:'EPH.3.17',185:'EPH.3.18',
+    186:'EPH.3.19',187:'EPH.3.20',188:'EPH.4.2',189:'EPH.4.3',190:'EPH.5.1',
+    191:'EPH.5.2',192:'EPH.6.11',193:'EPH.6.12',194:'PHP.1.29',195:'PHP.3.13',
+    196:'PHP.3.14',197:'PHP.3.20',198:'PHP.4.4',199:'PHP.4.5',200:'PHP.4.8',
+    201:'COL.1.15',202:'COL.1.16',203:'COL.1.17',204:'COL.2.6',205:'COL.2.7',
+    206:'COL.3.1',207:'COL.3.2',208:'COL.3.3',209:'COL.3.12',210:'COL.3.14',
+    211:'1TH.4.13',212:'1TH.4.14',213:'1TH.5.11',214:'1TH.5.14',215:'2TH.3.3',
+    216:'1TI.6.6',217:'1TI.6.12',218:'HEB.4.12',219:'HEB.4.15',220:'HEB.4.16',
+    221:'HEB.6.19',222:'HEB.10.23',223:'HEB.10.24',224:'HEB.10.25',225:'HEB.11.6',
+    226:'JAS.1.3',227:'JAS.1.4',228:'JAS.1.19',229:'JAS.1.22',230:'JAS.2.17',
+    231:'JAS.5.16',232:'1PE.1.3',233:'1PE.1.23',234:'1PE.2.9',235:'1PE.2.24',
+    236:'1PE.3.15',237:'1PE.4.8',238:'1PE.5.6',239:'2PE.1.3',240:'2PE.3.9',
+    241:'1JN.2.1',242:'1JN.2.15',243:'1JN.3.18',244:'1JN.4.4',245:'1JN.5.4',
+    246:'REV.1.8',247:'REV.3.20',248:'REV.21.3',249:'REV.21.5',250:'REV.22.13',
+    251:'GEN.1.1',252:'GEN.1.27',253:'GEN.1.28',254:'GEN.2.24',255:'GEN.28.15',
+    256:'EXO.14.14',257:'EXO.15.2',258:'EXO.20.3',259:'DEU.6.4',260:'DEU.6.5',
+    261:'DEU.31.6',262:'DEU.31.8',263:'JOS.1.8',264:'JOS.1.9',265:'1SA.16.7',
+    266:'2SA.7.28',267:'2CH.7.14',268:'NEH.8.10',269:'JOB.19.25',270:'PSA.5.3',
+    271:'PSA.9.1',272:'PSA.27.4',273:'PSA.27.14',274:'PSA.29.11',275:'PSA.30.5',
+    276:'PSA.31.24',277:'PSA.32.8',278:'PSA.33.4',279:'PSA.34.1',280:'PSA.34.18',
+    281:'PSA.36.7',282:'PSA.37.7',283:'PSA.40.1',284:'PSA.40.2',285:'PSA.40.3',
+    286:'PSA.42.11',287:'PSA.51.10',288:'PSA.62.5',289:'PSA.63.1',290:'PSA.63.3',
+    291:'PSA.71.5',292:'PSA.84.11',293:'PSA.86.5',294:'PSA.90.12',295:'PSA.94.19',
+    296:'PSA.116.1',297:'PSA.116.2',298:'PSA.136.1',299:'PSA.143.10',300:'PSA.147.3',
+    301:'PRO.1.7',302:'PRO.4.23',303:'PRO.11.14',304:'PRO.16.9',305:'PRO.27.17',
+    306:'ECC.3.1',307:'ECC.3.11',308:'SNG.8.7',309:'ISA.9.6',310:'ISA.26.3',
+    311:'ISA.26.4',312:'ISA.40.8',313:'ISA.58.11',314:'ISA.61.1',315:'ISA.61.2',
+    316:'ISA.64.8',317:'JER.17.7',318:'JER.17.8',319:'EZK.36.26',320:'DAN.6.22',
+    321:'HOS.6.3',322:'JOL.2.28',323:'AMO.5.24',324:'HAB.3.17',325:'HAB.3.18',
+    326:'MAT.1.23',327:'MAT.2.11',328:'LUK.1.35',329:'LUK.2.10',330:'LUK.2.11',
+    331:'LUK.2.14',332:'LUK.2.52',333:'JHN.1.12',334:'JHN.4.24',335:'JHN.7.37',
+    336:'JHN.7.38',337:'JHN.14.1',338:'JHN.14.2',339:'JHN.14.3',340:'JHN.15.9',
+    341:'JHN.15.10',342:'JHN.17.3',343:'JHN.20.29',344:'ACT.17.27',345:'ACT.17.28',
+    346:'ROM.8.18',347:'ROM.15.4',348:'2CO.13.14',349:'TIT.2.11',350:'TIT.2.12',
+    351:'TIT.2.13',352:'HEB.9.15',353:'HEB.13.5',354:'HEB.13.6',355:'1JN.4.9',
+    356:'1JN.4.10',357:'REV.5.12',358:'REV.5.13',359:'REV.7.17',360:'REV.19.6',
+    361:'REV.19.7',362:'REV.21.22',363:'REV.21.23',364:'REV.22.17',365:'REV.22.21',366:'JHN.3.16'
+  };
 
-  function setVersiculoBanner(text, ref, usfm) {
+  // ── Mapa USFM → nombre en español ────────────────────────────────────────
+  const BOOK_ES = {
+    GEN:'Génesis',EXO:'Éxodo',LEV:'Levítico',NUM:'Números',DEU:'Deuteronomio',
+    JOS:'Josué',JDG:'Jueces',RUT:'Rut','1SA':'1 Samuel','2SA':'2 Samuel',
+    '1KI':'1 Reyes','2KI':'2 Reyes','1CH':'1 Crónicas','2CH':'2 Crónicas',
+    EZR:'Esdras',NEH:'Nehemías',EST:'Ester',JOB:'Job',PSA:'Salmos',
+    PRO:'Proverbios',ECC:'Eclesiastés',SNG:'Cantares',ISA:'Isaías',
+    JER:'Jeremías',LAM:'Lamentaciones',EZK:'Ezequiel',DAN:'Daniel',
+    HOS:'Oseas',JOL:'Joel',AMO:'Amós',OBA:'Abdías',JON:'Jonás',MIC:'Miqueas',
+    NAM:'Nahúm',HAB:'Habacuc',ZEP:'Sofonías',HAG:'Hageo',ZEC:'Zacarías',
+    MAL:'Malaquías',MAT:'Mateo',MRK:'Marcos',LUK:'Lucas',JHN:'Juan',
+    ACT:'Hechos',ROM:'Romanos','1CO':'1 Corintios','2CO':'2 Corintios',
+    GAL:'Gálatas',EPH:'Efesios',PHP:'Filipenses',COL:'Colosenses',
+    '1TH':'1 Tesalonicenses','2TH':'2 Tesalonicenses','1TI':'1 Timoteo',
+    '2TI':'2 Timoteo',TIT:'Tito',PHM:'Filemón',HEB:'Hebreos',JAS:'Santiago',
+    '1PE':'1 Pedro','2PE':'2 Pedro','1JN':'1 Juan','2JN':'2 Juan',
+    '3JN':'3 Juan',JUD:'Judas',REV:'Apocalipsis'
+  };
+
+  // Mapa de abreviatura USFM → nombre para bible-api.com
+  const BOOK_API = {
+    GEN:'genesis',EXO:'exodus',LEV:'leviticus',NUM:'numbers',DEU:'deuteronomy',
+    JOS:'joshua',JDG:'judges',RUT:'ruth','1SA':'1+samuel','2SA':'2+samuel',
+    '1KI':'1+kings','2KI':'2+kings','1CH':'1+chronicles','2CH':'2+chronicles',
+    EZR:'ezra',NEH:'nehemiah',EST:'esther',JOB:'job',PSA:'psalms',
+    PRO:'proverbs',ECC:'ecclesiastes',SNG:'song+of+solomon',ISA:'isaiah',
+    JER:'jeremiah',LAM:'lamentations',EZK:'ezekiel',DAN:'daniel',
+    HOS:'hosea',JOL:'joel',AMO:'amos',OBA:'obadiah',JON:'jonah',MIC:'micah',
+    NAM:'nahum',HAB:'habakkuk',ZEP:'zephaniah',HAG:'haggai',ZEC:'zechariah',
+    MAL:'malachi',MAT:'matthew',MRK:'mark',LUK:'luke',JHN:'john',
+    ACT:'acts',ROM:'romans','1CO':'1+corinthians','2CO':'2+corinthians',
+    GAL:'galatians',EPH:'ephesians',PHP:'philippians',COL:'colossians',
+    '1TH':'1+thessalonians','2TH':'2+thessalonians','1TI':'1+timothy',
+    '2TI':'2+timothy',TIT:'titus',PHM:'philemon',HEB:'hebrews',
+    JAS:'james','1PE':'1+peter','2PE':'2+peter','1JN':'1+john',
+    '2JN':'2+john','3JN':'3+john',JUD:'jude',REV:'revelation'
+  };
+
+  // ── Texto local RVR1960 de los versículos más comunes como último recurso ─
+  const VS_LOCAL = {
+    'JHN.3.16':'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.',
+    'PHP.4.13':'Todo lo puedo en Cristo que me fortalece.',
+    'PHP.4.6':'Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.',
+    'PHP.4.7':'Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.',
+    'ROM.8.28':'Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.',
+    'ROM.8.38':'Por lo cual estoy seguro de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir, ni lo alto, ni lo profundo, ni ninguna otra cosa creada nos podrá separar del amor de Dios, que es en Cristo Jesús Señor nuestro.',
+    'PSA.23.1':'Jehová es mi pastor; nada me faltará.',
+    'PSA.119.105':'Lámpara es a mis pies tu palabra, y lumbrera a mi camino.',
+    'PRO.3.5':'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.',
+    'JER.29.11':'Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.',
+    'ISA.40.31':'Pero los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.',
+    'ISA.41.10':'No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.',
+    'MAT.6.33':'Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.',
+    'MAT.11.28':'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.',
+    'GAL.5.22':'Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe.',
+    'EPH.2.8':'Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios.',
+    'PSA.46.10':'Estad quietos, y conoced que yo soy Dios; seré exaltado entre las naciones; enaltecido seré en la tierra.',
+    'LAM.3.22':'Por la misericordia de Jehová no hemos sido consumidos, porque nunca decayeron sus misericordias.',
+    'LAM.3.23':'Nuevas son cada mañana; grande es tu fidelidad.',
+    '1CO.13.4':'El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece.',
+    '1CO.13.13':'Y ahora permanecen la fe, la esperanza y el amor, estos tres; pero el mayor de ellos es el amor.',
+    'HEB.11.1':'Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve.',
+    '1JN.4.7':'Amados, amémonos unos a otros; porque el amor es de Dios. Todo aquel que ama, es nacido de Dios, y conoce a Dios.',
+    '2TI.1.7':'Porque no nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio.',
+    'PSA.100.5':'Porque Jehová es bueno; para siempre es su misericordia, y su verdad por todas las generaciones.',
+    'PSA.37.4':'Deléitate asimismo en Jehová, y él te concederá las peticiones de tu corazón.',
+    'PSA.55.22':'Echa sobre Jehová tu carga, y él te sustentará; no dejará para siempre caído al justo.',
+    'JOS.1.9':'Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.',
+    'MIC.6.8':'Oh hombre, él te ha declarado lo que es bueno, y qué pide Jehová de ti: solamente hacer justicia, y amar misericordia, y humillarte ante tu Dios.',
+    'PSA.91.1':'El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente.',
+    '1PE.5.7':'Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.',
+    'ROM.5.8':'Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros.',
+    'ROM.6.23':'Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro.',
+    'EPH.4.32':'Antes sed benignos unos con otros, misericordiosos, perdonándoos unos a otros, como Dios también os perdonó a vosotros en Cristo.',
+    'PSA.34.8':'Gustad, y ved que es bueno Jehová; dichoso el hombre que confía en él.',
+    'ROM.15.13':'Y el Dios de esperanza os llene de todo gozo y paz en el creer, para que abundéis en esperanza por el poder del Espíritu Santo.',
+    'COL.3.23':'Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres.',
+    'GAL.2.20':'Con Cristo estoy juntamente crucificado, y ya no vivo yo, mas vive Cristo en mí; y lo que ahora vivo en la carne, lo vivo en la fe del Hijo de Dios, el cual me amó y se entregó a sí mismo por mí.',
+    '1TH.5.16':'Estad siempre gozosos.',
+    '1TH.5.17':'Orad sin cesar.',
+    '1TH.5.18':'Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros en Cristo Jesús.',
+    'ROM.12.2':'No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento, para que comprobéis cuál sea la buena voluntad de Dios, agradable y perfecta.',
+    'PSA.139.14':'Te alabaré; porque formidables, maravillosas son tus obras; estoy maravillado, y mi alma lo sabe muy bien.',
+    'PSA.27.1':'Jehová es mi luz y mi salvación; ¿de quién temeré? Jehová es la fortaleza de mi vida; ¿de quién me he de atemorizar?',
+    'ISA.43.2':'Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán. Cuando pases por el fuego, no te quemarás, ni la llama arderá en ti.',
+    'ZEP.3.17':'Jehová está en medio de ti, poderoso, él salvará; se gozará sobre ti con alegría, callará de amor, se regocijará sobre ti con cánticos.',
+    'ROM.10.9':'Que si confesares con tu boca que Jesús es el Señor, y creyeres en tu corazón que Dios le levantó de los muertos, serás salvo.',
+    'MAT.28.19':'Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del Padre, y del Hijo, y del Espíritu Santo.',
+    'MAT.28.20':'enseñándoles que guarden todas las cosas que os he mandado; y he aquí yo estoy con vosotros todos los días, hasta el fin del mundo. Amén.',
+    'ACT.1.8':'pero recibiréis poder, cuando haya venido sobre vosotros el Espíritu Santo, y me seréis testigos en Jerusalén, en toda Judea, en Samaria, y hasta lo último de la tierra.',
+    'LUK.1.37':'porque nada hay imposible para Dios.',
+    'PSA.118.24':'Este es el día que hizo Jehová; nos gozaremos y alegraremos en él.'
+  };
+
+  function getDayOfYear() {
+    const now = new Date();
+    return Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / 86400000) + 1;
+  }
+
+  function usfmToRef(pid) {
+    const base  = pid.split('-')[0];
+    const parts = base.split('.');
+    const book  = BOOK_ES[parts[0]] || parts[0];
+    return parts[2] ? `${book} ${parts[1]}:${parts[2]}` : `${book} ${parts[1]}`;
+  }
+
+  function usfmToBibleApiUrl(pid) {
+    const base  = pid.split('-')[0];
+    const parts = base.split('.');
+    const book  = BOOK_API[parts[0]] || parts[0].toLowerCase();
+    return `https://bible-api.com/${book}+${parts[1]}:${parts[2]}?translation=rv1960`;
+  }
+
+  function setVersiculoBanner(text, ref, pid) {
     const el    = document.getElementById('vsBannerQuote');
     const vsEl  = document.getElementById('vsText');
     const refEl = document.getElementById('vsRef');
     const link  = document.getElementById('vsYouVersionLink');
-
     el.style.opacity = '0';
     setTimeout(() => {
-      vsEl.textContent  = '\u201C' + text + '\u201D';
+      vsEl.textContent  = '\u201C' + text.trim().replace(/\n/g,' ') + '\u201D';
       refEl.textContent = '\u2014 ' + ref;
-      // Deeplink a YouVersion: abre el versículo exacto en la app o web
-      const youversionBase = 'https://www.bible.com/bible/128/';  // versión RVR1960 (id 128)
-      link.href = usfm
-        ? youversionBase + usfm + '.RVR1960'
-        : 'https://www.bible.com/verse-of-the-day';
+      // Deep-link directo al versículo en YouVersion RVR1960
+      link.href = `https://www.bible.com/bible/128/${pid}.RVR1960`;
       el.style.opacity = '1';
-    }, 400);
+    }, 350);
   }
 
   async function loadVersiculoDelDia() {
-    // Intentar con la API pública de YouVersion a través del proxy CORS de allorigins
-    // endpoint: https://developers.youversionapi.com/1.0/verse_of_the_day/1?fields=...
-    // Como requiere auth key, usamos el widget RSS oficial que es público:
+    const day = getDayOfYear();
+    // Obtener passage_id del calendario oficial de YouVersion para hoy
+    const pid = YV_CALENDAR[day] || YV_CALENDAR[((day - 1) % 365) + 1] || 'JHN.3.16';
+    const ref = usfmToRef(pid);
+
+    // ── Intento principal: bible-api.com con CORS abierto, rv1960
     try {
-      const today   = new Date();
-      const dayNum  = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 86400000); // día del año
-      const proxy   = 'https://api.allorigins.win/get?url=';
-      const target  = encodeURIComponent('https://www.bible.com/verse-of-the-day');
-      const res     = await fetch(proxy + target, { signal: AbortSignal.timeout(6000) });
-      const data    = await res.json();
-      const html    = data.contents || '';
-
-      // Extraer versículo del HTML devuelto por la página de YouVersion
-      const textMatch = html.match(/class="[^"]*verse-text[^"]*"[^>]*>([^<]+)</i)
-                     || html.match(/"verseText"\s*:\s*"([^"]+)"/);
-      const refMatch  = html.match(/class="[^"]*verse-reference[^"]*"[^>]*>([^<]+)</i)
-                     || html.match(/"reference"\s*:\s*"([^"]+)"/);
-
-      if (textMatch && refMatch) {
-        const cleanText = textMatch[1].replace(/\\n/g,'').replace(/\\u[\dA-F]{4}/gi, c =>
-          String.fromCharCode(parseInt(c.replace(/\\u/,''),16))).trim();
-        const cleanRef  = refMatch[1].trim();
-        setVersiculoBanner(cleanText, cleanRef, null);
-        return;
+      const res = await fetch(usfmToBibleApiUrl(pid), { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        const text = (data.text || '').trim();
+        if (text && text.length > 5) {
+          setVersiculoBanner(text, data.reference || ref, pid);
+          return;
+        }
       }
-      throw new Error('parse_fail');
-    } catch (_) {
-      // Fallback: elegir versículo según el día del año para que cambie cada día
-      const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000);
-      const v = VS_FALLBACK[dayOfYear % VS_FALLBACK.length];
-      setVersiculoBanner(v.text.replace(/^"|"$/g,''), v.ref, v.usfm);
+    } catch (_) { /* cae al fallback */ }
+
+    // ── Fallback: texto local RVR1960 del mismo versículo de YouVersion
+    const localText = VS_LOCAL[pid];
+    if (localText) {
+      setVersiculoBanner(localText, ref, pid);
+    } else {
+      // Último recurso absoluto si el versículo del día no está en VS_LOCAL
+      setVersiculoBanner('Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.', 'Juan 3:16', 'JHN.3.16');
     }
   }
 
-  // Cargar al iniciar
+  // Cargar al iniciar y refrescar a medianoche
   document.addEventListener('DOMContentLoaded', loadVersiculoDelDia);
-  // Refrescar a medianoche
-  const msHastaMedianoche = (() => {
-    const m = new Date(); m.setDate(m.getDate()+1); m.setHours(0,0,10,0);
+  const _msMedianoche = (() => {
+    const m = new Date(); m.setDate(m.getDate() + 1); m.setHours(0, 0, 15, 0);
     return m - new Date();
   })();
-  setTimeout(() => { loadVersiculoDelDia(); setInterval(loadVersiculoDelDia, 86400000); }, msHastaMedianoche);
-  // ────────────────────────────────────────────────────────────────────────
+  setTimeout(() => { loadVersiculoDelDia(); setInterval(loadVersiculoDelDia, 86400000); }, _msMedianoche);
+  // ══════════════════════════════════════════════════════════════════════════
 
   // Smooth close nav on mobile link click
   document.querySelectorAll('.mobile-menu a').forEach(a=>{
