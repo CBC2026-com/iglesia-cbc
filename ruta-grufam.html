@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ruta GRUFAM | Comunidad Bíblica Cristiana</title>
+  <meta name="description" content="Mapa interactivo de los Grupos Familiares (GRUFAM) de Comunidad Bíblica Cristiana en Araure, Portuguesa. Encuentra el grupo más cercano a tu casa.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://cbc2026-com.github.io/iglesia-cbc/ruta-grufam.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root{
+      --gmap-bg: var(--white);
+    }
+    body{ padding-top:68px; }
+
+    .grufam-hero{
+      text-align:center; padding:48px 20px 24px;
+      background: linear-gradient(135deg, var(--lavender), var(--blush));
+    }
+    .grufam-hero .section-label{
+      display:inline-block; background:rgba(255,255,255,.6); border:1px solid var(--rose);
+      color:var(--rose); padding:6px 18px; border-radius:30px; font-size:.8rem;
+      font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;
+    }
+    .grufam-hero h1{
+      font-family:'Playfair Display', serif; font-size:clamp(2rem,5vw,3rem);
+      color:var(--dark); margin-bottom:10px;
+    }
+    .grufam-hero p{ color:var(--text); max-width:640px; margin:0 auto; font-size:1rem; }
+
+    .grufam-wrap{
+      max-width:1200px; margin:0 auto; padding:32px 20px 60px;
+      display:grid; grid-template-columns: 1fr; gap:24px;
+    }
+    @media(min-width:960px){
+      .grufam-wrap{ grid-template-columns: 1.3fr .9fr; align-items:start; }
+    }
+
+    #map{
+      width:100%; height:480px; border-radius:var(--radius);
+      box-shadow:var(--shadow); border:1px solid var(--blush);
+      overflow:hidden; background:var(--lavender);
+    }
+    #map iframe{ width:100%; height:100%; border:0; display:block; }
+
+    .panel{
+      background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow);
+      border:1px solid var(--blush); padding:20px;
+    }
+    .panel h2{
+      font-family:'Playfair Display', serif; font-size:1.3rem; color:var(--dark);
+      margin-bottom:4px;
+    }
+    .panel .sub{ color:var(--muted); font-size:.85rem; margin-bottom:16px; }
+
+    .group-list{ display:flex; flex-direction:column; gap:10px; max-height:380px; overflow-y:auto; }
+    .group-card{
+      border:1px solid var(--blush); border-radius:12px; padding:12px 14px;
+      cursor:pointer; transition:.15s; background:var(--white);
+    }
+    .group-card:hover{ border-color:var(--rose); background:var(--blush); }
+    .group-card.active{ border-color:var(--purple); background:var(--lavender); }
+    .group-card .gc-title{ font-weight:700; color:var(--dark); font-size:.95rem; }
+    .group-card .gc-meta{ font-size:.8rem; color:var(--muted); margin-top:2px; }
+    .group-card .gc-meta i{ width:14px; text-align:center; margin-right:4px; color:var(--purple); }
+    .group-card .gc-notas{ font-size:.8rem; color:var(--text); margin-top:6px; }
+    .group-card .gc-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .group-card .gc-actions a{
+      font-size:.78rem; font-weight:700; padding:6px 12px; border-radius:50px;
+      text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+    }
+    .gc-actions .gc-dirs{ background:var(--green); color:#fff; }
+    .gc-actions .gc-wa{ background:var(--sky); color:var(--dark); }
+
+    .admin-toggle{
+      position:fixed; bottom:20px; right:20px; z-index:1000;
+      background:var(--purple); color:#fff; border:none; border-radius:50px;
+      padding:12px 20px; font-weight:700; font-size:.85rem; box-shadow:var(--shadow);
+      cursor:pointer; display:flex; align-items:center; gap:8px;
+    }
+    .admin-toggle:hover{ opacity:.9; }
+
+    .admin-panel{
+      display:none; max-width:1200px; margin:0 auto 60px; padding:0 20px;
+    }
+    .admin-panel.open{ display:block; }
+    .admin-box{
+      background:var(--white); border:1px solid var(--gold); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:24px;
+    }
+    .admin-box h2{ font-family:'Playfair Display', serif; color:var(--dark); margin-bottom:4px; }
+    .admin-box .sub{ color:var(--muted); font-size:.85rem; margin-bottom:18px; }
+
+    .admin-form{ display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:20px; }
+    @media(min-width:760px){
+      .admin-form{ grid-template-columns: 1fr 1fr; }
+      .admin-form .full{ grid-column: 1 / -1; }
+    }
+    .admin-form label{ display:block; font-size:.8rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .admin-form input, .admin-form textarea, .admin-form select{
+      width:100%; padding:10px 12px; border:1px solid var(--blush); border-radius:10px;
+      font-family:'Nunito', sans-serif; font-size:.9rem; background:var(--white); color:var(--text);
+    }
+    .admin-form textarea{ resize:vertical; min-height:60px; }
+    .admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus{
+      outline:none; border-color:var(--purple);
+    }
+
+    .admin-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+    .btn-grufam{
+      border:none; border-radius:50px; padding:10px 22px; font-weight:700;
+      font-size:.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-grufam.primary{ background:linear-gradient(135deg, var(--purple), var(--rose)); color:#fff; }
+    .btn-grufam.secondary{ background:transparent; border:2px solid var(--purple); color:var(--purple); }
+    .btn-grufam.danger{ background:var(--rose); color:#fff; }
+    .btn-grufam:hover{ opacity:.9; }
+
+    .admin-table-wrap{ overflow-x:auto; }
+    table.admin-table{ width:100%; border-collapse:collapse; font-size:.85rem; }
+    table.admin-table th, table.admin-table td{
+      text-align:left; padding:10px 8px; border-bottom:1px solid var(--blush); white-space:nowrap;
+    }
+    table.admin-table th{ color:var(--muted); font-weight:700; text-transform:uppercase; font-size:.72rem; letter-spacing:.5px; }
+    table.admin-table td.coords{ font-family:monospace; font-size:.78rem; color:var(--muted); }
+    table.admin-table .row-actions{ display:flex; gap:8px; }
+    table.admin-table .row-actions button{
+      border:none; background:none; cursor:pointer; font-size:1rem; color:var(--purple);
+    }
+    table.admin-table .row-actions button.del{ color:var(--rose); }
+
+    .data-tools{ margin-top:16px; padding-top:16px; border-top:1px solid var(--blush); }
+    .data-tools p{ font-size:.8rem; color:var(--muted); margin-bottom:10px; }
+    textarea.json-box{
+      width:100%; min-height:120px; font-family:monospace; font-size:.78rem;
+      border:1px solid var(--blush); border-radius:10px; padding:10px; background:var(--white);
+      color:var(--text);
+    }
+
+    .toast-g{
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(100px);
+      background:var(--dark); color:#fff; padding:10px 24px; border-radius:50px;
+      font-size:.85rem; z-index:2000; transition:.3s; opacity:0;
+    }
+    .toast-g.show{ transform:translateX(-50%) translateY(0); opacity:1; }
+
+    .back-link{ display:inline-flex; align-items:center; gap:6px; color:var(--purple); font-weight:700; font-size:.85rem; }
+    .back-link:hover{ text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="Logotipo de CBC" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+    <div class="nav-logo-text">Comunidad Bíblica Cristiana<span>Iglesia Evangélica</span></div>
+  </a>
+  <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+</nav>
+
+<section class="grufam-hero">
+  <div class="section-label">Grupos Familiares</div>
+  <h1>Ruta GRUFAM</h1>
+  <p>Encuentra el grupo familiar más cercano a tu hogar. Cada punto en el mapa representa un lugar de encuentro semanal donde puedes orar, estudiar la Palabra y crecer en comunidad.</p>
+</section>
+
+<div class="grufam-wrap">
+  <div id="map">
+    <iframe id="gmapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
+      src="https://www.google.com/maps?q=9.564,-69.205&z=13&output=embed"></iframe>
+  </div>
+
+  <div class="panel">
+    <h2>Puntos de encuentro</h2>
+    <div class="sub" id="groupCount">Cargando grupos...</div>
+    <div class="group-list" id="groupList"></div>
+  </div>
+</div>
+
+<button class="admin-toggle" id="adminToggle" onclick="toggleAdmin()">
+  <i class="fa-solid fa-pen-to-square"></i> Editar información
+</button>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-box">
+    <h2 id="formTitle">Agregar nuevo grupo</h2>
+    <div class="sub">Completa los datos del punto de encuentro. Para obtener las coordenadas, abre <a href="https://maps.google.com" target="_blank" rel="noopener">Google Maps</a>, busca la dirección, haz clic derecho sobre el punto exacto y selecciona las coordenadas que aparecen arriba (ej: 9.5567, -69.2114) para copiarlas aquí.</div>
+
+    <form class="admin-form" id="groupForm" onsubmit="saveGroup(event)">
+      <input type="hidden" id="groupId">
+      <div>
+        <label for="gNombre">Nombre del grupo / líder</label>
+        <input type="text" id="gNombre" placeholder="Ej: Grupo Familia Pérez" required>
+      </div>
+      <div>
+        <label for="gZona">Sector / Zona</label>
+        <input type="text" id="gZona" placeholder="Ej: Araure Centro" required>
+      </div>
+      <div>
+        <label for="gDia">Día y hora de reunión</label>
+        <input type="text" id="gDia" placeholder="Ej: Martes 7:00 PM" required>
+      </div>
+      <div>
+        <label for="gTelefono">Teléfono de contacto (WhatsApp)</label>
+        <input type="text" id="gTelefono" placeholder="Ej: 584245206320">
+      </div>
+      <div>
+        <label for="gLat">Latitud</label>
+        <input type="text" id="gLat" placeholder="Ej: 9.5567" required>
+      </div>
+      <div>
+        <label for="gLng">Longitud</label>
+        <input type="text" id="gLng" placeholder="Ej: -69.2114" required>
+      </div>
+      <div class="full">
+        <label for="gDireccion">Dirección / punto de referencia</label>
+        <input type="text" id="gDireccion" placeholder="Ej: Calle Bolívar, casa #12, cerca de la plaza">
+      </div>
+      <div class="full">
+        <label for="gNotas">Notas adicionales</label>
+        <textarea id="gNotas" placeholder="Información extra para los visitantes"></textarea>
+      </div>
+    </form>
+
+    <div class="admin-actions">
+      <button class="btn-grufam primary" onclick="document.getElementById('groupForm').requestSubmit()"><i class="fa-solid fa-floppy-disk"></i> Guardar grupo</button>
+      <button class="btn-grufam secondary" onclick="resetForm()"><i class="fa-solid fa-eraser"></i> Limpiar formulario</button>
+      <a class="btn-grufam secondary" href="https://maps.google.com" target="_blank" rel="noopener" style="text-decoration:none;"><i class="fa-solid fa-map-pin"></i> Buscar coordenadas en Google Maps</a>
+    </div>
+
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Grupo</th>
+            <th>Zona</th>
+            <th>Día / Hora</th>
+            <th>Coordenadas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="data-tools">
+      <p><i class="fa-solid fa-circle-info"></i> Los cambios se guardan automáticamente en este navegador (localStorage). Para que los cambios se vean en el sitio publicado para todos, exporta el JSON y reemplaza el contenido del array <code>GRUFAM_GRUPOS</code> en este mismo archivo.</p>
+      <div class="admin-actions">
+        <button class="btn-grufam secondary" onclick="exportJSON()"><i class="fa-solid fa-download"></i> Exportar JSON</button>
+        <button class="btn-grufam secondary" onclick="document.getElementById('importBox').style.display='block'"><i class="fa-solid fa-upload"></i> Importar JSON</button>
+        <button class="btn-grufam danger" onclick="resetToDefaults()"><i class="fa-solid fa-rotate-left"></i> Restaurar valores originales</button>
+      </div>
+      <div id="importBox" style="display:none; margin-top:10px;">
+        <textarea class="json-box" id="importText" placeholder="Pega aquí el JSON exportado..."></textarea>
+        <div class="admin-actions" style="margin-top:10px;">
+          <button class="btn-grufam primary" onclick="importJSON()"><i class="fa-solid fa-check"></i> Aplicar importación</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-g" id="toast"></div>
+
+<script>
+  // ══════════════════════════════════════════════════════════════════════
+  // RUTA GRUFAM — Mapa editable de Grupos Familiares
+  // CBC Araure, Portuguesa, Venezuela
+  //
+  // Edita el array GRUFAM_GRUPOS_DEFAULT abajo para cambiar los puntos
+  // que se muestran a todos los visitantes (versión publicada).
+  // Desde el panel "Editar información" en pantalla, cualquier cambio
+  // se guarda en este navegador (localStorage) y se puede exportar como
+  // JSON para actualizar este archivo de forma permanente.
+  // ══════════════════════════════════════════════════════════════════════
+
+  const GRUFAM_GRUPOS_DEFAULT = [
+    {
+      id: 'g1',
+      nombre: 'Grupo Familiar Araure Centro',
+      zona: 'Araure Centro',
+      dia: 'Martes 7:00 PM',
+      telefono: '584245206320',
+      lat: 9.5567,
+      lng: -69.2114,
+      direccion: 'Av. Libertador, cerca de la Plaza Bolívar de Araure',
+      notas: 'Casa con portón verde, frente a la panadería.'
+    },
+    {
+      id: 'g2',
+      nombre: 'Grupo Familiar Acarigua Norte',
+      zona: 'Acarigua',
+      dia: 'Miércoles 7:00 PM',
+      telefono: '',
+      lat: 9.5732,
+      lng: -69.1944,
+      direccion: 'Sector Norte, cerca del Estadio',
+      notas: ''
+    },
+    {
+      id: 'g3',
+      nombre: 'Grupo Familiar Las Lágrimas',
+      zona: 'Araure',
+      dia: 'Jueves 6:30 PM',
+      telefono: '',
+      lat: 9.5601,
+      lng: -69.2070,
+      direccion: 'Av. Las Lágrimas, frente al ambulatorio',
+      notas: ''
+    }
+  ];
+
+  const STORAGE_KEY = 'grufam_grupos_v1';
+  let activeId = null;
+
+  function loadGrupos(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return JSON.parse(JSON.stringify(GRUFAM_GRUPOS_DEFAULT));
+  }
+
+  function saveGrupos(list){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+
+  let grupos = loadGrupos();
+
+  function initMap(){
+    if(grupos.length){
+      activeId = grupos[0].id;
+      updateMapView(grupos[0].lat, grupos[0].lng, 14);
+    }
+    renderAll();
+  }
+
+  // Actualiza el iframe de Google Maps centrado en unas coordenadas
+  function updateMapView(lat, lng, zoom){
+    const frame = document.getElementById('gmapFrame');
+    frame.src = `https://www.google.com/maps?q=${lat},${lng}&z=${zoom || 14}&output=embed`;
+  }
+
+  // URL para "Cómo llegar" (direcciones) desde Google Maps
+  function directionsURL(g){
+    return `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}`;
+  }
+
+  function renderAll(){
+    renderList();
+    renderAdminTable();
+  }
+
+  function renderList(){
+    const list = document.getElementById('groupList');
+    const count = document.getElementById('groupCount');
+    count.textContent = grupos.length === 1 ? '1 grupo activo' : `${grupos.length} grupos activos`;
+    list.innerHTML = '';
+    grupos.forEach(g=>{
+      const card = document.createElement('div');
+      card.className = 'group-card' + (g.id===activeId ? ' active' : '');
+      let actions = `<a class="gc-dirs" href="${directionsURL(g)}" target="_blank" rel="noopener"><i class="fa-solid fa-diamond-turn-right"></i> Cómo llegar</a>`;
+      if(g.telefono) actions += `<a class="gc-wa" href="https://wa.me/${encodeURIComponent(g.telefono)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`;
+      card.innerHTML = `
+        <div class="gc-title">${escapeHTML(g.nombre)}</div>
+        <div class="gc-meta"><i class="fa-solid fa-location-dot"></i>${escapeHTML(g.zona)}</div>
+        <div class="gc-meta"><i class="fa-solid fa-clock"></i>${escapeHTML(g.dia)}</div>
+        ${g.direccion ? `<div class="gc-notas"><i class="fa-solid fa-signs-post"></i> ${escapeHTML(g.direccion)}</div>` : ''}
+        ${g.notas ? `<div class="gc-notas">${escapeHTML(g.notas)}</div>` : ''}
+        <div class="gc-actions">${actions}</div>
+      `;
+      card.querySelector('.gc-title').onclick = card.onclick = (e)=>{
+        if(e.target.closest('.gc-actions')) return;
+        activeId = g.id;
+        updateMapView(g.lat, g.lng, 15);
+        renderAll();
+      };
+      list.appendChild(card);
+    });
+  }
+
+  function renderAdminTable(){
+    const tbody = document.getElementById('adminTableBody');
+    tbody.innerHTML = '';
+    grupos.forEach(g=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${escapeHTML(g.nombre)}</td>
+        <td>${escapeHTML(g.zona)}</td>
+        <td>${escapeHTML(g.dia)}</td>
+        <td class="coords">${g.lat.toFixed(4)}, ${g.lng.toFixed(4)}</td>
+        <td class="row-actions">
+          <button title="Editar" onclick="editGroup('${g.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button title="Eliminar" class="del" onclick="deleteGroup('${g.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function escapeHTML(str){
+    return String(str ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function toggleAdmin(){
+    const panel = document.getElementById('adminPanel');
+    panel.classList.toggle('open');
+    if(panel.classList.contains('open')) panel.scrollIntoView({behavior:'smooth'});
+  }
+
+  function resetForm(){
+    document.getElementById('groupForm').reset();
+    document.getElementById('groupId').value = '';
+    document.getElementById('formTitle').textContent = 'Agregar nuevo grupo';
+  }
+
+  function editGroup(id){
+    const g = grupos.find(x=>x.id===id);
+    if(!g) return;
+    document.getElementById('groupId').value = g.id;
+    document.getElementById('gNombre').value = g.nombre;
+    document.getElementById('gZona').value = g.zona;
+    document.getElementById('gDia').value = g.dia;
+    document.getElementById('gTelefono').value = g.telefono || '';
+    document.getElementById('gLat').value = g.lat;
+    document.getElementById('gLng').value = g.lng;
+    document.getElementById('gDireccion').value = g.direccion || '';
+    document.getElementById('gNotas').value = g.notas || '';
+    document.getElementById('formTitle').textContent = 'Editar grupo';
+    document.getElementById('adminPanel').classList.add('open');
+    document.getElementById('adminPanel').scrollIntoView({behavior:'smooth'});
+  }
+
+  function deleteGroup(id){
+    if(!confirm('¿Eliminar este grupo del mapa?')) return;
+    grupos = grupos.filter(g=>g.id!==id);
+    if(activeId===id) activeId = null;
+    saveGrupos(grupos);
+    renderAll();
+    showToast('Grupo eliminado.');
+  }
+
+  function saveGroup(e){
+    e.preventDefault();
+    const id = document.getElementById('groupId').value;
+    const lat = parseFloat(document.getElementById('gLat').value);
+    const lng = parseFloat(document.getElementById('gLng').value);
+    if(isNaN(lat) || isNaN(lng)){
+      showToast('Latitud y longitud deben ser números válidos.');
+      return;
+    }
+    const data = {
+      nombre: document.getElementById('gNombre').value.trim(),
+      zona: document.getElementById('gZona').value.trim(),
+      dia: document.getElementById('gDia').value.trim(),
+      telefono: document.getElementById('gTelefono').value.trim(),
+      lat, lng,
+      direccion: document.getElementById('gDireccion').value.trim(),
+      notas: document.getElementById('gNotas').value.trim()
+    };
+
+    if(id){
+      const idx = grupos.findIndex(g=>g.id===id);
+      if(idx>-1) grupos[idx] = { id, ...data };
+    } else {
+      data.id = 'g' + Date.now();
+      grupos.push(data);
+    }
+
+    activeId = data.id || id;
+    saveGrupos(grupos);
+    resetForm();
+    renderAll();
+    updateMapView(lat, lng, 15);
+    showToast('Grupo guardado correctamente.');
+  }
+
+  function exportJSON(){
+    const dataStr = JSON.stringify(grupos, null, 2);
+    const blob = new Blob([dataStr], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'grufam-grupos.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON exportado. Reemplaza GRUFAM_GRUPOS_DEFAULT con este contenido para publicarlo.');
+  }
+
+  function importJSON(){
+    try{
+      const data = JSON.parse(document.getElementById('importText').value);
+      if(!Array.isArray(data)) throw new Error('Formato inválido');
+      grupos = data;
+      saveGrupos(grupos);
+      renderAll();
+      showToast('Datos importados correctamente.');
+      document.getElementById('importBox').style.display = 'none';
+      document.getElementById('importText').value = '';
+    }catch(e){
+      showToast('Error al importar JSON: ' + e.message);
+    }
+  }
+
+  function resetToDefaults(){
+    if(!confirm('¿Restaurar los grupos a los valores originales del archivo? Se perderán los cambios guardados en este navegador.')) return;
+    grupos = JSON.parse(JSON.stringify(GRUFAM_GRUPOS_DEFAULT));
+    saveGrupos(grupos);
+    renderAll();
+    showToast('Valores restaurados.');
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 3500);
+  }
+
+  document.addEventListener('DOMContentLoaded', initMap);
+</script>
+</body>
+</html>
