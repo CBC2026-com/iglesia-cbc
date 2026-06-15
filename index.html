@@ -76,8 +76,6 @@
   <ul class="nav-links">
     <li><a href="#inicio">Inicio</a></li>
     <li><a href="#dashboard">Panel</a></li>
-    <li><a href="#envivo">En Vivo</a></li>
-    <li><a href="#horarios">Horarios</a></li>
     <li><a href="#ministerios">Ministerios</a></li>
     <li><a href="#actividades">Actividades</a></li>
     <li><a href="ruta-grufam.html">Ruta GRUFAM</a></li>
@@ -94,8 +92,6 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="#inicio" onclick="toggleMenu()">🏠 Inicio </a>
   <a href="#dashboard" onclick="toggleMenu()">📊 Panel </a>
-  <a href="#envivo" onclick="toggleMenu()">📺 En Vivo </a>
-  <a href="#horarios" onclick="toggleMenu()">🕐 Actividades Horarios </a>
   <a href="#ministerios" onclick="toggleMenu()">✝️ Ministerios </a>
   <a href="#actividades" onclick="toggleMenu()">📅 </a>
   <a href="ruta-grufam.html">🗺️ Ruta GRUFAM</a>
@@ -244,7 +240,7 @@
       <div class="live-badge"><span class="live-dot"></span>Transmisión en Vivo</div>
       <div class="section-label">YouTube en directo</div>
       <h2 class="section-title">Únete a Nuestro Servicio</h2>
-      <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 10:00 AM.</p>
+      <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 9:00 AM.</p>
     </div>
 
     <div class="video-wrapper">
@@ -757,6 +753,8 @@
 <script type="module" src="firebase.js"></script>
 <!-- Contenido de YouTube en tiempo real (En Vivo / Sermones / Alabanza / Niños) -->
 <script type="module" src="transmision-live.js"></script>
+<!-- Dashboard dinámico: anuncios, actividades, ministerios y peticiones en tiempo real -->
+<script type="module" src="dashboard-live.js"></script>
 <!-- Lógica principal del sitio: cargada al final, después del HTML -->
 <script src="main.js" defer></script>
 </body>
