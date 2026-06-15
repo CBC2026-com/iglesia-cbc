@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Transmisión | Comunidad Bíblica Cristiana</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body{ padding-top:68px; background:var(--lavender); }
+
+    .admin-hero{
+      text-align:center; padding:40px 20px 20px;
+    }
+    .admin-hero h1{
+      font-family:'Playfair Display', serif; font-size:clamp(1.8rem,5vw,2.6rem);
+      color:var(--dark); margin-bottom:8px;
+    }
+    .admin-hero p{ color:var(--text); max-width:600px; margin:0 auto; font-size:.95rem; }
+
+    .admin-wrap{
+      max-width:900px; margin:0 auto; padding:20px 20px 60px;
+      display:grid; gap:20px;
+    }
+
+    .panel{
+      background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow);
+      border:1px solid var(--blush); padding:22px;
+    }
+    .panel h2{
+      font-family:'Playfair Display', serif; font-size:1.25rem; color:var(--dark);
+      margin-bottom:4px; display:flex; align-items:center; gap:10px;
+    }
+    .panel h2 i{ color:var(--purple); }
+    .panel .sub{ color:var(--muted); font-size:.85rem; margin-bottom:16px; }
+
+    .form-row{ margin-bottom:14px; }
+    .form-row label{ display:block; font-size:.8rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .form-row input[type="text"]{
+      width:100%; padding:10px 12px; border:1px solid var(--blush); border-radius:10px;
+      font-family:'Nunito', sans-serif; font-size:.9rem; background:var(--white); color:var(--text);
+    }
+    .form-row input:focus{ outline:none; border-color:var(--purple); }
+    .form-row .hint{ font-size:.75rem; color:var(--muted); margin-top:4px; }
+
+    .toggle-row{
+      display:flex; align-items:center; gap:10px; margin-bottom:14px;
+      padding:10px 14px; background:var(--lavender); border-radius:10px;
+    }
+    .toggle-row label{ font-size:.85rem; font-weight:700; color:var(--text); cursor:pointer; flex:1; }
+    .switch{ position:relative; display:inline-block; width:46px; height:26px; flex-shrink:0; }
+    .switch input{ opacity:0; width:0; height:0; }
+    .slider{
+      position:absolute; cursor:pointer; inset:0; background:#ccc;
+      transition:.3s; border-radius:26px;
+    }
+    .slider:before{
+      position:absolute; content:""; height:20px; width:20px; left:3px; bottom:3px;
+      background:#fff; transition:.3s; border-radius:50%;
+    }
+    .switch input:checked + .slider{ background:var(--green); }
+    .switch input:checked + .slider:before{ transform:translateX(20px); }
+
+    .btn-grufam{
+      border:none; border-radius:50px; padding:10px 22px; font-weight:700;
+      font-size:.85rem; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+      text-decoration:none;
+    }
+    .btn-grufam.primary{ background:linear-gradient(135deg, var(--purple), var(--rose)); color:#fff; }
+    .btn-grufam.secondary{ background:transparent; border:2px solid var(--purple); color:var(--purple); }
+    .btn-grufam:hover{ opacity:.9; }
+
+    .status-line{
+      display:flex; align-items:center; gap:8px; font-size:.8rem; color:var(--muted);
+      margin-top:10px; padding-top:10px; border-top:1px solid var(--blush);
+    }
+    .status-dot{ width:8px; height:8px; border-radius:50%; background:#ccc; flex-shrink:0; }
+    .status-dot.on{ background:var(--green); }
+    .status-dot.off{ background:var(--rose); }
+
+    .preview-wrap{
+      margin-top:14px; border-radius:12px; overflow:hidden; background:var(--dark);
+      aspect-ratio:16/9; display:none;
+    }
+    .preview-wrap.show{ display:block; }
+    .preview-wrap iframe{ width:100%; height:100%; border:0; display:block; }
+
+    .toast-g{
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(100px);
+      background:var(--dark); color:#fff; padding:10px 24px; border-radius:50px;
+      font-size:.85rem; z-index:2000; transition:.3s; opacity:0; text-align:center; max-width:90%;
+    }
+    .toast-g.show{ transform:translateX(-50%) translateY(0); opacity:1; }
+
+    .back-link{ display:inline-flex; align-items:center; gap:6px; color:var(--purple); font-weight:700; font-size:.85rem; }
+    .back-link:hover{ text-decoration:underline; }
+
+    .info-box{
+      background:var(--sky); border-radius:12px; padding:14px 16px; font-size:.82rem;
+      color:var(--text); margin-bottom:6px; display:flex; gap:10px; align-items:flex-start;
+    }
+    .info-box i{ color:var(--blue); margin-top:2px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="Logotipo de CBC" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+    <div class="nav-logo-text">Comunidad Bíblica Cristiana<span>Iglesia Evangélica</span></div>
+  </a>
+  <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Volver al inicio</a>
+</nav>
+
+<section class="admin-hero">
+  <h1>📺 Panel de Transmisión</h1>
+  <p>Gestiona el contenido de YouTube que aparece en la sección "En Vivo" del sitio. Los cambios se reflejan al instante en la página principal para todos los visitantes, sin que nadie tenga que recargar.</p>
+</section>
+
+<div class="admin-wrap">
+
+  <div class="info-box">
+    <i class="fa-solid fa-circle-info"></i>
+    <div>
+      Pega el <strong>ID de una playlist de YouTube</strong> (o el enlace completo, ej:
+      <code>https://www.youtube.com/playlist?list=PLxxxxxxxxxxxxxxxx</code>). Para "En Vivo",
+      activa el interruptor solo mientras el culto esté transmitiéndose en directo.
+    </div>
+  </div>
+
+  <!-- ════ EN VIVO ════ -->
+  <div class="panel" id="panel-live">
+    <h2><i class="fa-solid fa-circle-play"></i> En Vivo</h2>
+    <div class="sub">Transmisión del culto en directo (domingos 10:00 AM).</div>
+
+    <div class="toggle-row">
+      <label for="live-activo">Transmisión activa ahora</label>
+      <label class="switch">
+        <input type="checkbox" id="live-activo">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label for="live-playlist">Playlist o video de YouTube</label>
+      <input type="text" id="live-playlist" placeholder="ID o enlace de la playlist/video">
+      <div class="hint">Tip: en YouTube Studio puedes crear una playlist "En Vivo" con un solo video y mantenerla actualizada cada domingo.</div>
+    </div>
+
+    <button class="btn-grufam primary" onclick="guardar('live')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    <button class="btn-grufam secondary" onclick="previsualizar('live')"><i class="fa-solid fa-eye"></i> Previsualizar</button>
+
+    <div class="status-line">
+      <span class="status-dot" id="live-dot"></span>
+      <span id="live-status">Cargando estado actual…</span>
+    </div>
+    <div class="preview-wrap" id="live-preview"></div>
+  </div>
+
+  <!-- ════ SERMONES ════ -->
+  <div class="panel" id="panel-sermon">
+    <h2><i class="fa-solid fa-book-open"></i> Sermones</h2>
+    <div class="sub">Archivo de mensajes y predicaciones pasadas.</div>
+
+    <div class="form-row">
+      <label for="sermon-playlist">Playlist de YouTube</label>
+      <input type="text" id="sermon-playlist" placeholder="ID o enlace de la playlist">
+    </div>
+
+    <button class="btn-grufam primary" onclick="guardar('sermon')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    <button class="btn-grufam secondary" onclick="previsualizar('sermon')"><i class="fa-solid fa-eye"></i> Previsualizar</button>
+
+    <div class="status-line">
+      <span class="status-dot" id="sermon-dot"></span>
+      <span id="sermon-status">Cargando estado actual…</span>
+    </div>
+    <div class="preview-wrap" id="sermon-preview"></div>
+  </div>
+
+  <!-- ════ ALABANZA ════ -->
+  <div class="panel" id="panel-alabanza">
+    <h2><i class="fa-solid fa-music"></i> Alabanza</h2>
+    <div class="sub">Playlist de adoración y alabanza.</div>
+
+    <div class="form-row">
+      <label for="alabanza-playlist">Playlist de YouTube</label>
+      <input type="text" id="alabanza-playlist" placeholder="ID o enlace de la playlist">
+    </div>
+
+    <button class="btn-grufam primary" onclick="guardar('alabanza')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    <button class="btn-grufam secondary" onclick="previsualizar('alabanza')"><i class="fa-solid fa-eye"></i> Previsualizar</button>
+
+    <div class="status-line">
+      <span class="status-dot" id="alabanza-dot"></span>
+      <span id="alabanza-status">Cargando estado actual…</span>
+    </div>
+    <div class="preview-wrap" id="alabanza-preview"></div>
+  </div>
+
+  <!-- ════ NIÑOS ════ -->
+  <div class="panel" id="panel-ninos">
+    <h2><i class="fa-solid fa-child"></i> Niños</h2>
+    <div class="sub">Contenido de escuela dominical virtual para niños.</div>
+
+    <div class="form-row">
+      <label for="ninos-playlist">Playlist de YouTube</label>
+      <input type="text" id="ninos-playlist" placeholder="ID o enlace de la playlist">
+    </div>
+
+    <button class="btn-grufam primary" onclick="guardar('ninos')"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>
+    <button class="btn-grufam secondary" onclick="previsualizar('ninos')"><i class="fa-solid fa-eye"></i> Previsualizar</button>
+
+    <div class="status-line">
+      <span class="status-dot" id="ninos-dot"></span>
+      <span id="ninos-status">Cargando estado actual…</span>
+    </div>
+    <div class="preview-wrap" id="ninos-preview"></div>
+  </div>
+
+</div>
+
+<div class="toast-g" id="toast"></div>
+
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // Misma configuración que firebase.js / transmision-live.js (proyecto compartido)
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
+    authDomain:        "iglesia-cbc.firebaseapp.com",
+    projectId:         "iglesia-cbc",
+    storageBucket:     "iglesia-cbc.firebasestorage.app",
+    messagingSenderId: "365457083043",
+    appId:             "1:365457083043:web:b12ecdd14e17fa2a864d16"
+  };
+
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  const TABS = ['live', 'sermon', 'alabanza', 'ninos'];
+
+  // Extrae el ID de playlist o video desde un enlace completo de YouTube
+  function extractPlaylistId(input){
+    if (!input) return '';
+    input = input.trim();
+    const listMatch = input.match(/[?&]list=([\w-]+)/);
+    if (listMatch) return listMatch[1];
+    // Si pegan un video individual, usamos su ID (videoseries con un solo
+    // video también funciona si el "playlistId" es en realidad un videoId
+    // dentro de embed/VIDEO_ID — pero para mantener consistencia con
+    // transmision-live.js, devolvemos tal cual lo que se haya pegado).
+    return input;
+  }
+
+  // ── Cargar valores actuales en tiempo real ──
+  TABS.forEach(tab=>{
+    const ref = doc(db, 'transmision', tab);
+    onSnapshot(ref, (snap)=>{
+      const dot = document.getElementById(`${tab}-dot`);
+      const status = document.getElementById(`${tab}-status`);
+      const playlistInput = document.getElementById(`${tab}-playlist`);
+
+      if (snap.exists()) {
+        const d = snap.data();
+        if (document.activeElement !== playlistInput) {
+          playlistInput.value = d.playlistId || '';
+        }
+        if (tab === 'live') {
+          const activoEl = document.getElementById('live-activo');
+          if (document.activeElement !== activoEl) activoEl.checked = !!d.activo;
+        }
+
+        if (tab === 'live') {
+          if (d.activo && d.playlistId) {
+            dot.className = 'status-dot on';
+            status.textContent = 'Transmisión activa — visible para todos en este momento';
+          } else if (d.activo && !d.playlistId) {
+            dot.className = 'status-dot off';
+            status.textContent = 'Marcado como activo, pero falta la playlist/video';
+          } else {
+            dot.className = 'status-dot off';
+            status.textContent = 'Sin transmisión activa';
+          }
+        } else {
+          if (d.playlistId) {
+            dot.className = 'status-dot on';
+            status.textContent = 'Playlist configurada y visible en el sitio';
+          } else {
+            dot.className = 'status-dot off';
+            status.textContent = 'Sin playlist configurada';
+          }
+        }
+      } else {
+        dot.className = 'status-dot off';
+        status.textContent = 'Sin configurar todavía';
+      }
+    }, (err)=>{
+      document.getElementById(`${tab}-status`).textContent = 'Error al conectar con Firebase: ' + err.message;
+    });
+  });
+
+  // ── Guardar cambios ──
+  window.guardar = async (tab) => {
+    const playlistInput = document.getElementById(`${tab}-playlist`);
+    const playlistId = extractPlaylistId(playlistInput.value);
+    playlistInput.value = playlistId;
+
+    const data = { playlistId, actualizadoEn: serverTimestamp() };
+    if (tab === 'live') {
+      data.activo = document.getElementById('live-activo').checked;
+    }
+
+    try {
+      await setDoc(doc(db, 'transmision', tab), data, { merge: true });
+      showToast('Cambios guardados. Ya están visibles en el sitio para todos.');
+    } catch(e) {
+      showToast('Error al guardar: ' + e.message);
+    }
+  };
+
+  // ── Previsualizar ──
+  window.previsualizar = (tab) => {
+    const playlistInput = document.getElementById(`${tab}-playlist`);
+    const playlistId = extractPlaylistId(playlistInput.value);
+    const preview = document.getElementById(`${tab}-preview`);
+
+    if (!playlistId) {
+      showToast('Ingresa un ID o enlace de playlist primero.');
+      return;
+    }
+
+    preview.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${playlistId}" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
+    preview.classList.add('show');
+  };
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 4000);
+  }
+</script>
+</body>
+</html>
