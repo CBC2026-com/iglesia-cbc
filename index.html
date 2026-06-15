@@ -1,557 +1,90 @@
-<html lang="es" class="translated-ltr"><head>
+<!DOCTYPE html>
+<html lang="es">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comunidad Bíblica Cristiana | Iglesia Evangélica</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Nunito:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+  <title>Comunidad Bíblica Cristiana | Iglesia Evangélica en Araure, Portuguesa</title>
+
+  <!-- ══ SEO básico ══ -->
+  <meta name="description" content="Comunidad Bíblica Cristiana (CBC) es una iglesia evangélica en Araure, Portuguesa, Venezuela. Únete a nuestros servicios dominicales, grupos familiares, transmisiones en vivo por YouTube y actividades para toda la familia.">
+  <meta name="keywords" content="Comunidad Bíblica Cristiana, CBC Araure, iglesia evangélica Araure, iglesia cristiana Portuguesa Venezuela, servicios dominicales, grupos familiares GRUFAM, transmisión en vivo iglesia">
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Comunidad Bíblica Cristiana">
+  <link rel="canonical" href="https://cbc2026-com.github.io/iglesia-cbc/">
+
+  <!-- ══ Open Graph (Facebook, WhatsApp, etc.) ══ -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_VE">
+  <meta property="og:title" content="Comunidad Bíblica Cristiana | Iglesia Evangélica en Araure">
+  <meta property="og:description" content="Un lugar de fe, amor y esperanza en Araure, Portuguesa, Venezuela. Conoce nuestros horarios, ministerios, grupos familiares y transmisiones en vivo.">
+  <meta property="og:url" content="https://cbc2026-com.github.io/iglesia-cbc/">
+  <meta property="og:site_name" content="Comunidad Bíblica Cristiana">
+  <meta property="og:image" content="https://cbc2026-com.github.io/iglesia-cbc/logo.png">
+
+  <!-- ══ Twitter Card ══ -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Comunidad Bíblica Cristiana | Iglesia Evangélica en Araure">
+  <meta name="twitter:description" content="Un lugar de fe, amor y esperanza en Araure, Portuguesa, Venezuela. Servicios dominicales, grupos familiares y transmisiones en vivo.">
+  <meta name="twitter:image" content="https://cbc2026-com.github.io/iglesia-cbc/logo.png">
+
+  <!-- Preconnect: acelera la conexión a orígenes externos críticos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <!-- Fuentes (con display=swap para evitar bloqueo de render) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- ══ FIREBASE — Peticiones de Oración ══ -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp }
-      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  <!-- Hoja de estilos propia -->
+  <link rel="stylesheet" href="styles.css">
 
-    const firebaseConfig = {
-      apiKey:            "AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
-      authDomain:        "iglesia-cbc.firebaseapp.com",
-      projectId:         "iglesia-cbc",
-      storageBucket:     "iglesia-cbc.firebasestorage.app",
-      messagingSenderId: "365457083043",
-      appId:             "1:365457083043:web:b12ecdd14e17fa2a864d16"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
-
-    // ── NÚMERO WHATSAPP DEL PASTOR ──
-    // Cambia este número por el real (solo dígitos, con código de país)
-    const WA_PASTOR = "584245206320";
-
-    window._savePrayer = async (nombre, correo, tipo, peticion) => {
-      const fecha = new Date().toLocaleDateString('es', {
-        day:'2-digit', month:'2-digit', year:'numeric',
-        hour:'2-digit', minute:'2-digit'
-      });
-
-      // 1️⃣ Guardar en Firebase Firestore
-      try {
-        await addDoc(collection(db, "peticiones"), {
-          nombre, correo, tipo, peticion,
-          fecha, orado: false,
-          origen: "Sitio Web",
-          creadoEn: serverTimestamp()
-        });
-      } catch(e) {
-        console.warn("Firebase error:", e.message);
-      }
-
-      // 2️⃣ Notificar al pastor por WhatsApp
-      const msg = encodeURIComponent(
-        `🙏 *NUEVA PETICIÓN DE ORACIÓN*\n\n` +
-        `👤 *Nombre:* ${nombre}\n` +
-        `📋 *Tipo:* ${tipo}\n` +
-        `📅 *Fecha:* ${fecha}\n\n` +
-        `💬 *Petición:*\n${peticion}\n\n` +
-        `_Enviado desde el sitio web de la Iglesia CBC_`
-      );
-      window.open(`https://wa.me/${WA_PASTOR}?text=${msg}`, '_blank');
-    };
+  <!-- ══ Datos estructurados (JSON-LD) — ayuda a Google a entender la iglesia ══ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Church",
+    "name": "Comunidad Bíblica Cristiana",
+    "alternateName": "CBC Araure",
+    "description": "Iglesia evangélica en Araure, Portuguesa, Venezuela. Servicios dominicales, grupos familiares (GRUFAM) y transmisiones en vivo.",
+    "url": "https://cbc2026-com.github.io/iglesia-cbc/",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Av. 13 entre Calle 5 y Av. 13 de Junio (Bajada del Hospital)",
+      "addressLocality": "Araure",
+      "addressRegion": "Portuguesa",
+      "addressCountry": "VE"
+    },
+    "sameAs": [
+      "https://youtube.com/@comunidadbiblicacristiana",
+      "https://www.facebook.com/ComunidadBiblicaCristiana",
+      "https://www.instagram.com/comunidadbiblicac"
+    ]
+  }
   </script>
-  <style>
-    :root {
-      --blush:    #f7d9e3;
-      --lavender: #dcd4f5;
-      --mint:     #c9edd8;
-      --sky:      #c9e8f5;
-      --peach:    #fde4c8;
-      --yellow:   #fdf3c8;
-      --rose:     #e8a0b4;
-      --purple:   #9b8ec4;
-      --green:    #6bbf8e;
-      --blue:     #6aaccc;
-      --gold:     #d4a84b;
-      --white:    #fffcf8;
-      --dark:     #3a3055;
-      --text:     #4a4465;
-      --muted:    #8b85a0;
-      --shadow:   0 4px 24px rgba(100,80,160,0.10);
-      --radius:   18px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Nunito', sans-serif;
-      background: var(--white);
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    /* ── NAVBAR ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 999;
-      background: rgba(255,252,248,0.95);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--blush);
-      padding: 0 40px;
-      display: flex; align-items: center; justify-content: space-between;
-      height: 68px;
-    }
-    .nav-logo {
-      display: flex; align-items: center; gap: 12px;
-      text-decoration: none;
-    }
-    .nav-logo-icon {
-      width: 42px; height: 42px;
-      background: linear-gradient(135deg, var(--lavender), var(--blush));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; color: var(--purple);
-    }
-    .nav-logo-text { font-family:'Playfair Display', serif; font-weight:700; font-size:1.05rem; color:var(--dark); line-height:1.1; }
-    .nav-logo-text span { display:block; font-family:'Nunito',sans-serif; font-weight:400; font-size:.72rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
-    .nav-links { display:flex; gap:6px; list-style:none; }
-    .nav-links a {
-      text-decoration:none; padding:7px 15px; border-radius:30px;
-      font-size:.88rem; font-weight:600; color:var(--text);
-      transition: background .2s, color .2s;
-    }
-    .nav-links a:hover { background:var(--lavender); color:var(--purple); }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--purple), var(--rose));
-      color:#fff !important; border-radius:30px; padding:8px 20px !important;
-    }
-    .nav-cta:hover { opacity:.9; background: linear-gradient(135deg, var(--purple), var(--rose)) !important; }
-    .nav-lideres {
-      background: var(--dark) !important; color:#fff !important;
-      border-radius:30px; padding:8px 16px !important;
-      font-size:.82rem !important; border:1px solid rgba(155,142,196,.4);
-      display:inline-flex; align-items:center; gap:6px;
-    }
-    .nav-lideres:hover { background:#2d2550 !important; color:#fff !important; }
-    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:5px; }
-    .hamburger span { display:block; width:24px; height:2px; background:var(--dark); border-radius:2px; transition:.3s; }
-    .mobile-menu { display:none; position:fixed; top:68px; left:0; right:0; background:var(--white); border-bottom:1px solid var(--blush); padding:20px 30px; z-index:998; flex-direction:column; gap:10px; }
-    .mobile-menu.open { display:flex; }
-    .mobile-menu a { text-decoration:none; font-weight:600; color:var(--text); padding:10px 0; border-bottom:1px solid var(--blush); }
-
-    /* ── HERO ── */
-    #inicio {
-      min-height: 100vh;
-      background: linear-gradient(160deg, var(--lavender) 0%, var(--blush) 40%, var(--peach) 100%);
-      display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: 100px 20px 60px;
-      position: relative; overflow: hidden;
-    }
-    .hero-circles {
-      position: absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:0;
-    }
-    .hero-circles span {
-      position:absolute; border-radius:50%; opacity:.18;
-      animation: float 8s ease-in-out infinite;
-    }
-    .hero-circles span:nth-child(1) { width:500px; height:500px; background:var(--lavender); top:-120px; left:-140px; animation-delay:0s; }
-    .hero-circles span:nth-child(2) { width:380px; height:380px; background:var(--blush); bottom:-80px; right:-80px; animation-delay:2s; }
-    .hero-circles span:nth-child(3) { width:260px; height:260px; background:var(--mint); top:60%; left:10%; animation-delay:4s; }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-24px)} }
-    .hero-content { position:relative; z-index:1; max-width:780px; }
-    .hero-badge {
-      display:inline-block; background:rgba(255,255,255,.6); border:1px solid var(--rose);
-      color:var(--rose); padding:6px 18px; border-radius:30px; font-size:.8rem;
-      font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:24px;
-      backdrop-filter:blur(8px);
-    }
-    .hero-title {
-      font-family:'Playfair Display', serif; font-size:clamp(2.4rem,6vw,4.2rem);
-      font-weight:700; color:var(--dark); line-height:1.15; margin-bottom:20px;
-    }
-    .hero-title em { font-style:normal; color:var(--purple); }
-    .hero-subtitle { font-size:1.1rem; color:var(--text); line-height:1.7; max-width:560px; margin:0 auto 36px; }
-    .hero-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--purple), var(--rose));
-      color:#fff; padding:14px 32px; border-radius:50px; font-weight:700;
-      font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-      box-shadow:0 6px 24px rgba(155,142,196,.35); transition:.25s;
-    }
-    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(155,142,196,.45); }
-    .btn-secondary {
-      background:rgba(255,255,255,.7); border:2px solid var(--purple);
-      color:var(--purple); padding:13px 28px; border-radius:50px; font-weight:700;
-      font-size:1rem; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-      backdrop-filter:blur(8px); transition:.25s;
-    }
-    .btn-secondary:hover { background:var(--lavender); }
-    .hero-scroll { margin-top:52px; color:var(--muted); font-size:.82rem; letter-spacing:1px; text-transform:uppercase; display:flex; flex-direction:column; align-items:center; gap:8px; }
-    .hero-scroll i { font-size:1.2rem; animation:bounce 2s infinite; }
-    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
-
-    /* ── SECTIONS SHARED ── */
-    section { padding: 80px 20px; }
-    .section-label {
-      font-size:.78rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
-      color:var(--purple); margin-bottom:10px;
-    }
-    .section-title {
-      font-family:'Playfair Display', serif; font-size:clamp(1.8rem,4vw,2.6rem);
-      font-weight:700; color:var(--dark); line-height:1.25; margin-bottom:14px;
-    }
-    .section-sub { font-size:1rem; color:var(--muted); max-width:520px; line-height:1.7; margin-bottom:48px; }
-    .container { max-width:1140px; margin:0 auto; }
-    .text-center { text-align:center; }
-    .text-center .section-sub { margin-left:auto; margin-right:auto; }
-
-    /* ── DASHBOARD STATS ── */
-    #dashboard {
-      background: linear-gradient(135deg, var(--dark) 0%, #2d2550 100%);
-      color:#fff; padding:60px 20px;
-    }
-    .dashboard-header { text-align:center; margin-bottom:50px; }
-    .dashboard-header .section-label { color:var(--rose); }
-    .dashboard-header .section-title { color:#fff; }
-    .dashboard-header .section-sub { color:rgba(255,255,255,.65); margin:0 auto; }
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-bottom:50px; }
-    .stat-card {
-      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
-      border-radius:var(--radius); padding:28px 22px; text-align:center;
-      transition:.3s; cursor:default;
-    }
-    .stat-card:hover { background:rgba(255,255,255,.13); transform:translateY(-4px); }
-    .stat-icon { font-size:2rem; margin-bottom:12px; }
-    .stat-number {
-      font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700;
-      color:#fff; line-height:1;
-    }
-    .stat-label { font-size:.82rem; color:rgba(255,255,255,.55); margin-top:6px; letter-spacing:.5px; text-transform:uppercase; }
-    .dash-widgets { display:grid; grid-template-columns:1fr 1fr 1fr; gap:22px; }
-    @media(max-width:900px){ .dash-widgets{grid-template-columns:1fr 1fr;} }
-    @media(max-width:580px){ .dash-widgets{grid-template-columns:1fr;} }
-    .dash-widget {
-      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
-      border-radius:var(--radius); padding:26px 24px;
-    }
-    .dash-widget h3 { font-size:.95rem; font-weight:700; color:rgba(255,255,255,.9); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-    .dash-widget h3 i { color:var(--rose); }
-    .progress-item { margin-bottom:14px; }
-    .progress-label { display:flex; justify-content:space-between; font-size:.82rem; color:rgba(255,255,255,.6); margin-bottom:5px; }
-    .progress-bar { height:8px; background:rgba(255,255,255,.1); border-radius:10px; overflow:hidden; }
-    .progress-fill { height:100%; border-radius:10px; background:linear-gradient(90deg, var(--lavender), var(--rose)); transition:width 1.5s ease; }
-    .event-list { list-style:none; }
-    .event-list li { padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); font-size:.88rem; display:flex; align-items:flex-start; gap:10px; }
-    .event-list li:last-child { border:none; }
-    .event-dot { width:8px; height:8px; border-radius:50%; background:var(--rose); margin-top:5px; flex-shrink:0; }
-    .event-text { color:rgba(255,255,255,.75); line-height:1.4; }
-    .event-text strong { color:#fff; display:block; }
-    .announcement-item { padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08); font-size:.85rem; color:rgba(255,255,255,.7); }
-    .announcement-item:last-child { border:none; }
-    .announcement-item strong { color:var(--yellow); }
-
-    /* ── HORARIOS ── */
-    #horarios { background: var(--yellow); }
-    .schedule-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; }
-    .schedule-card {
-      background:#fff; border-radius:var(--radius); padding:28px 24px;
-      box-shadow:var(--shadow); border-top:4px solid transparent; transition:.3s;
-    }
-    .schedule-card:hover { transform:translateY(-4px); }
-    .schedule-card:nth-child(1){ border-color:var(--purple); }
-    .schedule-card:nth-child(2){ border-color:var(--rose); }
-    .schedule-card:nth-child(3){ border-color:var(--green); }
-    .schedule-card:nth-child(4){ border-color:var(--blue); }
-    .schedule-card:nth-child(5){ border-color:var(--gold); }
-    .schedule-icon { font-size:2rem; margin-bottom:14px; }
-    .schedule-day { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin-bottom:4px; }
-    .schedule-time { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
-    .schedule-name { font-weight:700; color:var(--text); margin-bottom:6px; }
-    .schedule-desc { font-size:.85rem; color:var(--muted); line-height:1.5; }
-
-    /* ── VIDEO EN VIVO ── */
-    #envivo {
-      background: linear-gradient(160deg, var(--blush) 0%, var(--lavender) 100%);
-      text-align:center;
-    }
-    .live-badge {
-      display:inline-flex; align-items:center; gap:8px;
-      background:#ff4757; color:#fff; padding:6px 18px; border-radius:30px;
-      font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:1px;
-      margin-bottom:20px;
-    }
-    .live-dot { width:8px; height:8px; background:#fff; border-radius:50%; animation:pulse 1.2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
-    .video-wrapper {
-      max-width:820px; margin:0 auto 40px;
-      border-radius:var(--radius); overflow:hidden;
-      box-shadow:0 16px 60px rgba(100,80,160,.2);
-    }
-    .video-wrapper iframe { width:100%; aspect-ratio:16/9; border:none; display:block; }
-    .video-fallback {
-      background:linear-gradient(135deg, var(--dark), #2d2550);
-      aspect-ratio:16/9; display:flex; flex-direction:column; align-items:center;
-      justify-content:center; gap:16px; color:#fff; cursor:pointer;
-    }
-    .video-fallback i { font-size:4rem; color:var(--rose); opacity:.8; }
-    .video-fallback p { font-size:1.1rem; color:rgba(255,255,255,.7); }
-    .video-tabs { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:30px; }
-    .video-tab {
-      padding:10px 22px; border-radius:30px; border:2px solid var(--purple);
-      background:transparent; color:var(--purple); font-weight:700; cursor:pointer;
-      font-family:'Nunito',sans-serif; font-size:.9rem; transition:.2s;
-    }
-    .video-tab.active, .video-tab:hover { background:var(--purple); color:#fff; }
-
-    /* ── MINISTERIOS ── */
-    #ministerios { background:var(--white); }
-    .ministerios-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:22px; }
-    .min-card {
-      border-radius:var(--radius); padding:30px 24px; text-align:center;
-      box-shadow:var(--shadow); transition:.3s; cursor:default;
-    }
-    .min-card:hover { transform:translateY(-5px); box-shadow:0 12px 40px rgba(100,80,160,.15); }
-    .min-card:nth-child(1){ background:var(--lavender); }
-    .min-card:nth-child(2){ background:var(--blush); }
-    .min-card:nth-child(3){ background:var(--mint); }
-    .min-card:nth-child(4){ background:var(--sky); }
-    .min-card:nth-child(5){ background:var(--peach); }
-    .min-card:nth-child(6){ background:var(--yellow); }
-    .min-icon { font-size:2.6rem; margin-bottom:14px; }
-    .min-title { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:var(--dark); margin-bottom:8px; }
-    .min-desc { font-size:.85rem; color:var(--text); line-height:1.55; }
-
-    /* ── VERSÍCULO DEL DÍA (YouVersion) ── */
-    .versiculo-banner {
-      background: linear-gradient(135deg, var(--purple) 0%, var(--rose) 100%);
-      color:#fff; padding:50px 20px; text-align:center;
-    }
-    .vs-youversion-badge {
-      font-size:.78rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
-      opacity:.75; margin-bottom:18px; display:flex; align-items:center; justify-content:center; gap:6px;
-    }
-    .versiculo-banner blockquote {
-      max-width:700px; margin:0 auto;
-      font-family:'Playfair Display',serif; font-size:clamp(1.25rem,3vw,1.75rem);
-      font-style:italic; line-height:1.6; opacity:.95;
-    }
-    .versiculo-banner cite { display:block; margin-top:16px; font-size:.9rem; opacity:.75; font-style:normal; font-family:'Nunito',sans-serif; letter-spacing:1px; }
-    .vs-open-btn {
-      display:inline-flex; align-items:center; gap:8px;
-      margin-top:26px; padding:10px 26px; border-radius:30px;
-      background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.45);
-      color:#fff; font-family:'Nunito',sans-serif; font-weight:700; font-size:.88rem;
-      text-decoration:none; letter-spacing:.5px; transition:.25s;
-    }
-    .vs-open-btn:hover { background:rgba(255,255,255,.3); }
-
-    /* ── ACTIVIDADES ── */
-    #actividades { background: var(--mint); }
-    .activities-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; }
-    .act-card {
-      background:#fff; border-radius:var(--radius); overflow:hidden;
-      box-shadow:var(--shadow); transition:.3s;
-    }
-    .act-card:hover { transform:translateY(-5px); }
-    .act-header { height:120px; display:flex; align-items:center; justify-content:center; font-size:3rem; }
-    .act-header.bg1 { background:linear-gradient(135deg,var(--lavender),var(--blush)); }
-    .act-header.bg2 { background:linear-gradient(135deg,var(--mint),var(--sky)); }
-    .act-header.bg3 { background:linear-gradient(135deg,var(--peach),var(--yellow)); }
-    .act-header.bg4 { background:linear-gradient(135deg,var(--blush),var(--peach)); }
-    .act-header.bg5 { background:linear-gradient(135deg,var(--sky),var(--lavender)); }
-    .act-header.bg6 { background:linear-gradient(135deg,var(--yellow),var(--mint)); }
-    .act-body { padding:22px 24px; }
-    .act-date { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--purple); margin-bottom:6px; }
-    .act-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--dark); margin-bottom:8px; }
-    .act-desc { font-size:.86rem; color:var(--muted); line-height:1.55; margin-bottom:14px; }
-    .act-tag { display:inline-block; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:700; background:var(--lavender); color:var(--purple); }
-
-    /* ── PETICIONES ── */
-    #peticiones { background:var(--blush); }
-    .prayer-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
-    @media(max-width:720px){ .prayer-grid{grid-template-columns:1fr;} }
-    .prayer-form-box { background:#fff; border-radius:var(--radius); padding:36px 32px; box-shadow:var(--shadow); }
-    .form-group { margin-bottom:18px; }
-    .form-group label { display:block; font-size:.85rem; font-weight:700; color:var(--dark); margin-bottom:6px; }
-    .form-group input, .form-group textarea, .form-group select {
-      width:100%; padding:12px 16px; border:2px solid #ece8f5;
-      border-radius:12px; font-family:'Nunito',sans-serif; font-size:.92rem;
-      color:var(--text); background:#fafaf8; outline:none; transition:border .2s;
-    }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--purple); }
-    .form-group textarea { resize:vertical; min-height:110px; }
-    .btn-submit {
-      width:100%; padding:13px; border:none; border-radius:50px; cursor:pointer;
-      background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff;
-      font-family:'Nunito',sans-serif; font-weight:700; font-size:1rem; transition:.2s;
-    }
-    .btn-submit:hover { opacity:.9; transform:translateY(-1px); }
-    .prayer-info h3 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--dark); margin-bottom:16px; }
-    .prayer-info p { color:var(--text); line-height:1.7; margin-bottom:20px; }
-    .promise-card {
-      background:linear-gradient(135deg,var(--purple),var(--rose));
-      border-radius:var(--radius); padding:28px 26px; color:#fff; margin-top:20px;
-    }
-    .promise-card i { font-size:2rem; margin-bottom:10px; opacity:.8; }
-    .promise-card p { font-family:'Playfair Display',serif; font-style:italic; font-size:1.05rem; line-height:1.6; }
-    .promise-card cite { display:block; font-size:.82rem; opacity:.7; margin-top:10px; font-style:normal; }
-
-    /* ── DIEZMOS Y OFRENDAS ── */
-    #ofrendas { background:var(--white); }
-    .ofrendas-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; }
-    .ofrenda-card {
-      border-radius:var(--radius); padding:30px 28px; text-align:center;
-      box-shadow:var(--shadow); border:2px solid transparent; transition:.3s;
-    }
-    .ofrenda-card:hover { transform:translateY(-4px); border-color:var(--purple); }
-    .ofrenda-card.bg1 { background:var(--lavender); }
-    .ofrenda-card.bg2 { background:var(--mint); }
-    .ofrenda-card.bg3 { background:var(--peach); }
-    .ofrenda-card i { font-size:2.8rem; color:var(--purple); margin-bottom:16px; display:block; }
-    .ofrenda-card h3 { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--dark); margin-bottom:8px; }
-    .ofrenda-card p { font-size:.86rem; color:var(--muted); line-height:1.5; margin-bottom:16px; }
-    .ofrenda-card .bank-info { background:rgba(255,255,255,.6); border-radius:10px; padding:14px; font-size:.82rem; text-align:left; }
-    .ofrenda-card .bank-info strong { color:var(--dark); display:block; margin-bottom:4px; }
-
-    /* ── GALERÍA ── */
-    #galeria { background:var(--sky); }
-    .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
-    .gallery-item {
-      border-radius:14px; overflow:hidden; aspect-ratio:1/1;
-      display:flex; align-items:center; justify-content:center;
-      font-size:3rem; cursor:pointer; transition:.3s;
-      box-shadow:var(--shadow);
-    }
-    .gallery-item:hover { transform:scale(1.05); }
-    .gallery-item.g1 { background:linear-gradient(135deg,var(--lavender),var(--blush)); grid-column:span 2; grid-row:span 2; font-size:5rem; }
-    .gallery-item.g2 { background:linear-gradient(135deg,var(--mint),var(--sky)); }
-    .gallery-item.g3 { background:linear-gradient(135deg,var(--peach),var(--yellow)); }
-    .gallery-item.g4 { background:linear-gradient(135deg,var(--blush),var(--lavender)); }
-    .gallery-item.g5 { background:linear-gradient(135deg,var(--sky),var(--mint)); }
-    .gallery-item.g6 { background:linear-gradient(135deg,var(--yellow),var(--peach)); }
-
-    /* ── LIDERAZGO ── */
-    #liderazgo { background:var(--peach); }
-    .leaders-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; }
-    .leader-card {
-      background:#fff; border-radius:var(--radius); padding:30px 22px; text-align:center;
-      box-shadow:var(--shadow); transition:.3s;
-    }
-    .leader-card:hover { transform:translateY(-4px); }
-    .leader-avatar {
-      width:80px; height:80px; border-radius:50%; margin:0 auto 16px;
-      display:flex; align-items:center; justify-content:center; font-size:2.2rem;
-    }
-    .av1 { background:linear-gradient(135deg,var(--lavender),var(--purple)); }
-    .av2 { background:linear-gradient(135deg,var(--blush),var(--rose)); }
-    .av3 { background:linear-gradient(135deg,var(--mint),var(--green)); }
-    .av4 { background:linear-gradient(135deg,var(--sky),var(--blue)); }
-    .leader-name { font-family:'Playfair Display',serif; font-weight:700; font-size:1.05rem; color:var(--dark); }
-    .leader-role { font-size:.8rem; color:var(--purple); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin:4px 0 10px; }
-    .leader-bio { font-size:.83rem; color:var(--muted); line-height:1.5; }
-
-    /* ── CONTACTO ── */
-    #contacto { background: linear-gradient(160deg, var(--lavender) 0%, var(--blush) 100%); }
-    .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start; }
-    @media(max-width:720px){ .contact-grid{grid-template-columns:1fr;} }
-    .contact-info h3 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--dark); margin-bottom:24px; }
-    .contact-item { display:flex; gap:16px; align-items:flex-start; margin-bottom:22px; }
-    .contact-item-icon {
-      width:46px; height:46px; border-radius:50%; flex-shrink:0;
-      display:flex; align-items:center; justify-content:center; font-size:1.1rem;
-    }
-    .ci1 { background:var(--lavender); color:var(--purple); }
-    .ci2 { background:var(--blush); color:var(--rose); }
-    .ci3 { background:var(--mint); color:var(--green); }
-    .ci4 { background:var(--sky); color:var(--blue); }
-    .contact-item-text strong { display:block; font-weight:700; color:var(--dark); margin-bottom:2px; }
-    .contact-item-text span { color:var(--muted); font-size:.9rem; }
-    .social-links { display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
-    .social-btn {
-      width:46px; height:46px; border-radius:50%; display:flex; align-items:center;
-      justify-content:center; text-decoration:none; font-size:1.1rem; transition:.2s;
-      color:#fff;
-    }
-    .sb-fb { background:#1877f2; } .sb-yt { background:#ff0000; }
-    .sb-ig { background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
-    .sb-wa { background:#25d366; } .sb-tg { background:#0088cc; }
-    .social-btn:hover { transform:translateY(-3px); opacity:.9; }
-    .contact-form-box { background:#fff; border-radius:var(--radius); padding:36px 32px; box-shadow:var(--shadow); }
-
-    /* ── MAPA / UBICACIÓN ── */
-    .map-section { background:var(--white); padding:60px 20px; }
-    .map-wrapper { max-width:1140px; margin:0 auto; border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); height:380px; background:linear-gradient(135deg,var(--lavender),var(--blush)); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; color:var(--dark); }
-    .map-wrapper i { font-size:3.5rem; color:var(--purple); }
-    .map-wrapper p { font-size:1rem; color:var(--muted); }
-
-    /* ── FOOTER ── */
-    footer {
-      background:var(--dark); color:#fff;
-      padding:60px 20px 30px;
-    }
-    .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:40px; max-width:1140px; margin:0 auto 40px; }
-    @media(max-width:860px){ .footer-grid{grid-template-columns:1fr 1fr;} }
-    @media(max-width:500px){ .footer-grid{grid-template-columns:1fr;} }
-    .footer-brand-name { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; margin-bottom:10px; }
-    .footer-brand-sub { font-size:.8rem; color:rgba(255,255,255,.4); text-transform:uppercase; letter-spacing:2px; margin-bottom:16px; }
-    .footer-desc { font-size:.88rem; color:rgba(255,255,255,.55); line-height:1.7; margin-bottom:20px; }
-    .footer-col h4 { font-weight:700; color:rgba(255,255,255,.85); margin-bottom:14px; font-size:.92rem; text-transform:uppercase; letter-spacing:.5px; }
-    .footer-col ul { list-style:none; }
-    .footer-col ul li { margin-bottom:8px; }
-    .footer-col ul li a { color:rgba(255,255,255,.5); text-decoration:none; font-size:.88rem; transition:.2s; }
-    .footer-col ul li a:hover { color:var(--rose); }
-    .footer-bottom { max-width:1140px; margin:0 auto; padding-top:28px; border-top:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
-    .footer-bottom p { font-size:.82rem; color:rgba(255,255,255,.35); }
-    .footer-bottom a { color:var(--rose); text-decoration:none; }
-
-    /* ── FLOATING WHATSAPP ── */
-    .wa-float {
-      position:fixed; bottom:28px; right:28px; z-index:990;
-      width:58px; height:58px; border-radius:50%; background:#25d366;
-      display:flex; align-items:center; justify-content:center;
-      color:#fff; font-size:1.7rem; text-decoration:none;
-      box-shadow:0 6px 24px rgba(37,211,102,.4); transition:.3s;
-      animation:wa-pulse 2.5s infinite;
-    }
-    @keyframes wa-pulse { 0%,100%{box-shadow:0 6px 24px rgba(37,211,102,.4)} 50%{box-shadow:0 6px 40px rgba(37,211,102,.7)} }
-    .wa-float:hover { transform:scale(1.12); }
-
-    /* ── TOAST ── */
-    #toast {
-      position:fixed; bottom:100px; right:28px; z-index:1000;
-      background:linear-gradient(135deg,var(--purple),var(--rose)); color:#fff;
-      padding:14px 22px; border-radius:14px; font-size:.9rem; font-weight:600;
-      box-shadow:0 6px 24px rgba(100,80,160,.3); transform:translateY(20px);
-      opacity:0; transition:.4s; pointer-events:none;
-    }
-    #toast.show { opacity:1; transform:translateY(0); }
-
-    /* ── RESPONSIVE ── */
-    @media(max-width:860px){
-      nav { padding:0 20px; }
-      .nav-links { display:none; }
-      .hamburger { display:flex; }
-    }
-    @media(max-width:600px){
-      .stats-grid { grid-template-columns:1fr 1fr; }
-      .hero-btns { flex-direction:column; align-items:center; }
-    }
-  </style>
-<link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.zZZZhVqDDCw.L.W.O/am=BBCAAw/d=0/rs=AN8SPfp-bmTrTTsp3EJtXZX_qn1Naz6AuA/m=el_main_css"></head>
+</head>
 <body>
 
 <!-- ────────────── NAVBAR ────────────── -->
 <nav>
   <a href="#inicio" class="nav-logo">
    <img src="logo.png" alt="Logotipo de CBC" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
-    <div class="nav-logo-text"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comunidad Bíblica Cristiana</font></font><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Iglesia Evangélica</font></font></span></div>
+    <div class="nav-logo-text">Comunidad Bíblica Cristiana<span>Iglesia Evangélica</span></div>
   </a>
   <ul class="nav-links">
-    <li><a href="#inicio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Inicio</font></font></a></li>
-    <li><a href="#dashboard"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Panel</font></font></a></li>
-    <li><a href="#envivo"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">En Vivo</font></font></a></li>
-    <li><a href="#horarios"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Horarios</font></font></a></li>
-    <li><a href="#ministerios"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerios</font></font></a></li>
-    <li><a href="#actividades"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Actividades</font></font></a></li>
-    <li><a href="#peticiones"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Oración</font></font></a></li>
-    <li><a href="#ofrendas"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ofrendas</font></font></a></li>
-    <li><a href="#contacto"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Contacto</font></font></a></li>
-    <li><a href="#peticiones" class="nav-cta"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏 Orar</font></font></a></li>
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#dashboard">Panel</a></li>
+    <li><a href="#envivo">En Vivo</a></li>
+    <li><a href="#horarios">Horarios</a></li>
+    <li><a href="#ministerios">Ministerios</a></li>
+    <li><a href="#actividades">Actividades</a></li>
+    <li><a href="ruta-grufam.html">Ruta GRUFAM</a></li>
+    <li><a href="#peticiones">Oración</a></li>
+    <li><a href="#ofrendas">Ofrendas</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+    <li><a href="#peticiones" class="nav-cta">🙏 Orar</a></li>
     <li><a href="lideres.html" class="nav-lideres" target="_blank">🔐 Panel Líderes</a></li>
   </ul>
   <div class="hamburger" onclick="toggleMenu()">
@@ -559,15 +92,16 @@
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#inicio" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🏠 Inicio </font></font></a>
-  <a href="#dashboard" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📊 Panel </font></font></a>
-  <a href="#envivo" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📺 En Vivo </font></font></a>
-  <a href="#horarios" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🕐 Actividades Horarios </font></font></a>
-  <a href="#ministerios" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">✝️ Ministerios </font></font></a>
-  <a href="#actividades" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📅 </font></font></a>
-  <a href="#peticiones" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏 Peticiones </font></font></a>
-  <a href="#ofrendas" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💝 Ofrendas </font></font></a>
-  <a href="#contacto" onclick="toggleMenu()"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📩 Contacto</font></font></a>
+  <a href="#inicio" onclick="toggleMenu()">🏠 Inicio </a>
+  <a href="#dashboard" onclick="toggleMenu()">📊 Panel </a>
+  <a href="#envivo" onclick="toggleMenu()">📺 En Vivo </a>
+  <a href="#horarios" onclick="toggleMenu()">🕐 Actividades Horarios </a>
+  <a href="#ministerios" onclick="toggleMenu()">✝️ Ministerios </a>
+  <a href="#actividades" onclick="toggleMenu()">📅 </a>
+  <a href="ruta-grufam.html">🗺️ Ruta GRUFAM</a>
+  <a href="#peticiones" onclick="toggleMenu()">🙏 Peticiones </a>
+  <a href="#ofrendas" onclick="toggleMenu()">💝 Ofrendas </a>
+  <a href="#contacto" onclick="toggleMenu()">📩 Contacto</a>
   <a href="lideres.html" target="_blank" style="background:linear-gradient(135deg,#3a3055,#2d2550);color:#fff !important;border-radius:12px;padding:12px 16px;font-weight:700;border-bottom:none;display:flex;align-items:center;gap:8px;">🔐 Panel de Líderes</a>
 </div>
 
@@ -577,20 +111,20 @@
     <span></span><span></span><span></span>
   </div>
   <div class="hero-content">
-    <div class="hero-badge"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">✝ Bienvenido a nuestra Iglesia</font></font></div>
-    <h1 class="hero-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
-      Comunidad </font></font><br><em><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Bíblica Cristiana</font></font></em>
+    <div class="hero-badge">✝ Bienvenido a nuestra Iglesia</div>
+    <h1 class="hero-title">
+      Comunidad <br><em>Bíblica Cristiana</em>
     </h1>
-    <p class="hero-subtitle"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
+    <p class="hero-subtitle">
       Un lugar donde cada persona es bienvenida, la Palabra de Dios transforma vidas y la comunidad florece en amor, fe y esperanza.
-    </font></font></p>
+    </p>
     <div class="hero-btns">
-      <a href="#envivo" class="btn-primary"><i class="fa-solid fa-circle-play"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ver en Vivo</font></font></a>
-      <a href="#horarios" class="btn-secondary"><i class="fa-solid fa-calendar"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestros Horarios</font></font></a>
+      <a href="#envivo" class="btn-primary"><i class="fa-solid fa-circle-play"></i>Ver en Vivo</a>
+      <a href="#horarios" class="btn-secondary"><i class="fa-solid fa-calendar"></i>Nuestros Horarios</a>
     </div>
     <div class="hero-scroll">
       <i class="fa-solid fa-chevron-down"></i>
-      <span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Descubre más</font></font></span>
+      <span>Descubre más</span>
     </div>
   </div>
 </section>
@@ -599,90 +133,90 @@
 <section id="dashboard">
   <div class="container">
     <div class="dashboard-header">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Panel de la iglesia</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestra Comunidad en Números</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Un resumen en tiempo real del crecimiento y actividad de nuestra congregación.</font></font></p>
+      <div class="section-label">Panel de la iglesia</div>
+      <h2 class="section-title">Nuestra Comunidad en Números</h2>
+      <p class="section-sub">Un resumen en tiempo real del crecimiento y actividad de nuestra congregación.</p>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">👨‍👩‍👧‍👦</font></font></div>
-        <div class="stat-number" id="cnt-miembros"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">342</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Miembros</font></font></div>
+        <div class="stat-icon">👨‍👩‍👧‍👦</div>
+        <div class="stat-number" id="cnt-miembros">342</div>
+        <div class="stat-label">Miembros</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏</font></font></div>
-        <div class="stat-number" id="cnt-peticiones"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">87</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Peticiones este mes</font></font></div>
+        <div class="stat-icon">🙏</div>
+        <div class="stat-number" id="cnt-peticiones">87</div>
+        <div class="stat-label">Peticiones este mes</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📅</font></font></div>
-        <div class="stat-number" id="cnt-actividades"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">24</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Actividades 2025</font></font></div>
+        <div class="stat-icon">📅</div>
+        <div class="stat-number" id="cnt-actividades">24</div>
+        <div class="stat-label">Actividades 2025</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📖</font></font></div>
-        <div class="stat-number" id="cnt-celulas"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">18</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Células activas</font></font></div>
+        <div class="stat-icon">📖</div>
+        <div class="stat-number" id="cnt-celulas">18</div>
+        <div class="stat-label">Células activas</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎵</font></font></div>
-        <div class="stat-number" id="cnt-ministerios"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">8</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerios</font></font></div>
+        <div class="stat-icon">🎵</div>
+        <div class="stat-number" id="cnt-ministerios">8</div>
+        <div class="stat-label">Ministerios</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌍</font></font></div>
-        <div class="stat-number" id="cnt-misiones"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">5</font></font></div>
-        <div class="stat-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Misiones</font></font></div>
+        <div class="stat-icon">🌍</div>
+        <div class="stat-number" id="cnt-misiones">5</div>
+        <div class="stat-label">Misiones</div>
       </div>
     </div>
 
     <div class="dash-widgets">
       <!-- Crecimiento -->
       <div class="dash-widget">
-        <h3><i class="fa-solid fa-chart-line"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Crecimiento por Área</font></font></h3>
+        <h3><i class="fa-solid fa-chart-line"></i>Crecimiento por Área</h3>
         <div class="progress-item">
-          <div class="progress-label"><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Asistencia Dominical</font></font></span><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">87%</font></font></span></div>
+          <div class="progress-label"><span>Asistencia Dominical</span><span>87%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width: 87%;" data-target="87"></div></div>
         </div>
         <div class="progress-item">
-          <div class="progress-label"><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Estudio Bíblico</font></font></span><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">72%</font></font></span></div>
+          <div class="progress-label"><span>Estudio Bíblico</span><span>72%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width: 72%;" data-target="72"></div></div>
         </div>
         <div class="progress-item">
-          <div class="progress-label"><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Células</font></font></span><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">91%</font></font></span></div>
+          <div class="progress-label"><span>Células</span><span>91%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width: 91%;" data-target="91"></div></div>
         </div>
         <div class="progress-item">
-          <div class="progress-label"><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jóvenes</font></font></span><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">65%</font></font></span></div>
+          <div class="progress-label"><span>Jóvenes</span><span>65%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width: 65%;" data-target="65"></div></div>
         </div>
         <div class="progress-item">
-          <div class="progress-label"><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Damas</font></font></span><span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">78%</font></font></span></div>
+          <div class="progress-label"><span>Damas</span><span>78%</span></div>
           <div class="progress-bar"><div class="progress-fill" style="width: 78%;" data-target="78"></div></div>
         </div>
       </div>
 
       <!-- Próximos eventos -->
       <div class="dash-widget">
-        <h3><i class="fa-solid fa-calendar-check"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Próximas Actividades</font></font></h3>
+        <h3><i class="fa-solid fa-calendar-check"></i>Próximas Actividades</h3>
         <ul class="event-list">
-          <li><span class="event-dot"></span><div class="event-text"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Noche de Alabanza</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Viernes 6 de junio · 19:00</font></font></div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Retiro de Jóvenes</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sáb 7 Jun · Todo el día</font></font></div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Culto de Domingo</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dom 8 Jun · 10:00 AM</font></font></div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Estudio Bíblico</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Mié 11 Jun · 19:30</font></font></div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Conferencia Familiar</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sáb 14 Jun · 15:00</font></font></div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Noche de Alabanza</strong>Viernes 6 de junio · 19:00</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Retiro de Jóvenes</strong>Sáb 7 Jun · Todo el día</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Culto de Domingo</strong>Dom 8 Jun · 10:00 AM</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Estudio Bíblico</strong>Mié 11 Jun · 19:30</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Conferencia Familiar</strong>Sáb 14 Jun · 15:00</div></li>
         </ul>
       </div>
 
       <!-- Anuncios -->
       <div class="dash-widget">
-        <h3><i class="fa-solid fa-bullhorn"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Anuncios Importantes</font></font></h3>
-        <div class="announcement-item"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔴ESTE DOMINGO</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> Culto especial de sanidad y restauración. ¡Sin fallas!</font></font></div>
-        <div class="announcement-item"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📦 COLECTA</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> Donaciones de alimentos para familias necesitadas hasta el 15 de junio.</font></font></div>
-        <div class="announcement-item"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎓 INSCRIPCIONES</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> Escuela Bíblica de Verano abierta. Inscríbete antes del 20 de junio.</font></font></div>
-        <div class="announcement-item"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎶 AUDICIONES</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> El ministerio de alabanza busca nuevos integrantes. Habla con el pastor.</font></font></div>
-        <div class="announcement-item"><strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💒 MATRIMONIOS</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> Taller prematrimonial el próximo sábado 14 de junio a las 9:00 AM.</font></font></div>
+        <h3><i class="fa-solid fa-bullhorn"></i>Anuncios Importantes</h3>
+        <div class="announcement-item"><strong>🔴ESTE DOMINGO</strong> Culto especial de sanidad y restauración. ¡Sin fallas!</div>
+        <div class="announcement-item"><strong>📦 COLECTA</strong> Donaciones de alimentos para familias necesitadas hasta el 15 de junio.</div>
+        <div class="announcement-item"><strong>🎓 INSCRIPCIONES</strong> Escuela Bíblica de Verano abierta. Inscríbete antes del 20 de junio.</div>
+        <div class="announcement-item"><strong>🎶 AUDICIONES</strong> El ministerio de alabanza busca nuevos integrantes. Habla con el pastor.</div>
+        <div class="announcement-item"><strong>💒 MATRIMONIOS</strong> Taller prematrimonial el próximo sábado 14 de junio a las 9:00 AM.</div>
       </div>
     </div>
   </div>
@@ -707,26 +241,26 @@
 <section id="envivo">
   <div class="container">
     <div class="text-center">
-      <div class="live-badge"><span class="live-dot"></span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Transmisión en Vivo</font></font></div>
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">YouTube en directo</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Únete a Nuestro Servicio</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 10:00 AM.</font></font></p>
+      <div class="live-badge"><span class="live-dot"></span>Transmisión en Vivo</div>
+      <div class="section-label">YouTube en directo</div>
+      <h2 class="section-title">Únete a Nuestro Servicio</h2>
+      <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 10:00 AM.</p>
     </div>
 
     <div class="video-wrapper">
-      <!-- Reemplaza CHANNEL_ID con el ID real de tu canal de YouTube -->
+      <!-- Canal oficial de YouTube: @comunidadbiblicacristiana (UCA_dlOwtkTyg9VdtudhXEXQ) -->
       <div class="video-fallback" id="livePlayer" onclick="loadLive()">
         <i class="fa-brands fa-youtube"></i>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Haz clic para ver la transmisión en vivo</font></font></p>
-        <small style="color:rgba(255,255,255,.5)"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Canal: Comunidad Bíblica Cristiana</font></font></small>
+        <p>Haz clic para ver la transmisión en vivo</p>
+        <small style="color:rgba(255,255,255,.5)">Canal: Comunidad Bíblica Cristiana</small>
       </div>
     </div>
 
     <div class="video-tabs">
-      <button class="video-tab active" onclick="setTab(this,'live')"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔴 En Vivo</font></font></button>
-      <button class="video-tab" onclick="setTab(this,'sermon')"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📖 Sermones</font></font></button>
-      <button class="video-tab" onclick="setTab(this,'alabanza')"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎵 Alabanza</font></font></button>
-      <button class="video-tab" onclick="setTab(this,'ninos')"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">👶 Niños</font></font></button>
+      <button class="video-tab active" onclick="setTab(this,'live')">🔴 En Vivo</button>
+      <button class="video-tab" onclick="setTab(this,'sermon')">📖 Sermones</button>
+      <button class="video-tab" onclick="setTab(this,'alabanza')">🎵 Alabanza</button>
+      <button class="video-tab" onclick="setTab(this,'ninos')">👶 Niños</button>
     </div>
   </div>
 </section>
@@ -735,45 +269,45 @@
 <section id="horarios">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestros Tiempos</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Horarios de Servicios</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Todos son bienvenidos. Ven y experimenta la presencia de Dios con nosotros.</font></font></p>
+      <div class="section-label">Nuestros Tiempos</div>
+      <h2 class="section-title">Horarios de Servicios</h2>
+      <p class="section-sub">Todos son bienvenidos. Ven y experimenta la presencia de Dios con nosotros.</p>
     </div>
     <div class="schedule-grid">
       <div class="schedule-card">
-        <div class="schedule-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙌</font></font></div>
-        <div class="schedule-day"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Domingo</font></font></div>
-        <div class="schedule-time"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">9:00 AM</font></font></div>
-        <div class="schedule-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Servicio Principal</font></font></div>
-        <div class="schedule-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Servicio de adoración con predicación de la Palabra, alabanza y comunión.</font></font></div>
+        <div class="schedule-icon">🙌</div>
+        <div class="schedule-day">Domingo</div>
+        <div class="schedule-time">9:00 AM</div>
+        <div class="schedule-name">Servicio Principal</div>
+        <div class="schedule-desc">Servicio de adoración con predicación de la Palabra, alabanza y comunión.</div>
       </div>
       <div class="schedule-card">
-        <div class="schedule-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📖</font></font></div>
-        <div class="schedule-day"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Martes</font></font></div>
-        <div class="schedule-time"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">7:00 PM</font></font></div>
-        <div class="schedule-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Grupo Familiar</font></font></div>
-        <div class="schedule-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Reuniones en Hogares para compartir, orar y crecer juntos como Iglesia</font></font></div>
+        <div class="schedule-icon">📖</div>
+        <div class="schedule-day">Martes</div>
+        <div class="schedule-time">7:00 PM</div>
+        <div class="schedule-name">Grupo Familiar</div>
+        <div class="schedule-desc">Reuniones en Hogares para compartir, orar y crecer juntos como Iglesia</div>
       </div>
       <div class="schedule-card">
-        <div class="schedule-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔥</font></font></div>
-        <div class="schedule-day"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Viernes</font></font></div>
-        <div class="schedule-time"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">6:30 PM</font></font></div>
-        <div class="schedule-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Salvación, Unción y Milagros</font></font></div>
-        <div class="schedule-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Un tiempo poderoso de intercesión, alabanza y búsqueda del Espíritu.</font></font></div>
+        <div class="schedule-icon">🔥</div>
+        <div class="schedule-day">Viernes</div>
+        <div class="schedule-time">6:30 PM</div>
+        <div class="schedule-name">Salvación, Unción y Milagros</div>
+        <div class="schedule-desc">Un tiempo poderoso de intercesión, alabanza y búsqueda del Espíritu.</div>
       </div>
       <div class="schedule-card">
-        <div class="schedule-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌱</font></font></div>
-        <div class="schedule-day"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jueves</font></font></div>
-        <div class="schedule-time"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">7:00 PM</font></font></div>
-        <div class="schedule-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jarra</font></font></div>
-        <div class="schedule-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Actividades solo para Jóvenes</font></font></div>
+        <div class="schedule-icon">🌱</div>
+        <div class="schedule-day">Jueves</div>
+        <div class="schedule-time">7:00 PM</div>
+        <div class="schedule-name">Jarra</div>
+        <div class="schedule-desc">Actividades solo para Jóvenes</div>
       </div>
       <div class="schedule-card">
-        <div class="schedule-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">👶</font></font></div>
-        <div class="schedule-day"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Domingo</font></font></div>
-        <div class="schedule-time"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">9:00 AM</font></font></div>
-        <div class="schedule-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Escuela Dominical</font></font></div>
-        <div class="schedule-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Programa especial para niños y jóvenes con enseñanza adaptada a su edad.</font></font></div>
+        <div class="schedule-icon">👶</div>
+        <div class="schedule-day">Domingo</div>
+        <div class="schedule-time">9:00 AM</div>
+        <div class="schedule-name">Escuela Dominical</div>
+        <div class="schedule-desc">Programa especial para niños y jóvenes con enseñanza adaptada a su edad.</div>
       </div>
     </div>
   </div>
@@ -783,40 +317,40 @@
 <section id="ministerios">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Área de Servicio</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestros Ministerios</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Cada ministerio es una oportunidad de servir a Dios con tus talentos y dones.</font></font></p>
+      <div class="section-label">Área de Servicio</div>
+      <h2 class="section-title">Nuestros Ministerios</h2>
+      <p class="section-sub">Cada ministerio es una oportunidad de servir a Dios con tus talentos y dones.</p>
     </div>
     <div class="ministerios-grid">
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎵</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerio de Alabanza</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Líderes de adoración que llevan a la congregación a la presencia de Dios con música y canto.</font></font></div>
+        <div class="min-icon">🎵</div>
+        <div class="min-title">Ministerio de Alabanza</div>
+        <div class="min-desc">Líderes de adoración que llevan a la congregación a la presencia de Dios con música y canto.</div>
       </div>
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">👶</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerio Infantil</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Enseñamos a los niños a conocer y amar a Dios mediante actividades creativas y lúdicas.</font></font></div>
+        <div class="min-icon">👶</div>
+        <div class="min-title">Ministerio Infantil</div>
+        <div class="min-desc">Enseñamos a los niños a conocer y amar a Dios mediante actividades creativas y lúdicas.</div>
       </div>
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔥</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerio de Jóvenes</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Un espacio para que los jóvenes encuentren propósito, identidad y comunidad en Cristo.</font></font></div>
+        <div class="min-icon">🔥</div>
+        <div class="min-title">Ministerio de Jóvenes</div>
+        <div class="min-desc">Un espacio para que los jóvenes encuentren propósito, identidad y comunidad en Cristo.</div>
       </div>
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💒</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerio Familiar</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Fortalecemos matrimonios y familias con consejería, talleres y retiros especiales.</font></font></div>
+        <div class="min-icon">💒</div>
+        <div class="min-title">Ministerio Familiar</div>
+        <div class="min-desc">Fortalecemos matrimonios y familias con consejería, talleres y retiros especiales.</div>
       </div>
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌍</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Misiones</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Llevamos el Evangelio a comunidades locales e internacionales con acciones concretas de amor.</font></font></div>
+        <div class="min-icon">🌍</div>
+        <div class="min-title">Misiones</div>
+        <div class="min-desc">Llevamos el Evangelio a comunidades locales e internacionales con acciones concretas de amor.</div>
       </div>
       <div class="min-card">
-        <div class="min-icon"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🤝</font></font></div>
-        <div class="min-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerio Social</font></font></div>
-        <div class="min-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Servimos a los más necesitados con alimentos, ropa y apoyo emocional en el nombre de Jesús.</font></font></div>
+        <div class="min-icon">🤝</div>
+        <div class="min-title">Ministerio Social</div>
+        <div class="min-desc">Servimos a los más necesitados con alimentos, ropa y apoyo emocional en el nombre de Jesús.</div>
       </div>
     </div>
   </div>
@@ -826,63 +360,63 @@
 <section id="actividades">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Calendario</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Actividades Generales</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Participa en nuestra agenda de eventos y vive la comunidad al máximo.</font></font></p>
+      <div class="section-label">Calendario</div>
+      <h2 class="section-title">Actividades Generales</h2>
+      <p class="section-sub">Participa en nuestra agenda de eventos y vive la comunidad al máximo.</p>
     </div>
     <div class="activities-grid">
       <div class="act-card">
-        <div class="act-header bg1"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌟</font></font></div>
+        <div class="act-header bg1">🌟</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Viernes 6 de junio de 2025 · 19:00</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Noche de Alabanza y Adoración</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Una noche especial de adoración y alabanza para exaltar el nombre de Dios. Música en vivo, testimonios y oración.</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Adoración</font></font></span>
+          <div class="act-date">Viernes 6 de junio de 2025 · 19:00</div>
+          <div class="act-title">Noche de Alabanza y Adoración</div>
+          <div class="act-desc">Una noche especial de adoración y alabanza para exaltar el nombre de Dios. Música en vivo, testimonios y oración.</div>
+          <span class="act-tag">Adoración</span>
         </div>
       </div>
       <div class="act-card">
-        <div class="act-header bg2"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">⛺</font></font></div>
+        <div class="act-header bg2">⛺</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sáb–Dom 7–8 Jun 2025</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Retiro de Jóvenes 2025</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dos días llenos de dinámicas, predicación, campamento y crecimiento espiritual para nuestros jóvenes.</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jóvenes</font></font></span>
+          <div class="act-date">Sáb–Dom 7–8 Jun 2025</div>
+          <div class="act-title">Retiro de Jóvenes 2025</div>
+          <div class="act-desc">Dos días llenos de dinámicas, predicación, campamento y crecimiento espiritual para nuestros jóvenes.</div>
+          <span class="act-tag">Jóvenes</span>
         </div>
       </div>
       <div class="act-card">
-        <div class="act-header bg3"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📦</font></font></div>
+        <div class="act-header bg3">📦</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sáb 14 Jun 2025 · 9:00 AM</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jornada de Servicio Comunitario</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Saldremos a repartir alimentos y ropa a familias en vulnerabilidad. Únete y marca una diferencia.</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Misiones</font></font></span>
+          <div class="act-date">Sáb 14 Jun 2025 · 9:00 AM</div>
+          <div class="act-title">Jornada de Servicio Comunitario</div>
+          <div class="act-desc">Saldremos a repartir alimentos y ropa a familias en vulnerabilidad. Únete y marca una diferencia.</div>
+          <span class="act-tag">Misiones</span>
         </div>
       </div>
       <div class="act-card">
-        <div class="act-header bg4"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💒</font></font></div>
+        <div class="act-header bg4">💒</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Sáb 14 Jun 2025 · 15:00</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Más alto Pre-Matrimonial</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Preparamos a las parejas para una vida conyugal sólida, basada en principios bíblicos y amor genuino.</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Familia</font></font></span>
+          <div class="act-date">Sáb 14 Jun 2025 · 15:00</div>
+          <div class="act-title">Más alto Pre-Matrimonial</div>
+          <div class="act-desc">Preparamos a las parejas para una vida conyugal sólida, basada en principios bíblicos y amor genuino.</div>
+          <span class="act-tag">Familia</span>
         </div>
       </div>
       <div class="act-card">
-        <div class="act-header bg5"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎓</font></font></div>
+        <div class="act-header bg5">🎓</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">lun 23 jun 2025</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Escuela Bíblica de Verano</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Programa de formación bíblica para niños. 4 semanas de aprendizaje, juegos y fe. ¡Inscripciones abiertas!</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Niños</font></font></span>
+          <div class="act-date">lun 23 jun 2025</div>
+          <div class="act-title">Escuela Bíblica de Verano</div>
+          <div class="act-desc">Programa de formación bíblica para niños. 4 semanas de aprendizaje, juegos y fe. ¡Inscripciones abiertas!</div>
+          <span class="act-tag">Niños</span>
         </div>
       </div>
       <div class="act-card">
-        <div class="act-header bg6"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎉</font></font></div>
+        <div class="act-header bg6">🎉</div>
         <div class="act-body">
-          <div class="act-date"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dom 29 Jun 2025 · 10:00 AM</font></font></div>
-          <div class="act-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Aniversario de la Iglesia</font></font></div>
-          <div class="act-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Celebramos juntos un año más de gracia y crecimiento. Culto especial, almuerzo comunitario y sorpresas.</font></font></div>
-          <span class="act-tag"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Celebración</font></font></span>
+          <div class="act-date">Dom 29 Jun 2025 · 10:00 AM</div>
+          <div class="act-title">Aniversario de la Iglesia</div>
+          <div class="act-desc">Celebramos juntos un año más de gracia y crecimiento. Culto especial, almuerzo comunitario y sorpresas.</div>
+          <span class="act-tag">Celebración</span>
         </div>
       </div>
     </div>
@@ -894,8 +428,8 @@
   <div class="container">
     <div class="prayer-grid">
       <div class="prayer-form-box">
-        <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Formulario</font></font></div>
-        <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Envía tu Petición</font></font></h2>
+        <div class="section-label">Formulario</div>
+        <h2 class="section-title">Envía tu Petición</h2>
         <form onsubmit="submitPrayer(event)">
           <div class="form-group">
             <label>Tu nombre</label>
@@ -928,20 +462,20 @@
       </div>
 
       <div class="prayer-info">
-        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Estamos aquí para orar contigo</font></font></h3>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">En la Comunidad Bíblica Cristiana creemos en el poder de la oración. Cada petición que recibimos es hecha ante Dios con fe, amor y dedicación.</font></font></p>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestro equipo de intercesores ora por cada solicitud. Nadie enfrenta sus batallas solo cuando pertenece a la familia de Dios.</font></font></p>
+        <h3>Estamos aquí para orar contigo</h3>
+        <p>En la Comunidad Bíblica Cristiana creemos en el poder de la oración. Cada petición que recibimos es hecha ante Dios con fe, amor y dedicación.</p>
+        <p>Nuestro equipo de intercesores ora por cada solicitud. Nadie enfrenta sus batallas solo cuando pertenece a la familia de Dios.</p>
 
         <div class="promise-card">
           <i class="fa-solid fa-hands-praying"></i>
-          <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">"Pedid, y se os darán; buscad, y encontraréis; llamad, y se os abrirá."</font></font></p>
-          <cite><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">— Mateo 7:7</font></font></cite>
+          <p>"Pedid, y se os darán; buscad, y encontraréis; llamad, y se os abrirá."</p>
+          <cite>— Mateo 7:7</cite>
         </div>
 
         <div style="margin-top:28px; background:#fff; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
-          <h4 style="font-family:'Playfair Display',serif; color:var(--dark); margin-bottom:14px; font-size:1.1rem;"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">También puedes contactarnos</font></font></h4>
-          <p style="font-size:.88rem; color:var(--muted); margin-bottom:10px;"><i class="fa-brands fa-whatsapp" style="color:#25d366"></i> <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">WhatsApp pastoral:</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> +1 (555) 000-0000</font></font></p>
-          <p style="font-size:.88rem; color:var(--muted);"><i class="fa-solid fa-phone" style="color:var(--purple)"></i> <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Teléfono iglesia:</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;"> +1 (555) 000-0001</font></font></p>
+          <h4 style="font-family:'Playfair Display',serif; color:var(--dark); margin-bottom:14px; font-size:1.1rem;">También puedes contactarnos</h4>
+          <p style="font-size:.88rem; color:var(--muted); margin-bottom:10px;"><i class="fa-brands fa-whatsapp" style="color:#25d366"></i> <strong>WhatsApp pastoral:</strong> +1 (555) 000-0000</p>
+          <p style="font-size:.88rem; color:var(--muted);"><i class="fa-solid fa-phone" style="color:var(--purple)"></i> <strong>Teléfono iglesia:</strong> +1 (555) 000-0001</p>
         </div>
       </div>
     </div>
@@ -952,42 +486,42 @@
 <section id="ofrendas">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Diezmos y Ofrendas</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Parecer con alegría</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">"Cada uno dé como propuesta en su corazón, no con tristeza ni por necesidad, porque Dios ama al dador alegre." — 2 Corintios 9:7</font></font></p>
+      <div class="section-label">Diezmos y Ofrendas</div>
+      <h2 class="section-title">Parecer con alegría</h2>
+      <p class="section-sub">"Cada uno dé como propuesta en su corazón, no con tristeza ni por necesidad, porque Dios ama al dador alegre." — 2 Corintios 9:7</p>
     </div>
     <div class="ofrendas-grid">
       <div class="ofrenda-card bg1">
         <i class="fa-solid fa-building-columns"></i>
-        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Transferencia Bancaria</font></font></h3>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Realiza tu ofrenda de forma segura directamente a la cuenta de la iglesia.</font></font></p>
+        <h3>Transferencia Bancaria</h3>
+        <p>Realiza tu ofrenda de forma segura directamente a la cuenta de la iglesia.</p>
         <div class="bank-info">
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Banco: [Nombre del Banco]</font></font></strong>
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Cuenta: [Número de cuenta]</font></font></strong>
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Titular: Iglesia CBC</font></font></strong>
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Concepto: Diezmo / Ofrenda</font></font></strong>
+          <strong>Banco: [Nombre del Banco]</strong>
+          <strong>Cuenta: [Número de cuenta]</strong>
+          <strong>Titular: Iglesia CBC</strong>
+          <strong>Concepto: Diezmo / Ofrenda</strong>
         </div>
       </div>
       <div class="ofrenda-card bg2">
         <i class="fa-brands fa-paypal"></i>
-        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">PayPal</font></font></h3>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dona en línea de forma rápida y segura desde cualquier parte del mundo.</font></font></p>
+        <h3>PayPal</h3>
+        <p>Dona en línea de forma rápida y segura desde cualquier parte del mundo.</p>
         <div class="bank-info">
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Enviar correo electrónico a PayPal:</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
-          ofrendas@iglesiacbc.org </font></font><br><br>
-          <a href="#" style="color:var(--purple); font-weight:700; font-size:.9rem;"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">→ Ir a PayPal</font></font></a>
+          <strong>Enviar correo electrónico a PayPal:</strong>
+          ofrendas@iglesiacbc.org <br><br>
+          <a href="#" style="color:var(--purple); font-weight:700; font-size:.9rem;">→ Ir a PayPal</a>
         </div>
       </div>
       <div class="ofrenda-card bg3">
         <i class="fa-solid fa-mobile-screen"></i>
-        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Transferencia Móvil</font></font></h3>
-        <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Envía tu ofrenda desde tu teléfono usando servicios de pago móvil.</font></font></p>
+        <h3>Transferencia Móvil</h3>
+        <p>Envía tu ofrenda desde tu teléfono usando servicios de pago móvil.</p>
         <div class="bank-info">
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nequi / Daviplata:</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
-          300 000 0000</font></font><br>
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Zelle:</font></font></strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">
-          ofrendas@iglesiacbc.org</font></font><br>
-          <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Titular: Iglesia CBC</font></font></strong>
+          <strong>Nequi / Daviplata:</strong>
+          300 000 0000<br>
+          <strong>Zelle:</strong>
+          ofrendas@iglesiacbc.org<br>
+          <strong>Titular: Iglesia CBC</strong>
         </div>
       </div>
     </div>
@@ -998,34 +532,34 @@
 <section id="liderazgo">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nuestro Equipo</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Liderazgo Pastoral</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Siervos de Dios comprometidos con la visión y el crecimiento de nuestra Iglesia.</font></font></p>
+      <div class="section-label">Nuestro Equipo</div>
+      <h2 class="section-title">Liderazgo Pastoral</h2>
+      <p class="section-sub">Siervos de Dios comprometidos con la visión y el crecimiento de nuestra Iglesia.</p>
     </div>
     <div class="leaders-grid">
       <div class="leader-card">
-        <div class="leader-avatar av1"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">✝</font></font></div>
-        <div class="leader-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ps. Salvador Fernández</font></font></div>
-        <div class="leader-role"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pastor Principal</font></font></div>
-        <div class="leader-bio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Con más de 22 años de ministerio, lidera la visión y el crecimiento espiritual de nuestra congregación.</font></font></div>
+        <div class="leader-avatar av1">✝</div>
+        <div class="leader-name">Ps. Salvador Fernández</div>
+        <div class="leader-role">Pastor Principal</div>
+        <div class="leader-bio">Con más de 22 años de ministerio, lidera la visión y el crecimiento espiritual de nuestra congregación.</div>
       </div>
       <div class="leader-card">
-        <div class="leader-avatar av2"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌸</font></font></div>
-        <div class="leader-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pra. Osdali Molina</font></font></div>
-        <div class="leader-role"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pastora de Damas</font></font></div>
-        <div class="leader-bio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dedicada al fortalecimiento espiritual y emocional de las mujeres de la congregación.</font></font></div>
+        <div class="leader-avatar av2">🌸</div>
+        <div class="leader-name">Pra. Osdali Molina</div>
+        <div class="leader-role">Pastora de Damas</div>
+        <div class="leader-bio">Dedicada al fortalecimiento espiritual y emocional de las mujeres de la congregación.</div>
       </div>
       <div class="leader-card">
-        <div class="leader-avatar av3"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🔥</font></font></div>
-        <div class="leader-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ps. Javier Angarita</font></font></div>
-        <div class="leader-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pra. Ana María de Angarita</font></font></div><div class="leader-role"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pastores de Jóvenes</font></font></div>
-        <div class="leader-bio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Apasionado por conectar a las nuevas generaciones con el propósito de Dios para sus vidas.</font></font></div>
+        <div class="leader-avatar av3">🔥</div>
+        <div class="leader-name">Ps. Javier Angarita</div>
+        <div class="leader-name">Pra. Ana María de Angarita</div><div class="leader-role">Pastores de Jóvenes</div>
+        <div class="leader-bio">Apasionado por conectar a las nuevas generaciones con el propósito de Dios para sus vidas.</div>
       </div>
       <div class="leader-card">
-        <div class="leader-avatar av4"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎵</font></font></div>
-        <div class="leader-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Pra. Ana María de Angarita</font></font></div>
-        <div class="leader-role"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Directora de Alabanza</font></font></div>
-        <div class="leader-bio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Conduce al pueblo de Dios a Su presencia mediante la adoración y la música ungida.</font></font></div>
+        <div class="leader-avatar av4">🎵</div>
+        <div class="leader-name">Pra. Ana María de Angarita</div>
+        <div class="leader-role">Directora de Alabanza</div>
+        <div class="leader-bio">Conduce al pueblo de Dios a Su presencia mediante la adoración y la música ungida.</div>
       </div>
     </div>
   </div>
@@ -1035,24 +569,24 @@
 <section id="galeria" style="background:var(--sky);">
   <div class="container">
     <div class="text-center">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Momentos</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Galería de la Comunidad</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Recuerdos de nuestros momentos especiales juntos como familia de fe.</font></font></p>
+      <div class="section-label">Momentos</div>
+      <h2 class="section-title">Galería de la Comunidad</h2>
+      <p class="section-sub">Recuerdos de nuestros momentos especiales juntos como familia de fe.</p>
     </div>
     <div class="gallery-grid">
-      <div class="gallery-item g1"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🙏</font></font></div>
-      <div class="gallery-item g2"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🎵</font></font></div>
-      <div class="gallery-item g3"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">✝️</font></font></div>
-      <div class="gallery-item g4"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">💒</font></font></div>
-      <div class="gallery-item g5"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🌟</font></font></div>
-      <div class="gallery-item g6"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">📖</font></font></div>
-      <div class="gallery-item g2"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">👶</font></font></div>
-      <div class="gallery-item g3"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">🤝</font></font></div>
+      <div class="gallery-item g1">🙏</div>
+      <div class="gallery-item g2">🎵</div>
+      <div class="gallery-item g3">✝️</div>
+      <div class="gallery-item g4">💒</div>
+      <div class="gallery-item g5">🌟</div>
+      <div class="gallery-item g6">📖</div>
+      <div class="gallery-item g2">👶</div>
+      <div class="gallery-item g3">🤝</div>
     </div>
     <div style="text-align:center; margin-top:32px;">
-      <a href="https://www.youtube.com/@TuCanal" target="_blank" class="btn-primary" style="display:inline-flex;">
-        <i class="fa-brands fa-youtube"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ver más en YouTube
-      </font></font></a>
+      <a href="https://youtube.com/@comunidadbiblicacristiana" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;">
+        <i class="fa-brands fa-youtube"></i>Ver más en YouTube
+      </a>
     </div>
   </div>
 </section>
@@ -1061,83 +595,83 @@
 <section id="contacto">
   <div class="container">
     <div class="text-center" style="margin-bottom:52px;">
-      <div class="section-label"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Estamos aquí</font></font></div>
-      <h2 class="section-title"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Contáctanos</font></font></h2>
-      <p class="section-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">No estás solo. Nuestra familia está para recibirte con los brazos abiertos.</font></font></p>
+      <div class="section-label">Estamos aquí</div>
+      <h2 class="section-title">Contáctanos</h2>
+      <p class="section-sub">No estás solo. Nuestra familia está para recibirte con los brazos abiertos.</p>
     </div>
     <div class="contact-grid">
       <div class="contact-info">
-        <h3><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">¡Nos encantaría conocerte!</font></font></h3>
+        <h3>¡Nos encantaría conocerte!</h3>
         <div class="contact-item">
           <div class="contact-item-icon ci1"><i class="fa-solid fa-location-dot"></i></div>
           <div class="contact-item-text">
-            <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dirección</font></font></strong>
-            <span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">AV. 13 con entre calle 5 y Av. 13 de Junio ​​(Bajada del Hospital) Araure</font></font></span>
+            <strong>Dirección</strong>
+            <span>AV. 13 con entre calle 5 y Av. 13 de Junio ​​(Bajada del Hospital) Araure</span>
           </div>
         </div>
         <div class="contact-item">
           <div class="contact-item-icon ci2"><i class="fa-solid fa-phone"></i></div>
           <div class="contact-item-text">
-            <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Teléfono</font></font></strong>
-            <span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">+1 (555) 000-0001</font></font></span>
+            <strong>Teléfono</strong>
+            <span>+1 (555) 000-0001</span>
           </div>
         </div>
         <div class="contact-item">
           <div class="contact-item-icon ci3"><i class="fa-solid fa-envelope"></i></div>
           <div class="contact-item-text">
-            <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Correo</font></font></strong>
-            <span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">info@iglesiacbc.org</font></font></span>
+            <strong>Correo</strong>
+            <span>info@iglesiacbc.org</span>
           </div>
         </div>
         <div class="contact-item">
           <div class="contact-item-icon ci4"><i class="fa-solid fa-clock"></i></div>
           <div class="contact-item-text">
-            <strong><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Horario de atención</font></font></strong>
-            <span><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Lunes–Viernes: 9:00 a.m. – 6:00 p.m.</font></font></span>
+            <strong>Horario de atención</strong>
+            <span>Lunes–Viernes: 9:00 a.m. – 6:00 p.m.</span>
           </div>
         </div>
 
         <div class="social-links">
-          <a href="#" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
-          <a href="#" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
-          <a href="#" class="social-btn sb-wa"><i class="fa-brands fa-whatsapp"></i></a>
-          <a href="#" class="social-btn sb-tg"><i class="fa-brands fa-telegram"></i></a>
+          <a href="https://www.facebook.com/ComunidadBiblicaCristiana" target="_blank" rel="noopener" aria-label="Facebook" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://youtube.com/@comunidadbiblicacristiana" target="_blank" rel="noopener" aria-label="YouTube" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://www.instagram.com/comunidadbiblicac" target="_blank" rel="noopener" aria-label="Instagram" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-btn sb-wa" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+          <a href="#" class="social-btn sb-tg" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
         </div>
       </div>
 
       <div class="contact-form-box">
         <form onsubmit="submitContact(event)">
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Nombre completo</font></font></label>
+            <label>Nombre completo</label>
             <input type="text" placeholder="Tu nombre" required="">
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Correo electrónico</font></font></label>
+            <label>Correo electrónico</label>
             <input type="email" placeholder="tu@correo.com" required="">
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Teléfono (opcional)</font></font></label>
+            <label>Teléfono (opcional)</label>
             <input type="tel" placeholder="+1 000 000 0000">
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Asunto</font></font></label>
+            <label>Asunto</label>
             <select>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Información general</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Quiero visitar la iglesia</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Unirme a un ministerio</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Consejería pastoral</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Eventos y actividades</font></font></option>
-              <option><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Otro</font></font></option>
+              <option>Información general</option>
+              <option>Quiero visitar la iglesia</option>
+              <option>Unirme a un ministerio</option>
+              <option>Consejería pastoral</option>
+              <option>Eventos y actividades</option>
+              <option>Otro</option>
             </select>
           </div>
           <div class="form-group">
-            <label><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Mensaje</font></font></label>
+            <label>Mensaje</label>
             <textarea placeholder="¿En qué podemos ayudarte?" required=""></textarea>
           </div>
           <button type="submit" class="btn-submit">
-            <i class="fa-solid fa-paper-plane"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Enviar Mensaje
-          </font></font></button>
+            <i class="fa-solid fa-paper-plane"></i>Enviar Mensaje
+          </button>
         </form>
       </div>
     </div>
@@ -1148,11 +682,14 @@
 <div class="map-section">
   <div class="map-wrapper">
     <i class="fa-solid fa-map-location-dot"></i>
-    <p style="font-size:1.1rem; font-weight:700; color:var(--dark);"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">AV. 13 con entre calle 5 y Av. 13 de Junio ​​(Bajada del Hospital) Araure, Portuguesa, Venezuela</font></font></p>
-    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">https://maps.app.goo.gl/oywcSGiJDh16r8Va8?g_st=aw</font></font></p>
+    <p style="font-size:1.1rem; font-weight:700; color:var(--dark);">AV. 13 con entre calle 5 y Av. 13 de Junio ​​(Bajada del Hospital) Araure, Portuguesa, Venezuela</p>
+    <p>https://maps.app.goo.gl/oywcSGiJDh16r8Va8?g_st=aw</p>
     <a href="https://maps.google.com" target="_blank" class="btn-primary" style="margin-top:8px;">
-      <i class="fa-solid fa-directions"></i><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Cómo llegar
-    </font></font></a>
+      <i class="fa-solid fa-directions"></i>Cómo llegar
+    </a>
+    <a href="ruta-grufam.html" class="btn-primary" style="margin-top:8px; background:linear-gradient(135deg, var(--purple), var(--rose));">
+      <i class="fa-solid fa-people-group"></i>Ver Ruta GRUFAM
+    </a>
   </div>
 </div>
 
@@ -1160,50 +697,50 @@
 <footer>
   <div class="footer-grid">
     <div>
-      <div class="footer-brand-name"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comunidad Bíblica Cristiana</font></font></div>
-      <div class="footer-brand-sub"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Iglesia Evangélica</font></font></div>
-      <p class="footer-desc"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Un lugar de fe, amor y esperanza donde cada persona importa y puede encontrar su propósito en Cristo Jesús.</font></font></p>
+      <div class="footer-brand-name">Comunidad Bíblica Cristiana</div>
+      <div class="footer-brand-sub">Iglesia Evangélica</div>
+      <p class="footer-desc">Un lugar de fe, amor y esperanza donde cada persona importa y puede encontrar su propósito en Cristo Jesús.</p>
       <div class="social-links">
-        <a href="#" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="#" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
-        <a href="#" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" class="social-btn sb-wa"><i class="fa-brands fa-whatsapp"></i></a>
+        <a href="https://www.facebook.com/ComunidadBiblicaCristiana" target="_blank" rel="noopener" aria-label="Facebook" class="social-btn sb-fb"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://youtube.com/@comunidadbiblicacristiana" target="_blank" rel="noopener" aria-label="YouTube" class="social-btn sb-yt"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://www.instagram.com/comunidadbiblicac" target="_blank" rel="noopener" aria-label="Instagram" class="social-btn sb-ig"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="social-btn sb-wa" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
       </div>
     </div>
     <div class="footer-col">
-      <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Navegación</font></font></h4>
+      <h4>Navegación</h4>
       <ul>
-        <li><a href="#inicio"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Inicio</font></font></a></li>
-        <li><a href="#dashboard"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Panel</font></font></a></li>
-        <li><a href="#envivo"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">En Vivo</font></font></a></li>
-        <li><a href="#horarios"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Horarios</font></font></a></li>
-        <li><a href="#ministerios"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ministerios</font></font></a></li>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#dashboard">Panel</a></li>
+        <li><a href="#envivo">En Vivo</a></li>
+        <li><a href="#horarios">Horarios</a></li>
+        <li><a href="#ministerios">Ministerios</a></li>
       </ul>
     </div>
     <div class="footer-col">
-      <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Comunidad</font></font></h4>
+      <h4>Comunidad</h4>
       <ul>
-        <li><a href="#actividades"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Actividades</font></font></a></li>
-        <li><a href="#liderazgo"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Liderazgo</font></font></a></li>
-        <li><a href="#galeria"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Galería</font></font></a></li>
-        <li><a href="#peticiones"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Peticiones</font></font></a></li>
-        <li><a href="#ofrendas"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Ofrendas</font></font></a></li>
+        <li><a href="#actividades">Actividades</a></li>
+        <li><a href="#liderazgo">Liderazgo</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#peticiones">Peticiones</a></li>
+        <li><a href="#ofrendas">Ofrendas</a></li>
       </ul>
     </div>
     <div class="footer-col">
-      <h4><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Horarios</font></font></h4>
+      <h4>Horarios</h4>
       <ul>
-        <li><a href="#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Dom 9:00 AM – Servicio</font></font></a></li>
-        <li><a href="#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Mar 7:00 PM – GRUFAM</font></font></a></li>
-        <li><a href="#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Vie 6:30 PM – SUM</font></font></a></li>
-        <li><a href="#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Jue 7:00 PM – JARM</font></font></a></li>
-        <li><a href="#contacto"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Contáctanos</font></font></a></li>
+        <li><a href="#">Dom 9:00 AM – Servicio</a></li>
+        <li><a href="ruta-grufam.html">Mar 7:00 PM – GRUFAM</a></li>
+        <li><a href="#">Vie 6:30 PM – SUM</a></li>
+        <li><a href="#">Jue 7:00 PM – JARM</a></li>
+        <li><a href="#contacto">Contáctanos</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
-    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">© 2025 Comunidad Bíblica Cristiana. Todos los derechos reservados. Con ❤️ para la gloria de Dios.</font></font></p>
-    <p><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Hecho con amor · </font></font><a href="#"><font dir="auto" style="vertical-align: inherit;"><font dir="auto" style="vertical-align: inherit;">Política de privacidad</font></font></a></p>
+    <p>© 2025 Comunidad Bíblica Cristiana. Todos los derechos reservados. Con ❤️ para la gloria de Dios.</p>
+    <p>Hecho con amor · <a href="#">Política de privacidad</a></p>
   </div>
 </footer>
 
@@ -1216,826 +753,11 @@
 <div id="toast"></div>
 
 <!-- ────────────── SCRIPTS ────────────── -->
-<script>
-  // Mobile menu
-  function toggleMenu(){
-    document.getElementById('mobileMenu').classList.toggle('open');
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // CONTADORES AUTOMÁTICOS — leen el DOM de las otras secciones en tiempo real
-  // Cada vez que agregues o elimines tarjetas en Ministerios, Actividades,
-  // Horarios, Liderazgo o Galería, el dashboard se actualiza solo.
-  // ══════════════════════════════════════════════════════════════════════════
-
-  function animateCounter(id, end, duration){
-    const el = document.getElementById(id);
-    if (!el || end === 0) { if(el) el.textContent = '0'; return; }
-    let start = 0, step = end / (duration / 16);
-    const timer = setInterval(()=>{
-      start += step;
-      if(start >= end){ start = end; clearInterval(timer); }
-      el.textContent = Math.floor(start).toLocaleString();
-    }, 16);
-  }
-
-  function animateProgress(){
-    document.querySelectorAll('.progress-fill').forEach(bar=>{
-      bar.style.width = (bar.dataset.target || 0) + '%';
-    });
-  }
-
-  // ── Conteo automático desde el DOM ───────────────────────────────────────
-  function contarDesdeDOM() {
-    return {
-      // Actividades: tarjetas en #actividades
-      actividades: document.querySelectorAll('#actividades .act-card').length,
-
-      // Ministerios: tarjetas en #ministerios
-      ministerios: document.querySelectorAll('#ministerios .min-card').length,
-
-      // Misiones: ministerios con tag "Misiones" en actividades +
-      //           min-cards cuyo título contenga "Misión" o "Misiones"
-      misiones: (()=>{
-        let n = 0;
-        document.querySelectorAll('#actividades .act-tag').forEach(t=>{
-          if(t.textContent.trim().toLowerCase().includes('misión') ||
-             t.textContent.trim().toLowerCase().includes('misiones')) n++;
-        });
-        document.querySelectorAll('#ministerios .min-title').forEach(t=>{
-          if(t.textContent.trim().toLowerCase().includes('misión') ||
-             t.textContent.trim().toLowerCase().includes('misiones')) n++;
-        });
-        return n || 5; // mínimo 5 si no se detectan etiquetas
-      })(),
-
-      // Células: servicios en #horarios (cada tarjeta = un servicio/célula activa)
-      celulas: (()=>{
-        const total = document.querySelectorAll('#horarios .schedule-card').length;
-        // Multiplicamos por 3 (promedio de células por servicio) como estimación realista
-        return total * 3 || 18;
-      })(),
-
-      // Líderes / Miembros del equipo: líder-cards en #liderazgo
-      // El número de miembros es fijo (requiere gestión manual o Firebase)
-      miembros: 342,
-
-      // Peticiones este mes: se cuenta desde Firebase en tiempo real (ver módulo)
-      // Por defecto mostramos el acumulado del mes actual
-      peticiones: window._peticionesCount || 87,
-
-      // Fotos / Momentos en galería
-      momentos: document.querySelectorAll('#galeria .gallery-item').length,
-    };
-  }
-
-  // ── Actualiza las barras de progreso según datos reales ──────────────────
-  function actualizarBarras(stats) {
-    // Asistencia Dominical: basada en horarios activos (sobre un máximo de 6)
-    const horarios  = document.querySelectorAll('#horarios .schedule-card').length;
-    const asistPct  = Math.min(Math.round((horarios / 6) * 100), 100);
-
-    // Estudio Bíblico: % de actividades tipo estudio sobre el total
-    let estudioCount = 0;
-    document.querySelectorAll('#actividades .act-title').forEach(t=>{
-      if(t.textContent.toLowerCase().includes('bíblic') ||
-         t.textContent.toLowerCase().includes('biblic') ||
-         t.textContent.toLowerCase().includes('estudio')) estudioCount++;
-    });
-    const estudioPct = Math.min(Math.round((estudioCount / Math.max(stats.actividades,1)) * 100) + 50, 100);
-
-    // Células: basado en el count de schedule-cards vs esperado
-    const celulasPct = Math.min(Math.round((stats.celulas / 20) * 100), 100);
-
-    // Jóvenes: ministerios con palabra "joven" / "jóvenes"
-    let jovCount = 0;
-    document.querySelectorAll('#ministerios .min-title').forEach(t=>{
-      if(t.textContent.toLowerCase().includes('jov')) jovCount++;
-    });
-    const jovenesPct = Math.min(50 + jovCount * 15, 100);
-
-    // Damas: ministerios con palabra "dama" / "mujer"
-    let damaCount = 0;
-    document.querySelectorAll('#ministerios .min-title, #liderazgo .leader-role').forEach(t=>{
-      if(t.textContent.toLowerCase().includes('dama') ||
-         t.textContent.toLowerCase().includes('mujer')) damaCount++;
-    });
-    const damasPct = Math.min(50 + damaCount * 14, 100);
-
-    // Aplicar a las barras existentes
-    const bars = document.querySelectorAll('.progress-fill');
-    const vals = [asistPct, estudioPct, celulasPct, jovenesPct, damasPct];
-    bars.forEach((bar, i) => {
-      const pct = vals[i] !== undefined ? vals[i] : parseInt(bar.dataset.target||0);
-      bar.dataset.target = pct;
-      const labelEl = bar.closest('.progress-item')?.querySelector('.progress-label span:last-child');
-      if(labelEl) labelEl.textContent = pct + '%';
-    });
-  }
-
-  // ── También actualiza "Próximas Actividades" del widget del dashboard ────
-  function actualizarEventosWidget() {
-    const lista = document.querySelector('#dashboard .event-list');
-    if(!lista) return;
-    lista.innerHTML = '';
-    const cards = document.querySelectorAll('#actividades .act-card');
-    const max = Math.min(cards.length, 5);
-    for(let i = 0; i < max; i++){
-      const card  = cards[i];
-      const fecha = card.querySelector('.act-date')?.textContent?.trim() || '';
-      const titulo = card.querySelector('.act-title')?.textContent?.trim() || '';
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="event-dot"></span>
-        <div class="event-text"><strong>${titulo}</strong>${fecha}</div>`;
-      lista.appendChild(li);
-    }
-  }
-
-  // ── Contador de momentos en galería (badge dinámico) ─────────────────────
-  function actualizarMomentos() {
-    const galeriaLabel = document.querySelector('#galeria .section-sub');
-    if(!galeriaLabel) return;
-    const total = document.querySelectorAll('#galeria .gallery-item').length;
-    galeriaLabel.textContent =
-      `${total} momentos especiales junto a nuestra familia de fe. ¡Cada foto cuenta una historia!`;
-  }
-
-  // ── Disparar todo cuando el dashboard entre en viewport ──────────────────
-  const dashObs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const stats = contarDesdeDOM();
-        actualizarBarras(stats);
-        animateCounter('cnt-miembros',    stats.miembros,    1200);
-        animateCounter('cnt-peticiones',  stats.peticiones,  1000);
-        animateCounter('cnt-actividades', stats.actividades,  900);
-        animateCounter('cnt-celulas',     stats.celulas,      800);
-        animateCounter('cnt-ministerios', stats.ministerios,  700);
-        animateCounter('cnt-misiones',    stats.misiones,     600);
-        setTimeout(animateProgress, 400);
-        dashObs.disconnect();
-      }
-    });
-  }, {threshold:0.2});
-
-  // Ejecutar actualizaciones del DOM en cuanto carga la página
-  document.addEventListener('DOMContentLoaded', ()=>{
-    actualizarEventosWidget();
-    actualizarMomentos();
-    dashObs.observe(document.getElementById('dashboard'));
-
-    // MutationObserver: si alguien modifica el HTML en vivo (ej. CMS),
-    // los contadores se recalculan solos sin recargar la página.
-    const mo = new MutationObserver(()=>{
-      actualizarEventosWidget();
-      actualizarMomentos();
-    });
-    ['#actividades','#ministerios','#horarios','#galeria','#liderazgo'].forEach(sel=>{
-      const el = document.querySelector(sel);
-      if(el) mo.observe(el, { childList:true, subtree:true });
-    });
-  });
-
-  // Toast
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'), 3200);
-  }
-
-  // Prayer form — Firebase + WhatsApp
-  async function submitPrayer(e){
-    e.preventDefault();
-    const nombre   = document.getElementById('prayNombre').value.trim();
-    const correo   = document.getElementById('prayCorreo').value.trim();
-    const tipo     = document.getElementById('prayTipo').value;
-    const peticion = document.getElementById('prayPeticion').value.trim();
-
-    const btn = document.getElementById('btnPrayer');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
-    try {
-      // Llama a la función del módulo Firebase
-      if(window._savePrayer) {
-        await window._savePrayer(nombre, correo, tipo, peticion);
-      }
-      showToast('🙏 ¡Petición enviada! El pastor fue notificado.');
-      e.target.reset();
-    } catch(err) {
-      showToast('⚠️ Error al enviar. Intenta de nuevo.');
-    }
-
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Enviar Petición de Oración';
-  }
-
-  // Contact form
-  function submitContact(e){
-    e.preventDefault();
-    showToast('✉️ ¡Mensaje enviado! Te responderemos pronto.');
-    e.target.reset();
-  }
-
-  // Video tabs
-  function setTab(btn, type){
-    document.querySelectorAll('.video-tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const player = document.getElementById('livePlayer');
-    const labels = {
-      live: { icon:'fa-circle-play', text:'Ver Transmisión en Vivo', note:'Domingos 10:00 AM' },
-      sermon: { icon:'fa-book-open', text:'Ver Sermones y Predicaciones', note:'Archivo de mensajes' },
-      alabanza: { icon:'fa-music', text:'Ver Videos de Alabanza', note:'Playlist de adoración' },
-      ninos: { icon:'fa-child', text:'Contenido para Niños', note:'Escuela dominical virtual' }
-    };
-    const l = labels[type];
-    player.innerHTML = `
-      <i class="fa-solid ${l.icon}" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
-      <p>${l.text}</p>
-      <small style="color:rgba(255,255,255,.5)">${l.note}</small>
-    `;
-  }
-
-  // Load live video (replace with actual YouTube channel/video ID)
-  function loadLive(){
-    const player = document.getElementById('livePlayer');
-    // Replace UCxxxxxxxxxxxxxxxx with your real YouTube channel ID
-    player.outerHTML = '<iframe src="https://www.youtube.com/embed/live_stream?channel=UCxxxxxxxxxxxxxxxx&autoplay=1" allowfullscreen allow="autoplay"></iframe>';
-  }
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // VERSÍCULO DEL DÍA — Sistema multi-API confiable
-  //
-  // API 1: jsDelivr CDN (wldeh/bible-api) — RVR1960 en español, CORS abierto
-  // API 2: bible-api.com — rv1960 en español, CORS abierto
-  // Fallback: Banco local RVR1960 — 200+ versículos en español, SIEMPRE disponible
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // Calendario YouVersion 2026 — passage_id por día del año
-  const YV_CALENDAR = {
-    1:'JHN.1.1',2:'JHN.1.14',3:'JHN.3.16',4:'JHN.3.17',5:'JHN.6.35',
-    6:'JHN.8.12',7:'JHN.10.10',8:'JHN.10.11',9:'JHN.11.25',10:'JHN.14.6',
-    11:'JHN.14.27',12:'JHN.15.5',13:'JHN.15.13',14:'JHN.16.33',15:'ROM.1.16',
-    16:'ROM.3.23',17:'ROM.5.8',18:'ROM.6.23',19:'ROM.8.1',20:'ROM.8.28',
-    21:'ROM.8.38',22:'ROM.10.9',23:'ROM.12.1',24:'ROM.12.2',25:'ROM.15.13',
-    26:'1CO.1.18',27:'1CO.13.4',28:'1CO.13.13',29:'1CO.15.57',30:'1CO.16.14',
-    31:'2CO.5.17',32:'2CO.5.21',33:'2CO.9.8',34:'2CO.12.9',35:'GAL.2.20',
-    36:'GAL.5.22',37:'GAL.6.2',38:'GAL.6.9',39:'EPH.2.8',40:'EPH.2.10',
-    41:'EPH.4.32',42:'EPH.6.10',43:'PHP.1.6',44:'PHP.2.3',45:'PHP.4.6',
-    46:'PHP.4.7',47:'PHP.4.13',48:'PHP.4.19',49:'COL.3.15',50:'COL.3.17',
-    51:'COL.3.23',52:'1TH.5.16',53:'1TH.5.17',54:'1TH.5.18',55:'2TI.1.7',
-    56:'2TI.3.16',57:'HEB.11.1',58:'HEB.12.1',59:'HEB.13.8',60:'JAS.1.2',
-    61:'JAS.1.5',62:'JAS.1.17',63:'JAS.4.7',64:'1PE.5.7',65:'1JN.1.9',
-    66:'1JN.3.1',67:'1JN.4.7',68:'1JN.4.19',69:'REV.21.4',70:'REV.22.20',
-    71:'PSA.1.1',72:'PSA.16.11',73:'PSA.19.1',74:'PSA.23.1',75:'PSA.27.1',
-    76:'PSA.34.8',77:'PSA.37.4',78:'PSA.46.1',79:'PSA.46.10',80:'PSA.55.22',
-    81:'PSA.91.1',82:'PSA.100.5',83:'PSA.103.12',84:'PSA.107.1',85:'PSA.118.24',
-    86:'PSA.119.9',87:'PSA.119.11',88:'PSA.119.105',89:'PSA.121.1',90:'PSA.139.14',
-    91:'PSA.145.18',92:'PRO.3.5',93:'PRO.3.6',94:'PRO.17.17',95:'PRO.22.6',
-    96:'ISA.40.28',97:'ISA.40.29',98:'ISA.40.31',99:'ISA.41.10',100:'ISA.43.2',
-    101:'ISA.43.19',102:'ISA.53.5',103:'ISA.53.6',104:'ISA.55.8',105:'ISA.55.9',
-    106:'JER.29.11',107:'JER.31.3',108:'LAM.3.22',109:'LAM.3.23',110:'MIC.6.8',
-    111:'ZEP.3.17',112:'MAL.3.10',113:'MAT.5.3',114:'MAT.5.4',115:'MAT.5.5',
-    116:'MAT.5.6',117:'MAT.5.7',118:'MAT.5.8',119:'MAT.5.9',120:'MAT.5.10',
-    121:'MAT.5.14',122:'MAT.5.16',123:'MAT.6.9',124:'MAT.6.25',125:'MAT.6.33',
-    126:'MAT.11.28',127:'MAT.11.29',128:'MAT.22.37',129:'MAT.28.19',130:'MAT.28.20',
-    131:'MRK.10.45',132:'MRK.12.30',133:'LUK.1.37',134:'LUK.6.27',135:'LUK.6.31',
-    136:'LUK.6.38',137:'LUK.10.27',138:'LUK.18.27',139:'ACT.1.8',140:'ACT.2.38',
-    141:'ACT.4.12',142:'ACT.16.31',143:'ROM.1.17',144:'ROM.4.20',145:'ROM.4.21',
-    146:'ROM.5.1',147:'ROM.5.3',148:'ROM.5.4',149:'ROM.5.5',150:'ROM.6.4',
-    151:'ROM.8.14',152:'ROM.8.17',153:'ROM.8.26',154:'ROM.8.37',155:'ROM.10.17',
-    156:'ROM.11.36',157:'ROM.13.8',158:'ROM.14.8',159:'1CO.1.30',160:'1CO.2.9',
-    161:'1CO.3.16',162:'1CO.6.19',163:'1CO.6.20',164:'1CO.10.13',165:'1CO.12.27',
-    166:'1CO.15.3',167:'1CO.15.4',168:'2CO.1.3',169:'2CO.1.4',170:'2CO.3.17',
-    171:'2CO.3.18',172:'2CO.4.16',173:'2CO.4.17',174:'2CO.4.18',175:'2CO.8.9',
-    176:'2CO.10.5',177:'GAL.3.26',178:'GAL.3.27',179:'GAL.3.28',180:'GAL.5.1',
-    181:'GAL.5.13',182:'EPH.1.7',183:'EPH.3.16',184:'EPH.3.17',185:'EPH.3.18',
-    186:'EPH.3.19',187:'EPH.3.20',188:'EPH.4.2',189:'EPH.4.3',190:'EPH.5.1',
-    191:'EPH.5.2',192:'EPH.6.11',193:'EPH.6.12',194:'PHP.1.29',195:'PHP.3.13',
-    196:'PHP.3.14',197:'PHP.3.20',198:'PHP.4.4',199:'PHP.4.5',200:'PHP.4.8',
-    201:'COL.1.15',202:'COL.1.16',203:'COL.1.17',204:'COL.2.6',205:'COL.2.7',
-    206:'COL.3.1',207:'COL.3.2',208:'COL.3.3',209:'COL.3.12',210:'COL.3.14',
-    211:'1TH.4.13',212:'1TH.4.14',213:'1TH.5.11',214:'1TH.5.14',215:'2TH.3.3',
-    216:'1TI.6.6',217:'1TI.6.12',218:'HEB.4.12',219:'HEB.4.15',220:'HEB.4.16',
-    221:'HEB.6.19',222:'HEB.10.23',223:'HEB.10.24',224:'HEB.10.25',225:'HEB.11.6',
-    226:'JAS.1.3',227:'JAS.1.4',228:'JAS.1.19',229:'JAS.1.22',230:'JAS.2.17',
-    231:'JAS.5.16',232:'1PE.1.3',233:'1PE.1.23',234:'1PE.2.9',235:'1PE.2.24',
-    236:'1PE.3.15',237:'1PE.4.8',238:'1PE.5.6',239:'2PE.1.3',240:'2PE.3.9',
-    241:'1JN.2.1',242:'1JN.2.15',243:'1JN.3.18',244:'1JN.4.4',245:'1JN.5.4',
-    246:'REV.1.8',247:'REV.3.20',248:'REV.21.3',249:'REV.21.5',250:'REV.22.13',
-    251:'GEN.1.1',252:'GEN.1.27',253:'GEN.1.28',254:'GEN.2.24',255:'GEN.28.15',
-    256:'EXO.14.14',257:'EXO.15.2',258:'EXO.20.3',259:'DEU.6.4',260:'DEU.6.5',
-    261:'DEU.31.6',262:'DEU.31.8',263:'JOS.1.8',264:'JOS.1.9',265:'1SA.16.7',
-    266:'2SA.7.28',267:'2CH.7.14',268:'NEH.8.10',269:'JOB.19.25',270:'PSA.5.3',
-    271:'PSA.9.1',272:'PSA.27.4',273:'PSA.27.14',274:'PSA.29.11',275:'PSA.30.5',
-    276:'PSA.31.24',277:'PSA.32.8',278:'PSA.33.4',279:'PSA.34.1',280:'PSA.34.18',
-    281:'PSA.36.7',282:'PSA.37.7',283:'PSA.40.1',284:'PSA.40.2',285:'PSA.40.3',
-    286:'PSA.42.11',287:'PSA.51.10',288:'PSA.62.5',289:'PSA.63.1',290:'PSA.63.3',
-    291:'PSA.71.5',292:'PSA.84.11',293:'PSA.86.5',294:'PSA.90.12',295:'PSA.94.19',
-    296:'PSA.116.1',297:'PSA.116.2',298:'PSA.136.1',299:'PSA.143.10',300:'PSA.147.3',
-    301:'PRO.1.7',302:'PRO.4.23',303:'PRO.11.14',304:'PRO.16.9',305:'PRO.27.17',
-    306:'ECC.3.1',307:'ECC.3.11',308:'SNG.8.7',309:'ISA.9.6',310:'ISA.26.3',
-    311:'ISA.26.4',312:'ISA.40.8',313:'ISA.58.11',314:'ISA.61.1',315:'ISA.61.2',
-    316:'ISA.64.8',317:'JER.17.7',318:'JER.17.8',319:'EZK.36.26',320:'DAN.6.22',
-    321:'HOS.6.3',322:'JOL.2.28',323:'AMO.5.24',324:'HAB.3.17',325:'HAB.3.18',
-    326:'MAT.1.23',327:'MAT.2.11',328:'LUK.1.35',329:'LUK.2.10',330:'LUK.2.11',
-    331:'LUK.2.14',332:'LUK.2.52',333:'JHN.1.12',334:'JHN.4.24',335:'JHN.7.37',
-    336:'JHN.7.38',337:'JHN.14.1',338:'JHN.14.2',339:'JHN.14.3',340:'JHN.15.9',
-    341:'JHN.15.10',342:'JHN.17.3',343:'JHN.20.29',344:'ACT.17.27',345:'ACT.17.28',
-    346:'ROM.8.18',347:'ROM.15.4',348:'2CO.13.14',349:'TIT.2.11',350:'TIT.2.12',
-    351:'TIT.2.13',352:'HEB.9.15',353:'HEB.13.5',354:'HEB.13.6',355:'1JN.4.9',
-    356:'1JN.4.10',357:'REV.5.12',358:'REV.5.13',359:'REV.7.17',360:'REV.19.6',
-    361:'REV.19.7',362:'REV.21.22',363:'REV.21.23',364:'REV.22.17',365:'REV.22.21',366:'JHN.3.16'
-  };
-
-  // Nombres libros español
-  const BOOK_ES = {
-    GEN:'Génesis',EXO:'Éxodo',LEV:'Levítico',NUM:'Números',DEU:'Deuteronomio',
-    JOS:'Josué',JDG:'Jueces',RUT:'Rut','1SA':'1 Samuel','2SA':'2 Samuel',
-    '1KI':'1 Reyes','2KI':'2 Reyes','1CH':'1 Crónicas','2CH':'2 Crónicas',
-    EZR:'Esdras',NEH:'Nehemías',EST:'Ester',JOB:'Job',PSA:'Salmos',
-    PRO:'Proverbios',ECC:'Eclesiastés',SNG:'Cantares',ISA:'Isaías',
-    JER:'Jeremías',LAM:'Lamentaciones',EZK:'Ezequiel',DAN:'Daniel',
-    HOS:'Oseas',JOL:'Joel',AMO:'Amós',OBA:'Abdías',JON:'Jonás',MIC:'Miqueas',
-    NAM:'Nahúm',HAB:'Habacuc',ZEP:'Sofonías',HAG:'Hageo',ZEC:'Zacarías',
-    MAL:'Malaquías',MAT:'Mateo',MRK:'Marcos',LUK:'Lucas',JHN:'Juan',
-    ACT:'Hechos',ROM:'Romanos','1CO':'1 Corintios','2CO':'2 Corintios',
-    GAL:'Gálatas',EPH:'Efesios',PHP:'Filipenses',COL:'Colosenses',
-    '1TH':'1 Tesalonicenses','2TH':'2 Tesalonicenses','1TI':'1 Timoteo',
-    '2TI':'2 Timoteo',TIT:'Tito',PHM:'Filemón',HEB:'Hebreos',JAS:'Santiago',
-    '1PE':'1 Pedro','2PE':'2 Pedro','1JN':'1 Juan','2JN':'2 Juan',
-    '3JN':'3 Juan',JUD:'Judas',REV:'Apocalipsis'
-  };
-
-  // Nombres libros para bible-api.com
-  const BOOK_BIBLEAPI = {
-    GEN:'genesis',EXO:'exodus',LEV:'leviticus',NUM:'numbers',DEU:'deuteronomy',
-    JOS:'joshua',JDG:'judges',RUT:'ruth','1SA':'1+samuel','2SA':'2+samuel',
-    '1KI':'1+kings','2KI':'2+kings','1CH':'1+chronicles','2CH':'2+chronicles',
-    EZR:'ezra',NEH:'nehemiah',EST:'esther',JOB:'job',PSA:'psalms',
-    PRO:'proverbs',ECC:'ecclesiastes',SNG:'song+of+solomon',ISA:'isaiah',
-    JER:'jeremiah',LAM:'lamentations',EZK:'ezekiel',DAN:'daniel',
-    HOS:'hosea',JOL:'joel',AMO:'amos',OBA:'obadiah',JON:'jonah',MIC:'micah',
-    NAM:'nahum',HAB:'habakkuk',ZEP:'zephaniah',HAG:'haggai',ZEC:'zechariah',
-    MAL:'malachi',MAT:'matthew',MRK:'mark',LUK:'luke',JHN:'john',
-    ACT:'acts',ROM:'romans','1CO':'1+corinthians','2CO':'2+corinthians',
-    GAL:'galatians',EPH:'ephesians',PHP:'philippians',COL:'colossians',
-    '1TH':'1+thessalonians','2TH':'2+thessalonians','1TI':'1+timothy',
-    '2TI':'2+timothy',TIT:'titus',PHM:'philemon',HEB:'hebrews',
-    JAS:'james','1PE':'1+peter','2PE':'2+peter','1JN':'1+john',
-    '2JN':'2+john','3JN':'3+john',JUD:'jude',REV:'revelation'
-  };
-
-  // Nombres libros para jsDelivr/wldeh (lowercase, sin números pegados)
-  const BOOK_JSD = {
-    GEN:'genesis',EXO:'exodus',LEV:'leviticus',NUM:'numbers',DEU:'deuteronomy',
-    JOS:'joshua',JDG:'judges',RUT:'ruth','1SA':'1samuel','2SA':'2samuel',
-    '1KI':'1kings','2KI':'2kings','1CH':'1chronicles','2CH':'2chronicles',
-    EZR:'ezra',NEH:'nehemiah',EST:'esther',JOB:'job',PSA:'psalms',
-    PRO:'proverbs',ECC:'ecclesiastes',SNG:'songofsolomon',ISA:'isaiah',
-    JER:'jeremiah',LAM:'lamentations',EZK:'ezekiel',DAN:'daniel',
-    HOS:'hosea',JOL:'joel',AMO:'amos',OBA:'obadiah',JON:'jonah',MIC:'micah',
-    NAM:'nahum',HAB:'habakkuk',ZEP:'zephaniah',HAG:'haggai',ZEC:'zechariah',
-    MAL:'malachi',MAT:'matthew',MRK:'mark',LUK:'luke',JHN:'john',
-    ACT:'acts',ROM:'romans','1CO':'1corinthians','2CO':'2corinthians',
-    GAL:'galatians',EPH:'ephesians',PHP:'philippians',COL:'colossians',
-    '1TH':'1thessalonians','2TH':'2thessalonians','1TI':'1timothy',
-    '2TI':'2timothy',TIT:'titus',PHM:'philemon',HEB:'hebrews',
-    JAS:'james','1PE':'1peter','2PE':'2peter','1JN':'1john',
-    '2JN':'2john','3JN':'3john',JUD:'jude',REV:'revelation'
-  };
-
-  // Texto local RVR1960 — fallback sin red
-  const VS_LOCAL = {
-    'JHN.3.16':'Porque de tal manera amó Dios al mundo, que ha dado a su Hijo unigénito, para que todo aquel que en él cree, no se pierda, mas tenga vida eterna.',
-    'PHP.4.13':'Todo lo puedo en Cristo que me fortalece.',
-    'PHP.4.6':'Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.',
-    'PHP.4.7':'Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.',
-    'ROM.8.28':'Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.',
-    'PSA.23.1':'Jehová es mi pastor; nada me faltará.',
-    'PSA.119.105':'Lámpara es a mis pies tu palabra, y lumbrera a mi camino.',
-    'PRO.3.5':'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.',
-    'PRO.3.6':'Reconócelo en todos tus caminos, y él enderezará tus veredas.',
-    'JER.29.11':'Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.',
-    'ISA.40.31':'Pero los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.',
-    'ISA.41.10':'No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.',
-    'MAT.6.33':'Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.',
-    'MAT.11.28':'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.',
-    'GAL.5.22':'Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe.',
-    'EPH.2.8':'Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios.',
-    'PSA.46.10':'Estad quietos, y conoced que yo soy Dios; seré exaltado entre las naciones; enaltecido seré en la tierra.',
-    'LAM.3.22':'Por la misericordia de Jehová no hemos sido consumidos, porque nunca decayeron sus misericordias.',
-    'LAM.3.23':'Nuevas son cada mañana; grande es tu fidelidad.',
-    '1CO.13.4':'El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece.',
-    '1CO.13.13':'Y ahora permanecen la fe, la esperanza y el amor, estos tres; pero el mayor de ellos es el amor.',
-    'HEB.11.1':'Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve.',
-    '1JN.4.7':'Amados, amémonos unos a otros; porque el amor es de Dios. Todo aquel que ama, es nacido de Dios, y conoce a Dios.',
-    '2TI.1.7':'Porque no nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio.',
-    'PSA.37.4':'Deléitate asimismo en Jehová, y él te concederá las peticiones de tu corazón.',
-    'JOS.1.9':'Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.',
-    'ZEP.3.17':'Jehová está en medio de ti, poderoso, él salvará; se gozará sobre ti con alegría, callará de amor, se regocijará sobre ti con cánticos.',
-    'ROM.5.8':'Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros.',
-    'ROM.6.23':'Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro.',
-    'PSA.91.1':'El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente.',
-    '1PE.5.7':'Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.',
-    'PSA.34.8':'Gustad, y ved que es bueno Jehová; dichoso el hombre que confía en él.',
-    'ROM.15.13':'Y el Dios de esperanza os llene de todo gozo y paz en el creer, para que abundéis en esperanza por el poder del Espíritu Santo.',
-    'COL.3.23':'Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres.',
-    'GAL.2.20':'Con Cristo estoy juntamente crucificado, y ya no vivo yo, mas vive Cristo en mí; y lo que ahora vivo en la carne, lo vivo en la fe del Hijo de Dios, el cual me amó y se entregó a sí mismo por mí.',
-    '1TH.5.16':'Estad siempre gozosos.',
-    '1TH.5.17':'Orad sin cesar.',
-    '1TH.5.18':'Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros en Cristo Jesús.',
-    'ROM.12.2':'No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento, para que comprobéis cuál sea la buena voluntad de Dios, agradable y perfecta.',
-    'PSA.27.1':'Jehová es mi luz y mi salvación; ¿de quién temeré? Jehová es la fortaleza de mi vida; ¿de quién me he de atemorizar?',
-    'ISA.43.2':'Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán. Cuando pases por el fuego, no te quemarás, ni la llama arderá en ti.',
-    'MAT.28.19':'Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del Padre, y del Hijo, y del Espíritu Santo.',
-    'ACT.1.8':'pero recibiréis poder, cuando haya venido sobre vosotros el Espíritu Santo, y me seréis testigos en Jerusalén, en toda Judea, en Samaria, y hasta lo último de la tierra.',
-    'LUK.1.37':'porque nada hay imposible para Dios.',
-    'PSA.118.24':'Este es el día que hizo Jehová; nos gozaremos y alegraremos en él.',
-    'ROM.8.38':'Por lo cual estoy seguro de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir, ni lo alto, ni lo profundo, ni ninguna otra cosa creada nos podrá separar del amor de Dios, que es en Cristo Jesús Señor nuestro.',
-    'PSA.100.5':'Porque Jehová es bueno; para siempre es su misericordia, y su verdad por todas las generaciones.'
-  };
-
-  // ── Helpers ──────────────────────────────────────────────────────────────
-  function getDayOfYear() {
-    const now   = new Date();
-    const start = new Date(now.getFullYear(), 0, 0);
-    return Math.floor((now - start) / 86400000);
-  }
-
-  function parsePid(pid) {
-    const base  = pid.split('-')[0];
-    const parts = base.split('.');
-    return { book: parts[0], chapter: parts[1], verse: parts[2] };
-  }
-
-  function pidToRef(pid) {
-    const p = parsePid(pid);
-    return `${BOOK_ES[p.book] || p.book} ${p.chapter}:${p.verse}`;
-  }
-
-  function setVersiculoBanner(text, ref, pid) {
-    const el    = document.getElementById('vsBannerQuote');
-    const vsEl  = document.getElementById('vsText');
-    const refEl = document.getElementById('vsRef');
-    const link  = document.getElementById('vsYouVersionLink');
-    if (!el || !vsEl || !refEl) return;
-    el.style.opacity = '0';
-    setTimeout(() => {
-      vsEl.textContent  = '\u201C' + text.trim().replace(/\s+/g, ' ') + '\u201D';
-      refEl.textContent = '\u2014 ' + ref + ' (RVR1960)';
-      if (link) link.href = `https://www.bible.com/bible/128/${pid}.RVR1960`;
-      el.style.opacity = '1';
-    }, 300);
-  }
-
-  async function fetchWithTimeout(url, ms) {
-    const ctrl = new AbortController();
-    const t    = setTimeout(() => ctrl.abort(), ms);
-    try {
-      const r = await fetch(url, { signal: ctrl.signal });
-      clearTimeout(t);
-      return r;
-    } catch(e) { clearTimeout(t); throw e; }
-  }
-
-  // ══ Banco local RVR1960 completo — cubre TODOS los días del calendario ════
-  // Se fusiona con VS_LOCAL para garantizar que NUNCA se muestre inglés.
-  const VS_EXTRA = {
-    'JHN.1.1':'En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios.',
-    'JHN.1.14':'Y aquel Verbo fue hecho carne, y habitó entre nosotros (y vimos su gloria, gloria como del unigénito del Padre), lleno de gracia y de verdad.',
-    'JHN.3.17':'Porque no envió Dios a su Hijo al mundo para condenar al mundo, sino para que el mundo sea salvo por él.',
-    'JHN.6.35':'Jesús les dijo: Yo soy el pan de vida; el que a mí viene, nunca tendrá hambre; y el que en mí cree, no tendrá sed jamás.',
-    'JHN.8.12':'Otra vez Jesús les habló, diciendo: Yo soy la luz del mundo; el que me sigue, no andará en tinieblas, sino que tendrá la luz de la vida.',
-    'JHN.10.10':'El ladrón no viene sino para hurtar y matar y destruir; yo he venido para que tengan vida, y para que la tengan en abundancia.',
-    'JHN.10.11':'Yo soy el buen pastor; el buen pastor su vida da por las ovejas.',
-    'JHN.11.25':'Le dijo Jesús: Yo soy la resurrección y la vida; el que cree en mí, aunque esté muerto, vivirá.',
-    'JHN.14.6':'Jesús le dijo: Yo soy el camino, y la verdad, y la vida; nadie viene al Padre, sino por mí.',
-    'JHN.14.27':'La paz os dejo, mi paz os doy; yo no os la doy como el mundo la da. No se turbe vuestro corazón, ni tenga miedo.',
-    'JHN.15.5':'Yo soy la vid, vosotros los pámpanos; el que permanece en mí, y yo en él, éste lleva mucho fruto; porque separados de mí nada podéis hacer.',
-    'JHN.15.13':'Nadie tiene mayor amor que este, que uno ponga su vida por sus amigos.',
-    'JHN.16.33':'Estas cosas os he hablado para que en mí tengáis paz. En el mundo tendréis aflicción; pero confiad, yo he vencido al mundo.',
-    'ROM.1.16':'Porque no me avergüenzo del evangelio, porque es poder de Dios para salvación a todo aquel que cree; al judío primeramente, y también al griego.',
-    'ROM.3.23':'por cuanto todos pecaron, y están destituidos de la gloria de Dios.',
-    'ROM.5.8':'Mas Dios muestra su amor para con nosotros, en que siendo aún pecadores, Cristo murió por nosotros.',
-    'ROM.6.23':'Porque la paga del pecado es muerte, mas la dádiva de Dios es vida eterna en Cristo Jesús Señor nuestro.',
-    'ROM.8.1':'Ahora, pues, ninguna condenación hay para los que están en Cristo Jesús.',
-    'ROM.8.28':'Y sabemos que a los que aman a Dios, todas las cosas les ayudan a bien, esto es, a los que conforme a su propósito son llamados.',
-    'ROM.8.38':'Por lo cual estoy seguro de que ni la muerte, ni la vida, ni ángeles, ni principados, ni potestades, ni lo presente, ni lo por venir nos podrá separar del amor de Dios.',
-    'ROM.10.9':'que si confesares con tu boca que Jesús es el Señor, y creyeres en tu corazón que Dios le levantó de los muertos, serás salvo.',
-    'ROM.12.1':'Así que, hermanos, os ruego por las misericordias de Dios, que presentéis vuestros cuerpos en sacrificio vivo, santo, agradable a Dios, que es vuestro culto racional.',
-    'ROM.12.2':'No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento.',
-    'ROM.15.13':'Y el Dios de esperanza os llene de todo gozo y paz en el creer, para que abundéis en esperanza por el poder del Espíritu Santo.',
-    '1CO.1.18':'Porque la palabra de la cruz es locura a los que se pierden; pero a los que se salvan, esto es, a nosotros, es poder de Dios.',
-    '1CO.13.4':'El amor es sufrido, es benigno; el amor no tiene envidia, el amor no es jactancioso, no se envanece.',
-    '1CO.13.13':'Y ahora permanecen la fe, la esperanza y el amor, estos tres; pero el mayor de ellos es el amor.',
-    '1CO.15.57':'Mas gracias sean dadas a Dios, que nos da la victoria por medio de nuestro Señor Jesucristo.',
-    '1CO.16.14':'Todas vuestras cosas sean hechas con amor.',
-    '2CO.5.17':'De modo que si alguno está en Cristo, nueva criatura es; las cosas viejas pasaron; he aquí todas son hechas nuevas.',
-    '2CO.5.21':'Al que no conoció pecado, por nosotros lo hizo pecado, para que nosotros fuésemos hechos justicia de Dios en él.',
-    '2CO.9.8':'Y poderoso es Dios para hacer que abunde en vosotros toda gracia, a fin de que, teniendo siempre en todas las cosas todo lo suficiente, abundéis para toda buena obra.',
-    '2CO.12.9':'Y me ha dicho: Bástate mi gracia; porque mi poder se perfecciona en la debilidad.',
-    'GAL.2.20':'Con Cristo estoy juntamente crucificado, y ya no vivo yo, mas vive Cristo en mí.',
-    'GAL.5.22':'Mas el fruto del Espíritu es amor, gozo, paz, paciencia, benignidad, bondad, fe.',
-    'GAL.6.2':'Sobrellevad los unos las cargas de los otros, y cumplid así la ley de Cristo.',
-    'GAL.6.9':'No nos cansemos, pues, de hacer bien; porque a su tiempo segaremos, si no desmayamos.',
-    'EPH.2.8':'Porque por gracia sois salvos por medio de la fe; y esto no de vosotros, pues es don de Dios.',
-    'EPH.2.10':'Porque somos hechura suya, creados en Cristo Jesús para buenas obras.',
-    'EPH.4.32':'Antes sed benignos unos con otros, misericordiosos, perdonándoos unos a otros, como Dios también os perdonó a vosotros en Cristo.',
-    'EPH.6.10':'Por lo demás, hermanos míos, fortaleceos en el Señor, y en el poder de su fuerza.',
-    'PHP.1.6':'estando persuadido de esto, que el que comenzó en vosotros la buena obra, la perfeccionará hasta el día de Jesucristo.',
-    'PHP.2.3':'Nada hagáis por contienda o por vanagloria; antes bien con humildad, estimando cada uno a los demás como superiores a él mismo.',
-    'PHP.4.6':'Por nada estéis afanosos, sino sean conocidas vuestras peticiones delante de Dios en toda oración y ruego, con acción de gracias.',
-    'PHP.4.7':'Y la paz de Dios, que sobrepasa todo entendimiento, guardará vuestros corazones y vuestros pensamientos en Cristo Jesús.',
-    'PHP.4.13':'Todo lo puedo en Cristo que me fortalece.',
-    'PHP.4.19':'Mi Dios, pues, suplirá todo lo que os falta conforme a sus riquezas en gloria en Cristo Jesús.',
-    'COL.3.15':'Y la paz de Dios gobierne en vuestros corazones, a la que asimismo fuisteis llamados en un solo cuerpo; y sed agradecidos.',
-    'COL.3.17':'Y todo lo que hacéis, sea de palabra o de hecho, hacedlo todo en el nombre del Señor Jesús.',
-    'COL.3.23':'Y todo lo que hagáis, hacedlo de corazón, como para el Señor y no para los hombres.',
-    '1TH.5.16':'Estad siempre gozosos.',
-    '1TH.5.17':'Orad sin cesar.',
-    '1TH.5.18':'Dad gracias en todo, porque esta es la voluntad de Dios para con vosotros en Cristo Jesús.',
-    '2TI.1.7':'Porque no nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio.',
-    '2TI.3.16':'Toda la Escritura es inspirada por Dios, y útil para enseñar, para redargüir, para corregir, para instruir en justicia.',
-    'HEB.11.1':'Es, pues, la fe la certeza de lo que se espera, la convicción de lo que no se ve.',
-    'HEB.12.1':'Por tanto, nosotros también, teniendo en derredor nuestro tan grande nube de testigos, corramos con paciencia la carrera que tenemos por delante.',
-    'HEB.13.8':'Jesucristo es el mismo ayer, y hoy, y por los siglos.',
-    'JAS.1.2':'Hermanos míos, tened por sumo gozo cuando os halléis en diversas pruebas.',
-    'JAS.1.5':'Y si alguno de vosotros tiene falta de sabiduría, pídala a Dios, el cual da a todos abundantemente y sin reproche, y le será dada.',
-    'JAS.1.17':'Toda buena dádiva y todo don perfecto desciende de lo alto, del Padre de las luces.',
-    'JAS.4.7':'Someteos, pues, a Dios; resistid al diablo, y huirá de vosotros.',
-    '1PE.5.7':'Echando toda vuestra ansiedad sobre él, porque él tiene cuidado de vosotros.',
-    '1JN.1.9':'Si confesamos nuestros pecados, él es fiel y justo para perdonar nuestros pecados, y limpiarnos de toda maldad.',
-    '1JN.3.1':'Mirad cuál amor nos ha dado el Padre, para que seamos llamados hijos de Dios.',
-    '1JN.4.7':'Amados, amémonos unos a otros; porque el amor es de Dios. Todo aquel que ama, es nacido de Dios, y conoce a Dios.',
-    '1JN.4.19':'Nosotros le amamos a él, porque él nos amó primero.',
-    'REV.21.4':'Enjugará Dios toda lágrima de los ojos de ellos; y ya no habrá muerte, ni habrá más llanto, ni clamor, ni dolor.',
-    'REV.22.20':'El que da testimonio de estas cosas dice: Ciertamente vengo en breve. Amén; sí, ven, Señor Jesús.',
-    'PSA.1.1':'Bienaventurado el varón que no anduvo en consejo de malos, ni estuvo en camino de pecadores, ni en silla de escarnecedores se ha sentado.',
-    'PSA.16.11':'Me mostrarás la senda de la vida; en tu presencia hay plenitud de gozo; delicias a tu diestra para siempre.',
-    'PSA.19.1':'Los cielos cuentan la gloria de Dios, y el firmamento anuncia la obra de sus manos.',
-    'PSA.23.1':'Jehová es mi pastor; nada me faltará.',
-    'PSA.27.1':'Jehová es mi luz y mi salvación; ¿de quién temeré? Jehová es la fortaleza de mi vida; ¿de quién me he de atemorizar?',
-    'PSA.34.8':'Gustad, y ved que es bueno Jehová; dichoso el hombre que confía en él.',
-    'PSA.37.4':'Deléitate asimismo en Jehová, y él te concederá las peticiones de tu corazón.',
-    'PSA.46.1':'Dios es nuestro amparo y fortaleza, nuestro pronto auxilio en las tribulaciones.',
-    'PSA.46.10':'Estad quietos, y conoced que yo soy Dios; seré exaltado entre las naciones; enaltecido seré en la tierra.',
-    'PSA.55.22':'Echa sobre Jehová tu carga, y él te sustentará; no dejará para siempre caído al justo.',
-    'PSA.91.1':'El que habita al abrigo del Altísimo morará bajo la sombra del Omnipotente.',
-    'PSA.100.5':'Porque Jehová es bueno; para siempre es su misericordia, y su verdad por todas las generaciones.',
-    'PSA.103.12':'Cuanto está lejos el oriente del occidente, hizo alejar de nosotros nuestras rebeliones.',
-    'PSA.107.1':'Alabad a Jehová, porque él es bueno; porque para siempre es su misericordia.',
-    'PSA.118.24':'Este es el día que hizo Jehová; nos gozaremos y alegraremos en él.',
-    'PSA.119.9':'¿Con qué limpiará el joven su camino? Con guardar tu palabra.',
-    'PSA.119.11':'En mi corazón he guardado tus dichos, para no pecar contra ti.',
-    'PSA.119.105':'Lámpara es a mis pies tu palabra, y lumbrera a mi camino.',
-    'PSA.121.1':'Alzaré mis ojos a los montes; ¿de dónde vendrá mi socorro?',
-    'PSA.139.14':'Te alabaré; porque formidables, maravillosas son tus obras; estoy maravillado, y mi alma lo sabe muy bien.',
-    'PSA.145.18':'Cercano está Jehová a todos los que le invocan, a todos los que le invocan de veras.',
-    'PRO.3.5':'Fíate de Jehová de todo tu corazón, y no te apoyes en tu propia prudencia.',
-    'PRO.3.6':'Reconócelo en todos tus caminos, y él enderezará tus veredas.',
-    'PRO.17.17':'En todo tiempo ama el amigo, y es como un hermano en tiempo de angustia.',
-    'PRO.22.6':'Instruye al niño en su camino, y aun cuando fuere viejo no se apartará de él.',
-    'ISA.40.28':'¿No has sabido, no has oído que el Dios eterno es Jehová, el cual creó los confines de la tierra? No se cansa ni se fatiga con cansancio.',
-    'ISA.40.29':'Él da esfuerzo al cansado, y multiplica las fuerzas al que no tiene ningunas.',
-    'ISA.40.31':'Pero los que esperan a Jehová tendrán nuevas fuerzas; levantarán alas como las águilas; correrán, y no se cansarán; caminarán, y no se fatigarán.',
-    'ISA.41.10':'No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios que te esfuerzo; siempre te ayudaré, siempre te sustentaré con la diestra de mi justicia.',
-    'ISA.43.2':'Cuando pases por las aguas, yo estaré contigo; y si por los ríos, no te anegarán.',
-    'ISA.43.19':'He aquí que yo hago cosa nueva; pronto saldrá a luz; ¿no la conoceréis? Otra vez abriré camino en el desierto, y ríos en la soledad.',
-    'ISA.53.5':'Mas él herido fue por nuestras rebeliones, molido por nuestros pecados; el castigo de nuestra paz fue sobre él, y por su llaga fuimos nosotros curados.',
-    'ISA.53.6':'Todos nosotros nos descarriamos como ovejas, cada cual se apartó por su camino; mas Jehová cargó en él el pecado de todos nosotros.',
-    'ISA.55.8':'Porque mis pensamientos no son vuestros pensamientos, ni vuestros caminos mis caminos, dijo Jehová.',
-    'ISA.55.9':'Como son más altos los cielos que la tierra, así son mis caminos más altos que vuestros caminos, y mis pensamientos más que vuestros pensamientos.',
-    'JER.29.11':'Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.',
-    'JER.31.3':'Jehová se manifestó a mí hace ya mucho tiempo, diciendo: Con amor eterno te he amado; por tanto, te prolongué mi misericordia.',
-    'LAM.3.22':'Por la misericordia de Jehová no hemos sido consumidos, porque nunca decayeron sus misericordias.',
-    'LAM.3.23':'Nuevas son cada mañana; grande es tu fidelidad.',
-    'MIC.6.8':'Oh hombre, él te ha declarado lo que es bueno, y qué pide Jehová de ti: solamente hacer justicia, y amar misericordia, y humillarte ante tu Dios.',
-    'ZEP.3.17':'Jehová está en medio de ti, poderoso, él salvará; se gozará sobre ti con alegría, callará de amor, se regocijará sobre ti con cánticos.',
-    'MAL.3.10':'Traed todos los diezmos al alfolí y haya alimento en mi casa; y probadme ahora en esto, dice Jehová de los ejércitos, si no os abriré las ventanas de los cielos.',
-    'MAT.5.3':'Bienaventurados los pobres en espíritu, porque de ellos es el reino de los cielos.',
-    'MAT.5.4':'Bienaventurados los que lloran, porque ellos recibirán consolación.',
-    'MAT.5.5':'Bienaventurados los mansos, porque ellos recibirán la tierra por heredad.',
-    'MAT.5.6':'Bienaventurados los que tienen hambre y sed de justicia, porque ellos serán saciados.',
-    'MAT.5.7':'Bienaventurados los misericordiosos, porque ellos alcanzarán misericordia.',
-    'MAT.5.8':'Bienaventurados los de limpio corazón, porque ellos verán a Dios.',
-    'MAT.5.9':'Bienaventurados los pacificadores, porque ellos serán llamados hijos de Dios.',
-    'MAT.5.10':'Bienaventurados los que padecen persecución por causa de la justicia, porque de ellos es el reino de los cielos.',
-    'MAT.5.14':'Vosotros sois la luz del mundo; una ciudad asentada sobre un monte no se puede esconder.',
-    'MAT.5.16':'Así alumbre vuestra luz delante de los hombres, para que vean vuestras buenas obras, y glorifiquen a vuestro Padre que está en los cielos.',
-    'MAT.6.9':'Vosotros, pues, oraréis así: Padre nuestro que estás en los cielos, santificado sea tu nombre.',
-    'MAT.6.25':'Por tanto os digo: No os afanéis por vuestra vida, qué habéis de comer o qué habéis de beber.',
-    'MAT.6.33':'Mas buscad primeramente el reino de Dios y su justicia, y todas estas cosas os serán añadidas.',
-    'MAT.11.28':'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.',
-    'MAT.11.29':'Llevad mi yugo sobre vosotros, y aprended de mí, que soy manso y humilde de corazón.',
-    'MAT.22.37':'Jesús le dijo: Amarás al Señor tu Dios con todo tu corazón, y con toda tu alma, y con toda tu mente.',
-    'MAT.28.19':'Por tanto, id, y haced discípulos a todas las naciones, bautizándolos en el nombre del Padre, y del Hijo, y del Espíritu Santo.',
-    'MAT.28.20':'enseñándoles que guarden todas las cosas que os he mandado; y he aquí yo estoy con vosotros todos los días, hasta el fin del mundo.',
-    'MRK.10.45':'porque el Hijo del Hombre no vino para ser servido, sino para servir, y para dar su vida en rescate por muchos.',
-    'MRK.12.30':'y amarás al Señor tu Dios con todo tu corazón, y con toda tu alma, y con toda tu mente y con todas tus fuerzas.',
-    'LUK.1.37':'porque nada hay imposible para Dios.',
-    'LUK.6.27':'Pero a vosotros los que oís, os digo: Amad a vuestros enemigos, haced bien a los que os aborrecen.',
-    'LUK.6.31':'Y como queréis que hagan los hombres con vosotros, así también haced vosotros con ellos.',
-    'LUK.6.38':'Dad, y se os dará; medida buena, apretada, remecida y rebosando darán en vuestro regazo.',
-    'LUK.10.27':'Y respondiendo él, dijo: Amarás al Señor tu Dios con todo tu corazón, y con toda tu alma, y con todas tus fuerzas, y con toda tu mente; y a tu prójimo como a ti mismo.',
-    'LUK.18.27':'Él les dijo: Lo que es imposible para los hombres, es posible para Dios.',
-    'ACT.1.8':'pero recibiréis poder, cuando haya venido sobre vosotros el Espíritu Santo, y me seréis testigos en Jerusalén, en toda Judea, en Samaria, y hasta lo último de la tierra.',
-    'ACT.2.38':'Pedro les dijo: Arrepentíos, y bautícese cada uno de vosotros en el nombre de Jesucristo para perdón de los pecados.',
-    'ACT.4.12':'Y en ningún otro hay salvación; porque no hay otro nombre bajo el cielo, dado a los hombres, en que podamos ser salvos.',
-    'ACT.16.31':'Ellos dijeron: Cree en el Señor Jesucristo, y serás salvo, tú y tu casa.',
-    'GEN.1.1':'En el principio creó Dios los cielos y la tierra.',
-    'GEN.1.27':'Y creó Dios al hombre a su imagen, a imagen de Dios lo creó; varón y hembra los creó.',
-    'GEN.1.28':'Y los bendijo Dios, y les dijo: Fructificad y multiplicaos; llenad la tierra, y sojuzgadla.',
-    'GEN.2.24':'Por tanto, dejará el hombre a su padre y a su madre, y se unirá a su mujer, y serán una sola carne.',
-    'GEN.28.15':'He aquí, yo estoy contigo, y te guardaré por dondequiera que fueres, y volveré a traerte a esta tierra.',
-    'EXO.14.14':'Jehová peleará por vosotros, y vosotros estaréis tranquilos.',
-    'EXO.15.2':'Jehová es mi fortaleza y mi cántico, y ha sido mi salvación.',
-    'EXO.20.3':'No tendrás dioses ajenos delante de mí.',
-    'DEU.6.4':'Oye, Israel: Jehová nuestro Dios, Jehová uno es.',
-    'DEU.6.5':'Y amarás a Jehová tu Dios de todo tu corazón, y de toda tu alma, y con todas tus fuerzas.',
-    'JOS.1.9':'Mira que te mando que te esfuerces y seas valiente; no temas ni desmayes, porque Jehová tu Dios estará contigo en dondequiera que vayas.',
-    'ROM.1.17':'Porque en el evangelio la justicia de Dios se revela por fe y para fe, como está escrito: Mas el justo por la fe vivirá.',
-    'ROM.4.20':'tampoco dudó, por incredulidad, de la promesa de Dios, sino que se fortaleció en fe.',
-    'ROM.4.21':'plenamente convencido de que era también poderoso para hacer todo lo que había prometido.',
-    'ROM.5.1':'Justificados, pues, por la fe, tenemos paz para con Dios por medio de nuestro Señor Jesucristo.',
-    'ROM.5.3':'Y no sólo esto, sino que también nos gloriamos en las tribulaciones, sabiendo que la tribulación produce paciencia.',
-    'ROM.5.4':'y la paciencia, prueba; y la prueba, esperanza.',
-    'ROM.5.5':'y la esperanza no avergüenza; porque el amor de Dios ha sido derramado en nuestros corazones por el Espíritu Santo que nos fue dado.',
-    'ROM.6.4':'Porque somos sepultados juntamente con él para muerte por el bautismo, a fin de que como Cristo resucitó de los muertos por la gloria del Padre, así también nosotros andemos en vida nueva.',
-    'ROM.8.14':'Porque todos los que son guiados por el Espíritu de Dios, éstos son hijos de Dios.',
-    'ROM.8.17':'y si hijos, también herederos; herederos de Dios y coherederos con Cristo.',
-    'ROM.8.26':'Y de igual manera el Espíritu nos ayuda en nuestra debilidad; pues qué hemos de pedir como conviene, no lo sabemos.',
-    'ROM.8.37':'Antes, en todas estas cosas somos más que vencedores por medio de aquel que nos amó.',
-    'ROM.10.17':'Así que la fe es por el oír, y el oír, por la palabra de Dios.',
-    'ROM.11.36':'Porque de él, y por él, y para él, son todas las cosas. A él sea la gloria por los siglos. Amén.',
-    'ROM.13.8':'No debáis a nadie nada, sino el amaros unos a otros; porque el que ama al prójimo, ha cumplido la ley.',
-    'ROM.14.8':'pues si vivimos, para el Señor vivimos; y si morimos, para el Señor morimos.',
-    '1CO.1.30':'Mas por él estáis vosotros en Cristo Jesús, el cual nos ha sido hecho por Dios sabiduría, justificación, santificación y redención.',
-    '1CO.2.9':'Antes bien, como está escrito: Cosas que ojo no vio, ni oído oyó, ni han subido en corazón de hombre, son las que Dios ha preparado para los que le aman.',
-    '1CO.3.16':'¿No sabéis que sois templo de Dios, y que el Espíritu de Dios mora en vosotros?',
-    '1CO.6.19':'¿O ignoráis que vuestro cuerpo es templo del Espíritu Santo, el cual está en vosotros, el cual tenéis de Dios?',
-    '1CO.6.20':'porque habéis sido comprados por precio; glorificad, pues, a Dios en vuestro cuerpo.',
-    '1CO.10.13':'No os ha sobrevenido ninguna tentación que no sea humana; pero fiel es Dios, que no os dejará ser tentados más de lo que podéis resistir.',
-    '1CO.12.27':'Vosotros, pues, sois el cuerpo de Cristo, y miembros cada uno en particular.',
-    '1CO.15.3':'Porque primeramente os he enseñado lo que asimismo recibí: Que Cristo murió por nuestros pecados, conforme a las Escrituras.',
-    '1CO.15.4':'y que fue sepultado, y que resucitó al tercer día, conforme a las Escrituras.',
-    '2CO.1.3':'Bendito sea el Dios y Padre de nuestro Señor Jesucristo, Padre de misericordias y Dios de toda consolación.',
-    '2CO.1.4':'el cual nos consuela en todas nuestras tribulaciones, para que podamos también nosotros consolar a los que están en cualquier tribulación.',
-    '2CO.3.17':'Porque el Señor es el Espíritu; y donde está el Espíritu del Señor, allí hay libertad.',
-    '2CO.3.18':'Por tanto, nosotros todos, mirando a cara descubierta como en un espejo la gloria del Señor, somos transformados de gloria en gloria en la misma imagen.',
-    '2CO.4.16':'Por tanto, no desmayamos; antes aunque este nuestro hombre exterior se va desgastando, el interior no obstante se renueva de día en día.',
-    '2CO.4.17':'Porque esta leve tribulación momentánea produce en nosotros un cada vez más excelente y eterno peso de gloria.',
-    '2CO.4.18':'no mirando nosotros las cosas que se ven, sino las que no se ven; pues las cosas que se ven son temporales, pero las que no se ven son eternas.',
-    '2CO.8.9':'Porque ya conocéis la gracia de nuestro Señor Jesucristo, que por amor a vosotros se hizo pobre, siendo rico, para que vosotros con su pobreza fueseis enriquecidos.',
-    '2CO.10.5':'y llevando cautivo todo pensamiento a la obediencia a Cristo.',
-    'GAL.3.26':'pues todos sois hijos de Dios por la fe en Cristo Jesús.',
-    'GAL.3.27':'porque todos los que habéis sido bautizados en Cristo, de Cristo estáis revestidos.',
-    'GAL.3.28':'Ya no hay judío ni griego; no hay esclavo ni libre; no hay varón ni mujer; porque todos vosotros sois uno en Cristo Jesús.',
-    'GAL.5.1':'Estad, pues, firmes en la libertad con que Cristo nos hizo libres, y no estéis otra vez sujetos al yugo de esclavitud.',
-    'GAL.5.13':'Porque vosotros, hermanos, a libertad fuisteis llamados; solamente que no uséis la libertad como ocasión para la carne, sino servíos por amor los unos a los otros.',
-    'EPH.1.7':'en quien tenemos redención por su sangre, el perdón de pecados según las riquezas de su gracia.',
-    'EPH.3.16':'para que os dé, conforme a las riquezas de su gloria, el ser fortalecidos con poder en el hombre interior por su Espíritu.',
-    'EPH.3.17':'para que habite Cristo por la fe en vuestros corazones.',
-    'EPH.3.18':'a fin de que seáis plenamente capaces de comprender con todos los santos cuál sea la anchura, la longitud, la profundidad y la altura.',
-    'EPH.3.19':'y de conocer el amor de Cristo, que excede a todo conocimiento, para que seáis llenos de toda la plenitud de Dios.',
-    'EPH.3.20':'Y a Aquel que es poderoso para hacer todas las cosas mucho más abundantemente de lo que pedimos o entendemos.',
-    'EPH.4.2':'con toda humildad y mansedumbre, soportándoos con paciencia los unos a los otros en amor.',
-    'EPH.4.3':'solícitos en guardar la unidad del Espíritu en el vínculo de la paz.',
-    'EPH.5.1':'Sed, pues, imitadores de Dios como hijos amados.',
-    'EPH.5.2':'y andad en amor, como también Cristo nos amó, y se entregó a sí mismo por nosotros.',
-    'EPH.6.11':'Vestíos de toda la armadura de Dios, para que podáis estar firmes contra las asechanzas del diablo.',
-    'EPH.6.12':'Porque no tenemos lucha contra sangre y carne, sino contra principados, contra potestades, contra los gobernadores de las tinieblas de este siglo.',
-    'PHP.1.29':'Porque a vosotros os es concedido a causa de Cristo, no sólo que creáis en él, sino también que padezcáis por él.',
-    'PHP.3.13':'hermanos, yo mismo no pretendo haberlo ya alcanzado; pero una cosa hago: olvidando ciertamente lo que queda atrás, y extendiéndome a lo que está delante.',
-    'PHP.3.14':'prosigo a la meta, al premio del supremo llamamiento de Dios en Cristo Jesús.',
-    'PHP.3.20':'Mas nuestra ciudadanía está en los cielos, de donde también esperamos al Salvador, al Señor Jesucristo.',
-    'PHP.4.4':'Regocijaos en el Señor siempre. Otra vez digo: ¡Regocijaos!',
-    'PHP.4.5':'Vuestra gentileza sea conocida de todos los hombres. El Señor está cerca.',
-    'PHP.4.8':'todo lo que es verdadero, todo lo honesto, todo lo justo, todo lo puro, todo lo amable, todo lo que es de buen nombre; si hay virtud alguna, si algo digno de alabanza, en esto pensad.',
-    'COL.1.15':'Él es la imagen del Dios invisible, el primogénito de toda creación.',
-    'COL.1.16':'Porque en él fueron creadas todas las cosas, las que hay en los cielos y las que hay en la tierra, visibles e invisibles.',
-    'COL.1.17':'y él es antes de todas las cosas, y todas las cosas en él subsisten.',
-    'COL.2.6':'Por tanto, de la manera que habéis recibido al Señor Jesucristo, andad en él.',
-    'COL.2.7':'arraigados y sobreedificados en él, y confirmados en la fe, así como habéis sido enseñados, abundando en acciones de gracias.',
-    'COL.3.1':'Si, pues, habéis resucitado con Cristo, buscad las cosas de arriba, donde está Cristo sentado a la diestra de Dios.',
-    'COL.3.2':'Poned la mira en las cosas de arriba, no en las de la tierra.',
-    'COL.3.3':'Porque habéis muerto, y vuestra vida está escondida con Cristo en Dios.',
-    'COL.3.12':'Vestíos, pues, como escogidos de Dios, santos y amados, de entrañable misericordia, de benignidad, de humildad, de mansedumbre, de paciencia.',
-    'COL.3.14':'Y sobre todas estas cosas vestíos de amor, que es el vínculo perfecto.',
-    '1TH.4.13':'Tampoco queremos, hermanos, que ignoréis acerca de los que duermen, para que no os entristezcáis como los otros que no tienen esperanza.',
-    '1TH.4.14':'Porque si creemos que Jesús murió y resucitó, así también traerá Dios con Jesús a los que durmieron en él.',
-    '1TH.5.11':'Por lo cual, animaos unos a otros, y edificaos unos a otros, así como lo hacéis.',
-    '1TH.5.14':'También os rogamos, hermanos, que amonestéis a los ociosos, que alentéis a los de poco ánimo, que sostengáis a los débiles, que seáis pacientes para con todos.',
-    '2TH.3.3':'Pero fiel es el Señor, que os afirmará y guardará del mal.',
-    '1TI.6.6':'Pero gran ganancia es la piedad acompañada de contentamiento.',
-    '1TI.6.12':'Pelea la buena batalla de la fe, echa mano de la vida eterna, a la cual asimismo fuiste llamado.',
-    'HEB.4.12':'Porque la palabra de Dios es viva y eficaz, y más cortante que toda espada de dos filos.',
-    'HEB.4.15':'Porque no tenemos un sumo sacerdote que no pueda compadecerse de nuestras debilidades, sino uno que fue tentado en todo según nuestra semejanza, pero sin pecado.',
-    'HEB.4.16':'Acerquémonos, pues, confiadamente al trono de la gracia, para alcanzar misericordia y hallar gracia para el oportuno socorro.',
-    'HEB.6.19':'La cual tenemos como segura y firme ancla del alma, y que penetra hasta dentro del velo.',
-    'HEB.10.23':'Mantengamos firme, sin fluctuar, la profesión de nuestra esperanza, porque fiel es el que prometió.',
-    'HEB.10.24':'Y considerémonos unos a otros para estimularnos al amor y a las buenas obras.',
-    'HEB.10.25':'no dejando de reunirnos, como algunos tienen por costumbre, sino exhortándonos; y tanto más, cuanto veis que aquel día se acerca.',
-    'HEB.11.6':'Pero sin fe es imposible agradar a Dios; porque es necesario que el que se acerca a Dios crea que le hay.',
-    'JAS.1.3':'sabiendo que la prueba de vuestra fe produce paciencia.',
-    'JAS.1.4':'Mas tenga la paciencia su obra completa, para que seáis perfectos y cabales, sin que os falte cosa alguna.',
-    'JAS.1.19':'Por esto, mis amados hermanos, todo hombre sea pronto para oír, tardo para hablar, tardo para airarse.',
-    'JAS.1.22':'Pero sed hacedores de la palabra, y no tan solamente oidores, engañándoos a vosotros mismos.',
-    'JAS.2.17':'Así también la fe, si no tiene obras, es muerta en sí misma.',
-    'JAS.5.16':'Confesaos vuestras ofensas unos a otros, y orad unos por otros, para que seáis sanados.',
-    '1PE.1.3':'Bendito el Dios y Padre de nuestro Señor Jesucristo, que según su grande misericordia nos hizo renacer para una esperanza viva.',
-    '1PE.1.23':'siendo renacidos, no de simiente corruptible, sino de incorruptible, por la palabra de Dios que vive y permanece para siempre.',
-    '1PE.2.9':'Mas vosotros sois linaje escogido, real sacerdocio, nación santa, pueblo adquirido por Dios.',
-    '1PE.2.24':'quien llevó él mismo nuestros pecados en su cuerpo sobre el madero, para que nosotros, estando muertos a los pecados, vivamos a la justicia; y por cuya herida fuisteis sanados.',
-    '1PE.3.15':'sino santificad a Dios el Señor en vuestros corazones, y estad siempre preparados para presentar defensa con mansedumbre y reverencia ante todo el que os demande razón de la esperanza que hay en vosotros.',
-    '1PE.4.8':'Y ante todo, tened entre vosotros ferviente amor; porque el amor cubrirá multitud de pecados.',
-    '1PE.5.6':'Humillaos, pues, bajo la poderosa mano de Dios, para que él os exalte cuando fuere tiempo.',
-    '2PE.1.3':'Como todas las cosas que pertenecen a la vida y a la piedad nos han sido dadas por su divino poder.',
-    '2PE.3.9':'El Señor no retarda su promesa, según algunos la tienen por tardanza, sino que es paciente para con nosotros, no queriendo que ninguno perezca.',
-    '1JN.2.1':'Hijitos míos, estas cosas os escribo para que no pequéis; y si alguno hubiere pecado, abogado tenemos para con el Padre, a Jesucristo el justo.',
-    '1JN.2.15':'No améis al mundo, ni las cosas que están en el mundo. Si alguno ama al mundo, el amor del Padre no está en él.',
-    '1JN.3.18':'Hijitos míos, no amemos de palabra ni de lengua, sino de hecho y en verdad.',
-    '1JN.4.4':'Hijitos, vosotros sois de Dios, y los habéis vencido; porque mayor es el que está en vosotros, que el que está en el mundo.',
-    '1JN.5.4':'Porque todo lo que es nacido de Dios vence al mundo; y esta es la victoria que ha vencido al mundo, nuestra fe.',
-    'REV.1.8':'Yo soy el Alfa y la Omega, principio y fin, dice el Señor, el que es y que era y que ha de venir, el Todopoderoso.',
-    'REV.3.20':'He aquí, yo estoy a la puerta y llamo; si alguno oye mi voz y abre la puerta, entraré a él, y cenaré con él, y él conmigo.',
-    'REV.21.3':'Y oí una gran voz del cielo que decía: He aquí el tabernáculo de Dios con los hombres, y él morará con ellos.',
-    'REV.21.5':'Y el que estaba sentado en el trono dijo: He aquí, yo hago nuevas todas las cosas.',
-    'REV.22.13':'Yo soy el Alfa y la Omega, el principio y el fin, el primero y el último.'
-  };
-
-  // Banco unificado: VS_EXTRA cubre lo que VS_LOCAL no tiene
-  const VS_BANCO = Object.assign({}, VS_EXTRA, VS_LOCAL);
-
-  async function loadVersiculoDelDia() {
-    const day = getDayOfYear();
-    const pid = YV_CALENDAR[day] || YV_CALENDAR[((day-1)%365)+1] || 'JHN.3.16';
-    const { book, chapter, verse } = parsePid(pid);
-    const ref = pidToRef(pid);
-
-    // ══ PRIMERO: intentar cargar desde las APIs en español ══════════════════
-
-    // API 1: jsDelivr CDN — wldeh/bible-api RVR1960 (CORS abierto, 150B req/mes)
-    try {
-      const jsdBook = BOOK_JSD[book] || book.toLowerCase();
-      const url1 = `https://cdn.jsdelivr.net/gh/wldeh/bible-api/bibles/es-rvr1960/books/${jsdBook}/chapters/${chapter}/verses/${verse}.json`;
-      const r1 = await fetchWithTimeout(url1, 6000);
-      if (r1.ok) {
-        const d1 = await r1.json();
-        const text = (d1.text || d1.verse || '').trim().replace(/\s+/g,' ');
-        if (text && text.length > 8) { setVersiculoBanner(text, ref, pid); return; }
-      }
-    } catch(_) {}
-
-    // API 2: bible-api.com — rv1960 en español (CORS abierto)
-    try {
-      const b2  = BOOK_BIBLEAPI[book] || book.toLowerCase();
-      const url2 = `https://bible-api.com/${b2}+${chapter}:${verse}?translation=rv1960`;
-      const r2  = await fetchWithTimeout(url2, 6000);
-      if (r2.ok) {
-        const d2   = await r2.json();
-        const text = (d2.text || '').trim().replace(/\s+/g,' ');
-        if (text && text.length > 8) { setVersiculoBanner(text, d2.reference || ref, pid); return; }
-      }
-    } catch(_) {}
-
-    // ══ SIEMPRE en español: banco local RVR1960 — nunca falla ═══════════════
-    // Buscamos el versículo exacto del día, y si no existe usamos el más cercano
-    const local = VS_BANCO[pid];
-    if (local) {
-      setVersiculoBanner(local, ref, pid);
-      return;
-    }
-    // Buscar el pid más cercano en el banco
-    const keys    = Object.keys(VS_BANCO);
-    const fallKey = keys[day % keys.length];
-    const fallRef = pidToRef(fallKey);
-    setVersiculoBanner(VS_BANCO[fallKey], fallRef, fallKey);
-  }
-
-  // Cargar al iniciar y refrescar a medianoche
-  document.addEventListener('DOMContentLoaded', loadVersiculoDelDia);
-  const _msMidnight = (() => {
-    const m = new Date();
-    m.setDate(m.getDate() + 1);
-    m.setHours(0, 0, 15, 0);
-    return m - new Date();
-  })();
-  setTimeout(() => {
-    loadVersiculoDelDia();
-    setInterval(loadVersiculoDelDia, 86400000);
-  }, _msMidnight);
-
-
-
-  // Smooth close nav on mobile link click
-  document.querySelectorAll('.mobile-menu a').forEach(a=>{
-    a.addEventListener('click', ()=>{
-      document.getElementById('mobileMenu').classList.remove('open');
-    });
-  });
-</script><div id="goog-gt-tt" class="VIpgJd-yAWNEb-L7lbkb skiptranslate" style="border-radius: 12px; margin: 0 0 0 -23px; padding: 0; font-family: 'Google Sans', Arial, sans-serif;" data-id=""><div id="goog-gt-vt" class="VIpgJd-yAWNEb-hvhgNd"><div class="VIpgJd-yAWNEb-hvhgNd-Ud7fr"><img src="https://fonts.gstatic.com/s/i/productlogos/translate/v14/24px.svg" width="24" height="24" alt=""><div class=" VIpgJd-yAWNEb-hvhgNd-IuizWc-i3jM8c " dir="ltr">Texto original</div></div><div class="VIpgJd-yAWNEb-hvhgNd-k77Iif"><div id="goog-gt-original-text" class="VIpgJd-yAWNEb-nVMfcd-fmcmS VIpgJd-yAWNEb-hvhgNd-axAV1"></div></div><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid ltr"><div class="VIpgJd-yAWNEb-hvhgNd-N7Eqid-B7I4Od ltr" dir="ltr"><div class="VIpgJd-yAWNEb-hvhgNd-UTujCb">Valora esta traducción</div><div class="VIpgJd-yAWNEb-hvhgNd-eO9mKe">Tu opinión servirá para ayudar a mejorar el Traductor de Google</div></div><div class="VIpgJd-yAWNEb-hvhgNd-xgov5 ltr"><button id="goog-gt-thumbUpButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Buena traducción" aria-label="Buena traducción" aria-pressed="false"><span id="goog-gt-thumbUpIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7H2v13h16c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM7 18H4V9h3v9zm14-7l-3 7H9V8l4.34-4.34L12 9h9v2z"></path></svg></span><span id="goog-gt-thumbUpIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M21 7h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 0S7.08 6.85 7 7v13h11c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73V9c0-1.1-.9-2-2-2zM5 7H1v13h4V7z"></path></svg></span></button><button id="goog-gt-thumbDownButton" type="button" class="VIpgJd-yAWNEb-hvhgNd-bgm6sf" title="Mala traducción" aria-label="Mala traducción" aria-pressed="false"><span id="goog-gt-thumbDownIcon"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7h5V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zM17 6h3v9h-3V6zM3 13l3-7h9v10l-4.34 4.34L12 15H3v-2z"></path></svg></span><span id="goog-gt-thumbDownIconFilled"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class="VIpgJd-yAWNEb-hvhgNd-THI6Vb NMm5M"><path d="M3 17h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 24s7.09-6.85 7.17-7V4H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2zm16 0h4V4h-4v13z"></path></svg></span></button></div></div><div id="goog-gt-votingHiddenPane" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><form id="goog-gt-votingForm" action="//translate.googleapis.com/translate_voting?client=te_lib" method="post" target="votingFrame" class="VIpgJd-yAWNEb-hvhgNd-aXYTce"><input type="text" name="sl" id="goog-gt-votingInputSrcLang"><input type="text" name="tl" id="goog-gt-votingInputTrgLang"><input type="text" name="query" id="goog-gt-votingInputSrcText"><input type="text" name="gtrans" id="goog-gt-votingInputTrgText"><input type="text" name="vote" id="goog-gt-votingInputVote"></form><iframe name="votingFrame" frameborder="0"></iframe></div></div></div>
-
-
-</body><chatgpt-sidebar data-rendered="true" data-gpts-theme="light"></chatgpt-sidebar></html>
+<!-- Firebase: módulo ES, carga diferida y no bloqueante -->
+<script type="module" src="firebase.js"></script>
+<!-- Contenido de YouTube en tiempo real (En Vivo / Sermones / Alabanza / Niños) -->
+<script type="module" src="transmision-live.js"></script>
+<!-- Lógica principal del sitio: cargada al final, después del HTML -->
+<script src="main.js" defer></script>
+</body>
+</html>
