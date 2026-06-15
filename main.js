@@ -238,7 +238,7 @@
 
     const player = document.getElementById('livePlayer');
     const labels = {
-      live: { icon:'fa-circle-play', text:'Ver Transmisión en Vivo', note:'Domingos 10:00 AM' },
+      live: { icon:'fa-circle-play', text:'Ver Transmisión en Vivo', note:'Domingos 9:00 AM' },
       sermon: { icon:'fa-book-open', text:'Ver Sermones y Predicaciones', note:'Archivo de mensajes' },
       alabanza: { icon:'fa-music', text:'Ver Videos de Alabanza', note:'Playlist de adoración' },
       ninos: { icon:'fa-child', text:'Contenido para Niños', note:'Escuela dominical virtual' }
