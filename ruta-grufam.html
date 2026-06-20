@@ -348,17 +348,29 @@
     const g = grupos.find(x=>x.id===id);
     if(!g) return;
     const frame = document.getElementById('gmapFrame');
-    // Embed de ruta usando coordenadas exactas Venezuela como destino.
-    // "saddr" vacío → Google Maps solicita ubicación actual al usuario.
-    // &region=VE + &hl=es forzan el contexto geográfico a Venezuela.
-    frame.src = `https://www.google.com/maps/dir//${g.lat},${g.lng}/@${g.lat},${g.lng},14z?hl=es&region=VE&output=embed`;
+
+    // DIAGNÓSTICO: el formato maps/dir// NO soporta output=embed —
+    // Google lo ignora y redirige al Maps completo que pierde el contexto
+    // de región y termina en Texas. El único formato embed confiable sin
+    // API key es maps?q=LAT,LNG&output=embed (muestra el pin en el lugar
+    // correcto). Para la ruta real usamos un popup pequeño del navegador.
+
+    // 1) Mostrar el pin del destino en el iframe (Araure, Venezuela ✓)
+    frame.src = `https://www.google.com/maps?q=${g.lat},${g.lng}&z=16&hl=es&output=embed`;
+
     directionsActiveGroup = g.id;
-    showDirectionsBanner(g);
     activeId = g.id;
+    showDirectionsBanner(g);
     renderAll();
   }
 
   window.showDirections = showDirections;
+
+  // Abre la ruta real en una ventana pequeña del navegador
+  window.abrirRutaReal = function(lat, lng){
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+    window.open(url, 'ruta_cbc', 'width=800,height=600,resizable=yes,scrollbars=yes');
+  };
 
   function showDirectionsBanner(g){
     let banner = document.getElementById('directionsBanner');
@@ -369,16 +381,24 @@
         background:var(--green);color:#fff;padding:10px 14px;
         border-radius:12px 12px 0 0;display:flex;align-items:center;
         justify-content:space-between;gap:10px;font-size:.85rem;font-weight:600;
+        flex-wrap:wrap;
       `;
       document.querySelector('.map-card').insertAdjacentElement('beforebegin', banner);
     }
     banner.innerHTML = `
-      <span><i class="fa-solid fa-diamond-turn-right" style="margin-right:6px;"></i>
-        Ruta hacia: <strong>${escapeHTML(g.nombre)}</strong></span>
-      <button onclick="cancelDirections()" style="
-        background:rgba(0,0,0,.2);border:none;color:#fff;border-radius:8px;
-        padding:4px 10px;cursor:pointer;font-size:.8rem;font-weight:700;
-      ">✕ Cerrar ruta</button>
+      <span><i class="fa-solid fa-location-dot" style="margin-right:6px;"></i>
+        Ubicación: <strong>${escapeHTML(g.nombre)}</strong></span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="abrirRutaReal(${g.lat},${g.lng})" style="
+          background:rgba(0,0,0,.25);border:none;color:#fff;border-radius:8px;
+          padding:5px 12px;cursor:pointer;font-size:.8rem;font-weight:700;
+          display:inline-flex;align-items:center;gap:5px;
+        "><i class="fa-solid fa-diamond-turn-right"></i> Ver ruta en Maps</button>
+        <button onclick="cancelDirections()" style="
+          background:rgba(0,0,0,.2);border:none;color:#fff;border-radius:8px;
+          padding:5px 10px;cursor:pointer;font-size:.8rem;font-weight:700;
+        ">✕ Cerrar</button>
+      </div>
     `;
     banner.style.display = 'flex';
   }
