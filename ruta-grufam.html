@@ -348,11 +348,12 @@
     const g = grupos.find(x=>x.id===id);
     if(!g) return;
     const frame = document.getElementById('gmapFrame');
-    // Formato embed de ruta: saddr vacío = "Mi ubicación", daddr = destino
-    frame.src = `https://www.google.com/maps?saddr=Mi+ubicación&daddr=${g.lat},${g.lng}&output=embed`;
+    // Embed de ruta usando coordenadas exactas Venezuela como destino.
+    // "saddr" vacío → Google Maps solicita ubicación actual al usuario.
+    // &region=VE + &hl=es forzan el contexto geográfico a Venezuela.
+    frame.src = `https://www.google.com/maps/dir//${g.lat},${g.lng}/@${g.lat},${g.lng},14z?hl=es&region=VE&output=embed`;
     directionsActiveGroup = g.id;
     showDirectionsBanner(g);
-    // Marcar la tarjeta activa
     activeId = g.id;
     renderAll();
   }
