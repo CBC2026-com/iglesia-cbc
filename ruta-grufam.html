@@ -77,7 +77,7 @@
       font-size:.78rem; font-weight:700; padding:6px 12px; border-radius:50px;
       text-decoration:none; display:inline-flex; align-items:center; gap:6px;
     }
-    .gc-actions .gc-dirs{ background:var(--green); color:#fff; }
+    .gc-actions .gc-dirs{ background:var(--green); color:#fff; border:none; cursor:pointer; font-family:inherit; }
     .gc-actions .gc-wa{ background:var(--sky); color:var(--dark); }
 
     .admin-toggle{
@@ -285,36 +285,25 @@
   const GRUFAM_GRUPOS_DEFAULT = [
     {
       id: 'g1',
-      nombre: 'Grupo Familiar Araure Centro',
-      zona: 'Araure Centro',
-      dia: 'Martes 7:00 PM',
-      telefono: '584245206320',
-      lat: 9.5567,
-      lng: -69.2114,
-      direccion: 'Av. Libertador, cerca de la Plaza Bolívar de Araure',
-      notas: 'Casa con portón verde, frente a la panadería.'
+      nombre: 'GRUFAM Mujeres Prado del Sol',
+      zona: 'Prados del Sol',
+      dia: 'Por confirmar',
+      telefono: '584120418037',
+      lat: 9.5269,
+      lng: -69.2322,
+      direccion: 'Prados del Sol, Sector Altos de Prado, J#17',
+      notas: 'Líder: Yoletty García'
     },
     {
       id: 'g2',
-      nombre: 'Grupo Familiar Acarigua Norte',
-      zona: 'Acarigua',
-      dia: 'Miércoles 7:00 PM',
-      telefono: '',
-      lat: 9.5732,
-      lng: -69.1944,
-      direccion: 'Sector Norte, cerca del Estadio',
-      notas: ''
-    },
-    {
-      id: 'g3',
-      nombre: 'Grupo Familiar Las Lágrimas',
+      nombre: 'GRUFAM Hombres',
       zona: 'Araure',
-      dia: 'Jueves 6:30 PM',
+      dia: 'Por confirmar',
       telefono: '',
-      lat: 9.5601,
-      lng: -69.2070,
-      direccion: 'Av. Las Lágrimas, frente al ambulatorio',
-      notas: ''
+      lat: 9.5575,
+      lng: -69.2113,
+      direccion: 'Av. 13 entre Calle 5 y Av. 13 de Junio (Bajada del Hospital), Araure',
+      notas: 'Líder: Salvador Fernández'
     }
   ];
 
@@ -347,12 +336,73 @@
   function updateMapView(lat, lng, zoom){
     const frame = document.getElementById('gmapFrame');
     frame.src = `https://www.google.com/maps?q=${lat},${lng}&z=${zoom || 14}&output=embed`;
+    hideDirectionsBanner();
   }
 
-  // URL para "Cómo llegar" (direcciones) desde Google Maps
-  function directionsURL(g){
-    return `https://www.google.com/maps/dir/?api=1&destination=${g.lat},${g.lng}`;
+  // Muestra la RUTA dentro del iframe (sin salir de la página)
+  // Usa el formato embed de Google Maps con destino fijo; el origen
+  // queda vacío para que Google Maps use la ubicación actual del usuario.
+  let directionsActiveGroup = null;
+
+  function showDirections(id){
+    const g = grupos.find(x=>x.id===id);
+    if(!g) return;
+    const frame = document.getElementById('gmapFrame');
+    // Formato embed de ruta: saddr vacío = "Mi ubicación", daddr = destino
+    frame.src = `https://www.google.com/maps?saddr=Mi+ubicación&daddr=${g.lat},${g.lng}&output=embed`;
+    directionsActiveGroup = g.id;
+    showDirectionsBanner(g);
+    // Marcar la tarjeta activa
+    activeId = g.id;
+    renderAll();
   }
+
+  window.showDirections = showDirections;
+
+  function showDirectionsBanner(g){
+    let banner = document.getElementById('directionsBanner');
+    if(!banner){
+      banner = document.createElement('div');
+      banner.id = 'directionsBanner';
+      banner.style.cssText = `
+        background:var(--green);color:#fff;padding:10px 14px;
+        border-radius:12px 12px 0 0;display:flex;align-items:center;
+        justify-content:space-between;gap:10px;font-size:.85rem;font-weight:600;
+      `;
+      document.querySelector('.map-card').insertAdjacentElement('beforebegin', banner);
+    }
+    banner.innerHTML = `
+      <span><i class="fa-solid fa-diamond-turn-right" style="margin-right:6px;"></i>
+        Ruta hacia: <strong>${escapeHTML(g.nombre)}</strong></span>
+      <button onclick="cancelDirections()" style="
+        background:rgba(0,0,0,.2);border:none;color:#fff;border-radius:8px;
+        padding:4px 10px;cursor:pointer;font-size:.8rem;font-weight:700;
+      ">✕ Cerrar ruta</button>
+    `;
+    banner.style.display = 'flex';
+  }
+
+  function hideDirectionsBanner(){
+    const banner = document.getElementById('directionsBanner');
+    if(banner) banner.style.display = 'none';
+    directionsActiveGroup = null;
+  }
+
+  function cancelDirections(){
+    directionsActiveGroup = null;
+    hideDirectionsBanner();
+    // Volver a la vista del grupo activo o vista general
+    if(activeId){
+      const g = grupos.find(x=>x.id===activeId);
+      if(g) updateMapView(g.lat, g.lng, 15);
+    } else {
+      updateMapView(9.564, -69.205, 13);
+    }
+    renderAll();
+  }
+
+  // Expose cancelDirections globally (called from inline onclick)
+  window.cancelDirections = cancelDirections;
 
   function renderAll(){
     renderList();
@@ -367,7 +417,7 @@
     grupos.forEach(g=>{
       const card = document.createElement('div');
       card.className = 'group-card' + (g.id===activeId ? ' active' : '');
-      let actions = `<a class="gc-dirs" href="${directionsURL(g)}" target="_blank" rel="noopener"><i class="fa-solid fa-diamond-turn-right"></i> Cómo llegar</a>`;
+      let actions = `<button class="gc-dirs" onclick="showDirections('${escapeHTML(g.id)}')" title="Ver ruta en el mapa"><i class="fa-solid fa-diamond-turn-right"></i> Cómo llegar</button>`;
       if(g.telefono) actions += `<a class="gc-wa" href="https://wa.me/${encodeURIComponent(g.telefono)}" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>`;
       card.innerHTML = `
         <div class="gc-title">${escapeHTML(g.nombre)}</div>
