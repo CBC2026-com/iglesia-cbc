@@ -175,7 +175,7 @@
 <div class="grufam-wrap">
   <div id="map">
     <iframe id="gmapFrame" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen
-      src="https://www.google.com/maps?q=9.564,-69.205&z=13&output=embed"></iframe>
+      src="https://www.google.com/maps?q=Acarigua,Portuguesa,Venezuela&z=13&output=embed"></iframe>
   </div>
 
   <div class="panel">
@@ -335,7 +335,7 @@
   // Actualiza el iframe de Google Maps centrado en unas coordenadas
   function updateMapView(lat, lng, zoom){
     const frame = document.getElementById('gmapFrame');
-    frame.src = `https://www.google.com/maps?q=${lat},${lng}&z=${zoom || 14}&output=embed`;
+    frame.src = `https://www.google.com/maps?q=${lat},${lng}&z=${zoom || 14}&hl=es&output=embed`;
     hideDirectionsBanner();
   }
 
@@ -396,7 +396,7 @@
       const g = grupos.find(x=>x.id===activeId);
       if(g) updateMapView(g.lat, g.lng, 15);
     } else {
-      updateMapView(9.564, -69.205, 13);
+      updateMapView(9.5950, -69.2210, 13);
     }
     renderAll();
   }
