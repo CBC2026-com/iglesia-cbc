@@ -41,6 +41,24 @@
   <!-- Hoja de estilos propia -->
   <link rel="stylesheet" href="styles.css">
 
+  <style>
+    /* ── Fotos de líderes ── */
+    .leader-photo-wrap {
+      width:110px; height:110px; margin:0 auto 16px;
+    }
+    .leader-photo-img {
+      width:110px; height:110px; border-radius:50%;
+      object-fit:cover; object-position:center top;
+      border:3px solid var(--lavender);
+      display:block; background:var(--lavender);
+    }
+    .leader-photo-fallback {
+      width:110px; height:110px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.6rem; border:3px solid var(--lavender);
+    }
+  </style>
+
   <!-- ══ Datos estructurados (JSON-LD) — ayuda a Google a entender la iglesia ══ -->
   <script type="application/ld+json">
   {
@@ -533,44 +551,94 @@
       <p class="section-sub">Siervos de Dios comprometidos con la visión y el crecimiento de nuestra Iglesia.</p>
     </div>
     <div class="leaders-grid">
+
+      <!-- Pastor Principal -->
       <div class="leader-card">
-        <div class="leader-avatar av1">✝</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-salvador.jpeg"
+               alt="Ps. Salvador Fernández"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av1" style="display:none">✝</div>
+        </div>
         <div class="leader-name">Ps. Salvador Fernández</div>
         <div class="leader-role">Pastor Principal</div>
         <div class="leader-bio">Con más de 22 años de ministerio, lidera la visión y el crecimiento espiritual de nuestra congregación.</div>
       </div>
+
+      <!-- Pastora de Damas -->
       <div class="leader-card">
-        <div class="leader-avatar av2">🌸</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-osdali.jpeg"
+               alt="Pra. Osdali Molina"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av2" style="display:none">🌸</div>
+        </div>
         <div class="leader-name">Pra. Osdali Molina</div>
         <div class="leader-role">Pastora de Damas</div>
         <div class="leader-bio">Dedicada al fortalecimiento espiritual y emocional de las mujeres de la congregación.</div>
       </div>
+
+      <!-- Pastores de Jóvenes -->
       <div class="leader-card">
-        <div class="leader-avatar av3">🔥</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-jovenes.jpeg"
+               alt="Pastores de Jóvenes"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av3" style="display:none">🔥</div>
+        </div>
         <div class="leader-name">Ps. Javier Angarita</div>
-        <div class="leader-name">Pra. Ana María de Angarita</div><div class="leader-role">Pastores de Jóvenes</div>
-        <div class="leader-bio">Apasionado por conectar a las nuevas generaciones con el propósito de Dios para sus vidas.</div>
+        <div class="leader-name">Pra. Ana María de Angarita</div>
+        <div class="leader-role">Pastores de Jóvenes</div>
+        <div class="leader-bio">Apasionados por conectar a las nuevas generaciones con el propósito de Dios para sus vidas.</div>
       </div>
+
+      <!-- Directora de Alabanza -->
       <div class="leader-card">
-        <div class="leader-avatar av4">🎵</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-alabanza.jpeg"
+               alt="Pra. Ana María de Angarita"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av4" style="display:none">🎵</div>
+        </div>
         <div class="leader-name">Pra. Ana María de Angarita</div>
         <div class="leader-role">Directora de Alabanza</div>
         <div class="leader-bio">Conduce al pueblo de Dios a Su presencia mediante la adoración y la música ungida.</div>
       </div>
+
+      <!-- Pastores CBC La Tapa -->
       <div class="leader-card">
-        <div class="leader-avatar av1">🏡</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-latapa.jpeg"
+               alt="Pastores CBC La Tapa"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av1" style="display:none">🏡</div>
+        </div>
         <div class="leader-name">Ps. Yoel García</div>
         <div class="leader-name">Pra. Yadira de García</div>
         <div class="leader-role">Pastores CBC La Tapa</div>
         <div class="leader-bio">Siervos comprometidos con el crecimiento espiritual y la comunidad de la iglesia CBC La Tapa.</div>
       </div>
+
+      <!-- Pastores CBC Guacuy -->
       <div class="leader-card">
-        <div class="leader-avatar av2">🌿</div>
+        <div class="leader-photo-wrap">
+          <img src="fotos/foto-guacuy.jpeg"
+               alt="Pastores CBC Guacuy"
+               class="leader-photo-img"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="leader-photo-fallback av2" style="display:none">🌿</div>
+        </div>
         <div class="leader-name">Ps. Yonathan Linarez</div>
         <div class="leader-name">Pra. Damaris de Linarez</div>
         <div class="leader-role">Pastores CBC Guacuy</div>
         <div class="leader-bio">Siervos comprometidos con el crecimiento espiritual y la comunidad de la iglesia CBC Guacuy.</div>
       </div>
+
     </div>
   </div>
 </section>
