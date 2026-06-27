@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CBC Admin — Panel de Gestión</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--surface3:#2a2f45;
+  --border:#2e3350;--border2:#3d4466;
+  --accent:#7c6fcd;--accent2:#9d94e0;--accent-glow:rgba(124,111,205,.18);
+  --gold:#e8b84b;--green:#27ae60;--red:#e74c3c;--blue:#3498db;--orange:#e67e22;
+  --text:#eef0f8;--text2:#9299b8;--text3:#5a6080;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+
+/* ── LOGIN ── */
+#loginScreen{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0a0c14,#12162a);
+}
+.login-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:40px;width:100%;max-width:380px;
+  box-shadow:var(--shadow);
+}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo .licon{font-size:2.5rem;margin-bottom:8px}
+.login-logo h1{font-size:1.4rem;font-weight:700;color:var(--text)}
+.login-logo p{font-size:.82rem;color:var(--text2);margin-top:4px}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:.78rem;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.login-field select,.login-field input{
+  width:100%;padding:11px 14px;border-radius:var(--radius-sm);
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--text);font-family:inherit;font-size:.9rem;
+  transition:border-color .2s;
+}
+.login-field select:focus,.login-field input:focus{outline:none;border-color:var(--accent)}
+.login-btn{
+  width:100%;padding:12px;border:none;border-radius:var(--radius-sm);
+  background:var(--accent);color:#fff;font-weight:700;font-size:.95rem;
+  cursor:pointer;transition:.2s;margin-top:8px;
+}
+.login-btn:hover{background:var(--accent2)}
+.login-error{color:var(--red);font-size:.82rem;text-align:center;margin-top:10px;display:none}
+
+/* ── APP SHELL ── */
+#app{display:none;height:100%;flex-direction:row}
+#app.show{display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;height:100%;
+  overflow-y:auto;
+}
+.sidebar-brand{
+  padding:20px 18px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.sidebar-brand .brand-icon{font-size:1.4rem}
+.sidebar-brand .brand-text{font-size:.9rem;font-weight:700;color:var(--text);line-height:1.2}
+.sidebar-brand .brand-sub{font-size:.7rem;color:var(--text2)}
+.sidebar-user{
+  padding:12px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.user-avatar{
+  width:34px;height:34px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.85rem;flex-shrink:0;
+}
+.user-info .user-name{font-size:.82rem;font-weight:600;color:var(--text)}
+.user-info .user-role{font-size:.72rem;color:var(--text2)}
+.sidebar-nav{flex:1;padding:10px 0}
+.nav-section{padding:8px 18px 4px;font-size:.65rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px;cursor:pointer;transition:.15s;
+  border-left:3px solid transparent;font-size:.85rem;color:var(--text2);
+  text-decoration:none;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent2);border-left-color:var(--accent)}
+.nav-item i{width:18px;text-align:center;font-size:.9rem}
+.sidebar-bottom{padding:14px 18px;border-top:1px solid var(--border)}
+.logout-btn{
+  display:flex;align-items:center;gap:8px;cursor:pointer;
+  font-size:.82rem;color:var(--text3);padding:8px 0;transition:.2s;
+  background:none;border:none;font-family:inherit;width:100%;
+}
+.logout-btn:hover{color:var(--red)}
+
+/* ── MAIN CONTENT ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  height:56px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;background:var(--surface);flex-shrink:0;
+}
+.topbar h2{font-size:1rem;font-weight:600;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.status-text{font-size:.78rem;color:var(--text2)}
+.content{flex:1;overflow-y:auto;padding:24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── MODULES ── */
+.module{display:none}
+.module.active{display:block}
+
+/* ── CARDS / PANELS ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:18px;
+}
+.card-title{
+  font-size:.9rem;font-weight:700;color:var(--text);
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.card-title i{color:var(--accent)}
+
+/* ── FORMS ── */
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:.75rem;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.form-row input,.form-row textarea,.form-row select{
+  width:100%;padding:9px 12px;border-radius:var(--radius-sm);
+  border:1px solid var(--border2);background:var(--surface2);
+  color:var(--text);font-family:inherit;font-size:.88rem;transition:.2s;
+}
+.form-row input:focus,.form-row textarea:focus,.form-row select:focus{
+  outline:none;border-color:var(--accent);background:var(--surface3);
+}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.form-cols{grid-template-columns:1fr}}
+
+/* ── BUTTONS ── */
+.btn{
+  border:none;border-radius:var(--radius-sm);padding:9px 18px;
+  font-weight:600;font-size:.82rem;cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;gap:7px;transition:.2s;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-success{background:var(--green);color:#fff}
+.btn-danger{background:var(--red);color:#fff}
+.btn-warning{background:var(--orange);color:#fff}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--surface3);color:var(--text)}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{padding:10px 12px;text-align:left;font-size:.72rem;font-weight:700;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid var(--border);background:var(--surface2)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+.badge{
+  display:inline-flex;align-items:center;padding:2px 8px;border-radius:50px;
+  font-size:.7rem;font-weight:700;
+}
+.badge-green{background:rgba(39,174,96,.15);color:#2ecc71}
+.badge-red{background:rgba(231,76,60,.15);color:#e74c3c}
+.badge-blue{background:rgba(52,152,219,.15);color:#3498db}
+.badge-gold{background:rgba(232,184,75,.15);color:#e8b84b}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle-label{font-size:.85rem;color:var(--text2)}
+.switch{position:relative;display:inline-block;width:44px;height:24px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--border2);transition:.3s;border-radius:24px}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%}
+.switch input:checked + .slider{background:var(--green)}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+}
+.stat-value{font-size:1.8rem;font-weight:700;color:var(--text);line-height:1}
+.stat-label{font-size:.75rem;color:var(--text2);margin-top:4px}
+.stat-icon{font-size:1.2rem;margin-bottom:8px}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state i{font-size:2.5rem;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:.9rem}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--surface);border:1px solid var(--border2);
+  color:var(--text);padding:11px 22px;border-radius:50px;
+  font-size:.85rem;font-weight:500;z-index:2000;transition:.3s;
+  opacity:0;white-space:nowrap;box-shadow:var(--shadow);
+}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+#toast.success{border-color:var(--green);color:var(--green)}
+#toast.error{border-color:var(--red);color:var(--red)}
+
+/* ── MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;width:100%;max-width:520px;
+  max-height:85vh;overflow-y:auto;padding:24px;
+  box-shadow:var(--shadow);
+}
+.modal-box h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:var(--text)}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+/* ── PHOTO UPLOAD ── */
+.photo-drop{
+  border:2px dashed var(--border2);border-radius:var(--radius);
+  padding:28px;text-align:center;cursor:pointer;transition:.2s;
+  color:var(--text3);font-size:.85rem;
+}
+.photo-drop:hover{border-color:var(--accent);background:var(--accent-glow)}
+.photo-drop i{font-size:1.8rem;margin-bottom:8px;display:block}
+.photo-preview{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:10px;margin-top:14px;
+}
+.photo-thumb{
+  aspect-ratio:1;border-radius:8px;overflow:hidden;
+  background:var(--surface2);position:relative;
+}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb .del-photo{
+  position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);
+  color:#fff;border:none;border-radius:50%;width:22px;height:22px;
+  cursor:pointer;font-size:.7rem;display:flex;align-items:center;justify-content:center;
+}
+
+/* ── PETICIONES TABLE ── */
+.pet-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;
+}
+.pet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pet-name{font-weight:600;font-size:.88rem;color:var(--text)}
+.pet-date{font-size:.75rem;color:var(--text3)}
+.pet-tipo{margin-bottom:6px}
+.pet-texto{font-size:.83rem;color:var(--text2);line-height:1.5}
+.pet-actions{display:flex;gap:8px;margin-top:10px}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{width:200px}
+  .content{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="licon">⛪</div>
+      <h1>CBC Admin</h1>
+      <p>Comunidad Bíblica Cristiana</p>
+    </div>
+    <div class="login-field">
+      <label>Área / Rol</label>
+      <select id="loginRol">
+        <option value="">-- Selecciona tu área --</option>
+        <option value="admin">Administrador General</option>
+        <option value="pastores">Pastores</option>
+        <option value="medios">Equipo de Medios</option>
+        <option value="jovenes">Ministerio de Jóvenes</option>
+        <option value="grufam">Coordinación GRUFAM</option>
+      </select>
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">
+      <i class="fa-solid fa-right-to-bracket"></i> Ingresar
+    </button>
+    <div class="login-error" id="loginError">Rol o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⛪</div>
+      <div class="brand-text">CBC Admin<div class="brand-sub">Panel de Gestión</div></div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Admin</div>
+        <div class="user-role" id="userRolLabel">Administrador</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <!-- populated by JS based on role -->
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="logout-btn" onclick="doLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <h2 id="topbarTitle">Dashboard</h2>
+      <div class="topbar-right">
+        <div class="status-dot" id="connDot"></div>
+        <span class="status-text" id="connText">Conectando…</span>
+        <a href="index.html" target="_blank" style="font-size:.78rem;color:var(--text2);text-decoration:none;padding:5px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver sitio
+        </a>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- ── MÓDULO: RESUMEN ── -->
+      <div class="module active" id="mod-resumen">
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-circle-info"></i> Bienvenido al Panel CBC</div>
+          <p style="font-size:.88rem;color:var(--text2);line-height:1.7">
+            Desde aquí puedes gestionar todo el contenido del sitio web de la Comunidad Bíblica Cristiana.
+            Los cambios que hagas se reflejan <strong style="color:var(--accent2)">instantáneamente</strong>
+            en la página web para todos los visitantes, sin necesidad de tocar código.
+          </p>
+          <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px">
+            <span style="font-size:.78rem;background:var(--accent-glow);color:var(--accent2);padding:4px 12px;border-radius:50px;border:1px solid var(--accent)">🔒 Sesión activa</span>
+            <span style="font-size:.78rem;background:rgba(39,174,96,.1);color:#2ecc71;padding:4px 12px;border-radius:50px;border:1px solid rgba(39,174,96,.3)">🔥 Firebase conectado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: TRANSMISIÓN ── -->
+      <div class="module" id="mod-transmision">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-circle-play"></i> En Vivo — Control de Transmisión</div>
+          <div class="toggle-wrap" style="margin-bottom:18px">
+            <label class="switch"><input type="checkbox" id="liveActivo"><span class="slider"></span></label>
+            <span class="toggle-label" id="liveActivoLabel">Transmisión inactiva</span>
+          </div>
+          <div class="form-row">
+            <label>Link o ID del Video / Playlist en Vivo</label>
+            <input type="text" id="livePlaylist" placeholder="https://youtube.com/watch?v=... o ID de la playlist">
+          </div>
+          <button class="btn btn-success" onclick="saveTransmision('live')">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar En Vivo
+          </button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-book-open"></i> Sermones</div>
+            <div class="form-row">
+              <label>Playlist de YouTube</label>
+              <input type="text" id="sermonPlaylist" placeholder="ID o link de playlist">
+            </div>
+            <button class="btn btn-primary" onclick="saveTransmision('sermon')">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-music"></i> Alabanza</div>
+            <div class="form-row">
+              <label>Playlist de YouTube</label>
+              <input type="text" id="alabanzaPlaylist" placeholder="ID o link de playlist">
+            </div>
+            <button class="btn btn-primary" onclick="saveTransmision('alabanza')">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="fa-solid fa-child"></i> Niños</div>
+            <div class="form-row">
+              <label>Playlist de YouTube</label>
+              <input type="text" id="ninosPlaylist" placeholder="ID o link de playlist">
+            </div>
+            <button class="btn btn-primary" onclick="saveTransmision('ninos')">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: ANUNCIOS ── -->
+      <div class="module" id="mod-anuncios">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-bullhorn"></i> Nuevo Anuncio</div>
+          <input type="hidden" id="anuncioId">
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Emoji / Icono</label>
+              <input type="text" id="anuncioEmoji" placeholder="📢" maxlength="4">
+            </div>
+            <div class="form-row">
+              <label>Orden (número)</label>
+              <input type="number" id="anuncioOrden" placeholder="1" min="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Título</label>
+            <input type="text" id="anuncioTitulo" placeholder="Título del anuncio">
+          </div>
+          <div class="form-row">
+            <label>Texto del anuncio</label>
+            <textarea id="anuncioTexto" placeholder="Describe el anuncio..."></textarea>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-success" onclick="saveAnuncio()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+            <button class="btn btn-ghost" onclick="clearAnuncioForm()">
+              <i class="fa-solid fa-eraser"></i> Limpiar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-list"></i> Anuncios Actuales</div>
+          <div id="anunciosList"><div class="empty-state"><i class="fa-solid fa-bullhorn"></i><p>Cargando anuncios…</p></div></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: ACTIVIDADES ── -->
+      <div class="module" id="mod-actividades">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-calendar-plus"></i> Nueva Actividad</div>
+          <input type="hidden" id="actId">
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Emoji</label>
+              <input type="text" id="actEmoji" placeholder="🌟" maxlength="4">
+            </div>
+            <div class="form-row">
+              <label>Categoría / Tag</label>
+              <input type="text" id="actTag" placeholder="Jóvenes, Familia, Evangelización…">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Título de la actividad</label>
+            <input type="text" id="actTitulo" placeholder="Nombre del evento">
+          </div>
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Fecha y hora</label>
+              <input type="text" id="actFecha" placeholder="Sáb 28 Jun 2026 · 7:00 PM">
+            </div>
+            <div class="form-row">
+              <label>Orden</label>
+              <input type="number" id="actOrden" placeholder="1" min="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Descripción</label>
+            <textarea id="actDesc" placeholder="Describe la actividad…"></textarea>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-success" onclick="saveActividad()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+            <button class="btn btn-ghost" onclick="clearActForm()">
+              <i class="fa-solid fa-eraser"></i> Limpiar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-list"></i> Actividades Actuales</div>
+          <div id="actividadesList"><div class="empty-state"><i class="fa-solid fa-calendar"></i><p>Cargando actividades…</p></div></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: LIDERAZGO ── -->
+      <div class="module" id="mod-liderazgo">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-user-plus"></i> Agregar / Editar Líder</div>
+          <input type="hidden" id="liderId">
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Emoji / Avatar</label>
+              <input type="text" id="liderEmoji" placeholder="✝ 🌸 🔥 🎵" maxlength="4">
+            </div>
+            <div class="form-row">
+              <label>Orden</label>
+              <input type="number" id="liderOrden" placeholder="1" min="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Nombre(s) — si son dos, separar con coma</label>
+            <input type="text" id="liderNombre" placeholder="Ps. Salvador Fernández, Pra. Nombre">
+          </div>
+          <div class="form-row">
+            <label>Cargo / Rol</label>
+            <input type="text" id="liderCargo" placeholder="Pastor Principal">
+          </div>
+          <div class="form-row">
+            <label>Biografía breve</label>
+            <textarea id="liderBio" placeholder="Descripción breve del líder…"></textarea>
+          </div>
+          <div class="form-row">
+            <label>URL de foto (opcional)</label>
+            <input type="text" id="liderFoto" placeholder="https://… o dejar vacío para usar emoji">
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-success" onclick="saveLider()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+            <button class="btn btn-ghost" onclick="clearLiderForm()">
+              <i class="fa-solid fa-eraser"></i> Limpiar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-users"></i> Líderes Actuales</div>
+          <div id="liderazgoList"><div class="empty-state"><i class="fa-solid fa-users"></i><p>Cargando líderes…</p></div></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: GRUFAM ── -->
+      <div class="module" id="mod-grufam">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-house-heart"></i> Agregar / Editar Grupo</div>
+          <input type="hidden" id="grufamId">
+          <div class="form-row">
+            <label>Nombre del grupo</label>
+            <input type="text" id="grufamNombre" placeholder="GRUFAM Mujeres Prado del Sol">
+          </div>
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Zona / Sector</label>
+              <input type="text" id="grufamZona" placeholder="Prados del Sol">
+            </div>
+            <div class="form-row">
+              <label>Día y Hora</label>
+              <input type="text" id="grufamDia" placeholder="Martes 7:00 PM">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Dirección completa</label>
+            <input type="text" id="grufamDireccion" placeholder="Calle, sector, referencia…">
+          </div>
+          <div class="form-row">
+            <label>Líder(es)</label>
+            <input type="text" id="grufamLider" placeholder="Nombre del líder o lideresa">
+          </div>
+          <div class="form-row">
+            <label>WhatsApp del líder (solo números con código de país)</label>
+            <input type="text" id="grufamWA" placeholder="584120418037">
+          </div>
+          <div class="form-cols">
+            <div class="form-row">
+              <label>Latitud</label>
+              <input type="text" id="grufamLat" placeholder="9.5269">
+            </div>
+            <div class="form-row">
+              <label>Longitud</label>
+              <input type="text" id="grufamLng" placeholder="-69.2322">
+            </div>
+          </div>
+          <div class="form-row">
+            <label>Notas adicionales</label>
+            <textarea id="grufamNotas" placeholder="Información extra…"></textarea>
+          </div>
+          <div style="font-size:.75rem;color:var(--text3);margin-bottom:14px">
+            💡 Para obtener lat/lng: abre <a href="https://maps.google.com" target="_blank" style="color:var(--accent2)">Google Maps</a>, busca la dirección, clic derecho → copiar coordenadas.
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-success" onclick="saveGrufam()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar
+            </button>
+            <button class="btn btn-ghost" onclick="clearGrufamForm()">
+              <i class="fa-solid fa-eraser"></i> Limpiar
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-map-pin"></i> Grupos Actuales</div>
+          <div id="grufamList"><div class="empty-state"><i class="fa-solid fa-map"></i><p>Cargando grupos…</p></div></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: JÓVENES ── -->
+      <div class="module" id="mod-jovenes">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-fire"></i> Contenido Jóvenes</div>
+          <div class="form-row">
+            <label>Título del anuncio para jóvenes</label>
+            <input type="text" id="jovTitulo" placeholder="Retiro de Jóvenes 2026">
+          </div>
+          <div class="form-row">
+            <label>Fecha y hora</label>
+            <input type="text" id="jovFecha" placeholder="Sáb 15 Ago 2026 · 4:00 PM">
+          </div>
+          <div class="form-row">
+            <label>Descripción</label>
+            <textarea id="jovDesc" placeholder="Detalles del evento para jóvenes…"></textarea>
+          </div>
+          <div class="form-row">
+            <label>Link de registro o más info (opcional)</label>
+            <input type="text" id="jovLink" placeholder="https://…">
+          </div>
+          <button class="btn btn-success" onclick="saveJovenes()">
+            <i class="fa-solid fa-floppy-disk"></i> Publicar para Jóvenes
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-list"></i> Publicaciones Jóvenes</div>
+          <div id="jovenesList"><div class="empty-state"><i class="fa-solid fa-fire"></i><p>Cargando…</p></div></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: GALERÍA ── -->
+      <div class="module" id="mod-galeria">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-images"></i> Subir Fotos a la Galería</div>
+          <div class="form-row">
+            <label>Categoría / Evento</label>
+            <input type="text" id="galeriaCategoria" placeholder="Evangelización 2026, Bautismos, Retiro…">
+          </div>
+          <div class="form-row">
+            <label>URL de la imagen</label>
+            <input type="text" id="galeriaUrl" placeholder="https://…">
+            <small style="color:var(--text3);font-size:.72rem;margin-top:4px;display:block">
+              Sube la foto a <a href="https://imgbb.com" target="_blank" style="color:var(--accent2)">ImgBB</a> (gratuito) y pega aquí el link directo a la imagen.
+            </small>
+          </div>
+          <div class="form-row">
+            <label>Descripción (opcional)</label>
+            <input type="text" id="galeriaDesc" placeholder="Descripción de la foto">
+          </div>
+          <button class="btn btn-success" onclick="saveGaleria()">
+            <i class="fa-solid fa-plus"></i> Agregar a Galería
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-photo-film"></i> Fotos en Galería</div>
+          <div class="photo-preview" id="galeriaGrid">
+            <div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-images"></i><p>Cargando galería…</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO: PETICIONES ── -->
+      <div class="module" id="mod-peticiones">
+        <div class="card">
+          <div class="card-title"><i class="fa-solid fa-hands-praying"></i> Peticiones de Oración Recibidas</div>
+          <div id="peticionesList"><div class="empty-state"><i class="fa-solid fa-hands-praying"></i><p>Cargando peticiones…</p></div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp, getApps, getApp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, collection, getDocs, getDoc, setDoc,
+         addDoc, updateDoc, deleteDoc, onSnapshot, query,
+         orderBy, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const FC = {
+  apiKey:"AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
+  authDomain:"iglesia-cbc.firebaseapp.com",
+  projectId:"iglesia-cbc",
+  storageBucket:"iglesia-cbc.firebasestorage.app",
+  messagingSenderId:"365457083043",
+  appId:"1:365457083043:web:b12ecdd14e17fa2a864d16"
+};
+const app = getApps().length ? getApp() : initializeApp(FC);
+const db  = getFirestore(app);
+
+// ══════════════════════════════════════════════════════
+// ROLES Y PERMISOS
+// Contraseñas guardadas en Firestore → colección "roles"
+// Documento: { admin:{pass:"..."}, medios:{pass:"..."}, ... }
+// ══════════════════════════════════════════════════════
+const MENUS = {
+  admin:    ['resumen','transmision','anuncios','actividades','liderazgo','grufam','jovenes','galeria','peticiones'],
+  pastores: ['resumen','anuncios','actividades','liderazgo','peticiones'],
+  medios:   ['resumen','transmision','galeria'],
+  jovenes:  ['resumen','jovenes','actividades'],
+  grufam:   ['resumen','grufam']
+};
+const MENU_LABELS = {
+  resumen:     { icon:'fa-gauge',          label:'Resumen' },
+  transmision: { icon:'fa-circle-play',    label:'Transmisión' },
+  anuncios:    { icon:'fa-bullhorn',       label:'Anuncios' },
+  actividades: { icon:'fa-calendar-days',  label:'Actividades' },
+  liderazgo:   { icon:'fa-users',          label:'Liderazgo' },
+  grufam:      { icon:'fa-house-heart',    label:'GRUFAM' },
+  jovenes:     { icon:'fa-fire',           label:'Jóvenes' },
+  galeria:     { icon:'fa-images',         label:'Galería' },
+  peticiones:  { icon:'fa-hands-praying',  label:'Peticiones' }
+};
+const ROL_LABELS = {
+  admin:'Administrador General', pastores:'Pastores',
+  medios:'Equipo de Medios', jovenes:'Ministerio de Jóvenes', grufam:'GRUFAM'
+};
+
+// ── Estado de sesión ──
+let currentRol = null;
+let unsubs = [];
+
+// ══════════════════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════════════════
+window.doLogin = async function(){
+  const rol = document.getElementById('loginRol').value;
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if(!rol){ errEl.textContent = 'Selecciona tu área'; errEl.style.display='block'; return; }
+  if(!pass){ errEl.textContent = 'Escribe tu contraseña'; errEl.style.display='block'; return; }
+  try {
+    const snap = await getDoc(doc(db,'roles','credenciales'));
+    if(!snap.exists()){ errEl.textContent='No hay roles configurados en Firebase'; errEl.style.display='block'; return; }
+    const data = snap.data();
+    if(!data[rol] || data[rol].pass !== pass){
+      errEl.textContent='Contraseña incorrecta'; errEl.style.display='block'; return;
+    }
+    currentRol = rol;
+    startApp();
+  } catch(e){
+    errEl.textContent='Error al conectar: '+e.message; errEl.style.display='block';
+  }
+};
+
+window.doLogout = function(){
+  unsubs.forEach(u=>u()); unsubs=[];
+  currentRol=null;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginPass').value='';
+};
+
+// ══════════════════════════════════════════════════════
+// INICIAR APP
+// ══════════════════════════════════════════════════════
+function startApp(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').classList.add('show');
+  // User info
+  document.getElementById('userAvatar').textContent = currentRol[0].toUpperCase();
+  document.getElementById('userName').textContent = ROL_LABELS[currentRol];
+  document.getElementById('userRolLabel').textContent = currentRol;
+  // Build nav
+  buildNav();
+  // Load first module
+  showModule(MENUS[currentRol][0]);
+  // Firebase status
+  document.getElementById('connDot').style.background='#2ecc71';
+  document.getElementById('connText').textContent='Firebase conectado';
+  // Load stats
+  loadStats();
+}
+
+function buildNav(){
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '<div class="nav-section">Módulos</div>';
+  MENUS[currentRol].forEach(mod => {
+    const m = MENU_LABELS[mod];
+    const el = document.createElement('div');
+    el.className='nav-item'; el.id='nav-'+mod;
+    el.innerHTML=`<i class="fa-solid ${m.icon}"></i>${m.label}`;
+    el.onclick=()=>showModule(mod);
+    nav.appendChild(el);
+  });
+}
+
+function showModule(mod){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const el = document.getElementById('mod-'+mod);
+  if(el) el.classList.add('active');
+  const nav = document.getElementById('nav-'+mod);
+  if(nav) nav.classList.add('active');
+  document.getElementById('topbarTitle').textContent = MENU_LABELS[mod]?.label || mod;
+  // Load module data
+  const loaders = {
+    transmision: loadTransmision,
+    anuncios: loadAnuncios,
+    actividades: loadActividades,
+    liderazgo: loadLiderazgo,
+    grufam: loadGrufam,
+    jovenes: loadJovenes,
+    galeria: loadGaleria,
+    peticiones: loadPeticiones
+  };
+  if(loaders[mod]) loaders[mod]();
+}
+window.showModule = showModule;
+
+// ══════════════════════════════════════════════════════
+// STATS (resumen)
+// ══════════════════════════════════════════════════════
+async function loadStats(){
+  const grid = document.getElementById('statsGrid');
+  const cols = [
+    {col:'anuncios',     icon:'fa-bullhorn',       label:'Anuncios',       color:'#e8b84b'},
+    {col:'actividades',  icon:'fa-calendar-days',  label:'Actividades',    color:'#3498db'},
+    {col:'peticiones',   icon:'fa-hands-praying',  label:'Peticiones',     color:'#9b59b6'},
+    {col:'grufam',       icon:'fa-house-heart',    label:'Grupos GRUFAM',  color:'#27ae60'},
+  ];
+  grid.innerHTML = '';
+  cols.forEach(async c=>{
+    const card = document.createElement('div');
+    card.className='stat-card';
+    card.innerHTML=`<div class="stat-icon" style="color:${c.color}"><i class="fa-solid ${c.icon}"></i></div>
+      <div class="stat-value" id="stat-${c.col}">…</div>
+      <div class="stat-label">${c.label}</div>`;
+    grid.appendChild(card);
+    try{
+      const snap = await getDocs(collection(db, c.col));
+      document.getElementById('stat-'+c.col).textContent = snap.size;
+    }catch(e){ document.getElementById('stat-'+c.col).textContent='—'; }
+  });
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+let _toastTimer;
+window.showToast = function(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+(type||'');
+  clearTimeout(_toastTimer); _toastTimer=setTimeout(()=>t.className='',3500);
+};
+function extractYTId(input){
+  if(!input) return '';
+  const m = input.match(/[?&]list=([\w-]+)/)||input.match(/(?:watch\?v=|youtu\.be\/|live\/)([\w-]{11})/)||input.match(/^([\w-]{11,}$)/);
+  return m ? m[1] : input.trim();
+}
+
+// ══════════════════════════════════════════════════════
+// TRANSMISIÓN
+// ══════════════════════════════════════════════════════
+async function loadTransmision(){
+  const tabs = ['live','sermon','alabanza','ninos'];
+  const fields = {live:'livePlaylist', sermon:'sermonPlaylist', alabanza:'alabanzaPlaylist', ninos:'ninosPlaylist'};
+  for(const tab of tabs){
+    try{
+      const snap = await getDoc(doc(db,'transmision',tab));
+      if(snap.exists()){
+        const d=snap.data();
+        if(fields[tab]) document.getElementById(fields[tab]).value=d.playlistId||'';
+        if(tab==='live'){
+          document.getElementById('liveActivo').checked=!!d.activo;
+          document.getElementById('liveActivoLabel').textContent=d.activo?'🔴 Transmisión ACTIVA':'Transmisión inactiva';
+        }
+      }
+    }catch(e){}
+  }
+  document.getElementById('liveActivo').onchange=function(){
+    document.getElementById('liveActivoLabel').textContent=this.checked?'🔴 Transmisión ACTIVA':'Transmisión inactiva';
+  };
+}
+window.saveTransmision = async function(tab){
+  const fields = {live:'livePlaylist', sermon:'sermonPlaylist', alabanza:'alabanzaPlaylist', ninos:'ninosPlaylist'};
+  const playlistId = extractYTId(document.getElementById(fields[tab]).value);
+  document.getElementById(fields[tab]).value = playlistId;
+  const data = {playlistId, actualizadoEn:serverTimestamp()};
+  if(tab==='live') data.activo = document.getElementById('liveActivo').checked;
+  try{
+    await setDoc(doc(db,'transmision',tab), data, {merge:true});
+    showToast('✅ Transmisión guardada — visible para todos','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+
+// ══════════════════════════════════════════════════════
+// ANUNCIOS
+// ══════════════════════════════════════════════════════
+function loadAnuncios(){
+  const el = document.getElementById('anunciosList');
+  const q = query(collection(db,'anuncios'), orderBy('orden','asc'));
+  const unsub = onSnapshot(q, snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-bullhorn"></i><p>No hay anuncios todavía</p></div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>Emoji</th><th>Título</th><th>Texto</th><th>Orden</th><th>Acciones</th></tr></thead><tbody id="anunciosTbody"></tbody></table></div>';
+    const tbody=document.getElementById('anunciosTbody');
+    snap.forEach(d=>{
+      const dat=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-size:1.3rem">${esc(dat.emoji||'📢')}</td>
+        <td><strong style="color:var(--text)">${esc(dat.titulo||'')}</strong></td>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(dat.texto||'')}</td>
+        <td>${esc(dat.orden||'')}</td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:5px 10px" onclick="editAnuncio('${d.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger" style="padding:5px 10px" onclick="delAnuncio('${d.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div></td>`;
+      tbody.appendChild(tr);
+    });
+  }, e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveAnuncio = async function(){
+  const id=document.getElementById('anuncioId').value;
+  const data={
+    emoji:document.getElementById('anuncioEmoji').value.trim()||'📢',
+    titulo:document.getElementById('anuncioTitulo').value.trim(),
+    texto:document.getElementById('anuncioTexto').value.trim(),
+    orden:parseInt(document.getElementById('anuncioOrden').value)||99,
+    actualizadoEn:serverTimestamp()
+  };
+  if(!data.titulo){ showToast('Escribe un título','error'); return; }
+  try{
+    if(id) await updateDoc(doc(db,'anuncios',id),data);
+    else await addDoc(collection(db,'anuncios'),{...data,creadoEn:serverTimestamp()});
+    clearAnuncioForm();
+    showToast('✅ Anuncio guardado','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.editAnuncio = async function(id){
+  const snap=await getDoc(doc(db,'anuncios',id));
+  if(!snap.exists()) return;
+  const d=snap.data();
+  document.getElementById('anuncioId').value=id;
+  document.getElementById('anuncioEmoji').value=d.emoji||'';
+  document.getElementById('anuncioTitulo').value=d.titulo||'';
+  document.getElementById('anuncioTexto').value=d.texto||'';
+  document.getElementById('anuncioOrden').value=d.orden||'';
+  showModule('anuncios');
+  document.getElementById('anuncioTitulo').focus();
+};
+window.delAnuncio = async function(id){
+  if(!confirm('¿Eliminar este anuncio?')) return;
+  try{ await deleteDoc(doc(db,'anuncios',id)); showToast('Anuncio eliminado','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.clearAnuncioForm = function(){
+  ['anuncioId','anuncioEmoji','anuncioTitulo','anuncioTexto','anuncioOrden'].forEach(id=>{ document.getElementById(id).value=''; });
+};
+
+// ══════════════════════════════════════════════════════
+// ACTIVIDADES
+// ══════════════════════════════════════════════════════
+function loadActividades(){
+  const el=document.getElementById('actividadesList');
+  const unsub=onSnapshot(collection(db,'actividades'),snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-calendar"></i><p>No hay actividades todavía</p></div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>Emoji</th><th>Título</th><th>Fecha</th><th>Tag</th><th>Acciones</th></tr></thead><tbody id="actTbody"></tbody></table></div>';
+    const tbody=document.getElementById('actTbody');
+    snap.forEach(d=>{
+      const dat=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-size:1.3rem">${esc(dat.emoji||'🌟')}</td>
+        <td><strong style="color:var(--text)">${esc(dat.titulo||'')}</strong></td>
+        <td>${esc(dat.fecha||dat.fechaTexto||'')}</td>
+        <td><span class="badge badge-blue">${esc(dat.tag||dat.categoria||'')}</span></td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:5px 10px" onclick="editActividad('${d.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger" style="padding:5px 10px" onclick="delActividad('${d.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div></td>`;
+      tbody.appendChild(tr);
+    });
+  },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveActividad = async function(){
+  const id=document.getElementById('actId').value;
+  const data={
+    emoji:document.getElementById('actEmoji').value.trim()||'🌟',
+    titulo:document.getElementById('actTitulo').value.trim(),
+    descripcion:document.getElementById('actDesc').value.trim(),
+    fecha:document.getElementById('actFecha').value.trim(),
+    tag:document.getElementById('actTag').value.trim(),
+    orden:parseInt(document.getElementById('actOrden').value)||99,
+    actualizadoEn:serverTimestamp()
+  };
+  if(!data.titulo){ showToast('Escribe un título','error'); return; }
+  try{
+    if(id) await updateDoc(doc(db,'actividades',id),data);
+    else await addDoc(collection(db,'actividades'),{...data,creadoEn:serverTimestamp()});
+    clearActForm();
+    showToast('✅ Actividad guardada','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.editActividad = async function(id){
+  const snap=await getDoc(doc(db,'actividades',id));
+  if(!snap.exists()) return;
+  const d=snap.data();
+  document.getElementById('actId').value=id;
+  document.getElementById('actEmoji').value=d.emoji||'';
+  document.getElementById('actTitulo').value=d.titulo||'';
+  document.getElementById('actDesc').value=d.descripcion||'';
+  document.getElementById('actFecha').value=d.fecha||d.fechaTexto||'';
+  document.getElementById('actTag').value=d.tag||d.categoria||'';
+  document.getElementById('actOrden').value=d.orden||'';
+};
+window.delActividad = async function(id){
+  if(!confirm('¿Eliminar esta actividad?')) return;
+  try{ await deleteDoc(doc(db,'actividades',id)); showToast('Actividad eliminada','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.clearActForm = function(){
+  ['actId','actEmoji','actTitulo','actDesc','actFecha','actTag','actOrden'].forEach(id=>{ document.getElementById(id).value=''; });
+};
+
+// ══════════════════════════════════════════════════════
+// LIDERAZGO
+// ══════════════════════════════════════════════════════
+function loadLiderazgo(){
+  const el=document.getElementById('liderazgoList');
+  const unsub=onSnapshot(collection(db,'lideres'),snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-users"></i><p>No hay líderes en Firebase todavía.<br><small style="color:var(--text3)">Los líderes actuales del sitio están en el HTML. Agrégalos aquí para que sean dinámicos.</small></p></div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>Avatar</th><th>Nombre</th><th>Cargo</th><th>Acciones</th></tr></thead><tbody id="liderTbody"></tbody></table></div>';
+    const tbody=document.getElementById('liderTbody');
+    snap.forEach(d=>{
+      const dat=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td style="font-size:1.4rem">${esc(dat.emoji||'👤')}</td>
+        <td><strong style="color:var(--text)">${esc(dat.nombre||'')}</strong></td>
+        <td><span class="badge badge-gold">${esc(dat.cargo||'')}</span></td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:5px 10px" onclick="editLider('${d.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger" style="padding:5px 10px" onclick="delLider('${d.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div></td>`;
+      tbody.appendChild(tr);
+    });
+  },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveLider = async function(){
+  const id=document.getElementById('liderId').value;
+  const data={
+    emoji:document.getElementById('liderEmoji').value.trim()||'👤',
+    nombre:document.getElementById('liderNombre').value.trim(),
+    cargo:document.getElementById('liderCargo').value.trim(),
+    bio:document.getElementById('liderBio').value.trim(),
+    foto:document.getElementById('liderFoto').value.trim(),
+    orden:parseInt(document.getElementById('liderOrden').value)||99,
+    actualizadoEn:serverTimestamp()
+  };
+  if(!data.nombre){ showToast('Escribe el nombre','error'); return; }
+  try{
+    if(id) await updateDoc(doc(db,'lideres',id),data);
+    else await addDoc(collection(db,'lideres'),{...data,creadoEn:serverTimestamp()});
+    clearLiderForm();
+    showToast('✅ Líder guardado','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.editLider = async function(id){
+  const snap=await getDoc(doc(db,'lideres',id));
+  if(!snap.exists()) return;
+  const d=snap.data();
+  document.getElementById('liderId').value=id;
+  document.getElementById('liderEmoji').value=d.emoji||'';
+  document.getElementById('liderNombre').value=d.nombre||'';
+  document.getElementById('liderCargo').value=d.cargo||'';
+  document.getElementById('liderBio').value=d.bio||'';
+  document.getElementById('liderFoto').value=d.foto||'';
+  document.getElementById('liderOrden').value=d.orden||'';
+};
+window.delLider = async function(id){
+  if(!confirm('¿Eliminar este líder?')) return;
+  try{ await deleteDoc(doc(db,'lideres',id)); showToast('Líder eliminado','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.clearLiderForm = function(){
+  ['liderId','liderEmoji','liderNombre','liderCargo','liderBio','liderFoto','liderOrden'].forEach(id=>{ document.getElementById(id).value=''; });
+};
+
+// ══════════════════════════════════════════════════════
+// GRUFAM
+// ══════════════════════════════════════════════════════
+function loadGrufam(){
+  const el=document.getElementById('grufamList');
+  const unsub=onSnapshot(collection(db,'grufam'),snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-map"></i><p>No hay grupos en Firebase todavía.</p></div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Zona</th><th>Líder</th><th>Día</th><th>Acciones</th></tr></thead><tbody id="grufamTbody"></tbody></table></div>';
+    const tbody=document.getElementById('grufamTbody');
+    snap.forEach(d=>{
+      const dat=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><strong style="color:var(--text)">${esc(dat.nombre||'')}</strong></td>
+        <td>${esc(dat.zona||'')}</td>
+        <td>${esc(dat.lider||dat.notas||'')}</td>
+        <td><span class="badge badge-green">${esc(dat.dia||'')}</span></td>
+        <td><div style="display:flex;gap:6px">
+          <button class="btn btn-ghost" style="padding:5px 10px" onclick="editGrufam('${d.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger" style="padding:5px 10px" onclick="delGrufam('${d.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div></td>`;
+      tbody.appendChild(tr);
+    });
+  },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveGrufam = async function(){
+  const id=document.getElementById('grufamId').value;
+  const lat=parseFloat(document.getElementById('grufamLat').value);
+  const lng=parseFloat(document.getElementById('grufamLng').value);
+  if(isNaN(lat)||isNaN(lng)){ showToast('Latitud y longitud deben ser números','error'); return; }
+  const data={
+    nombre:document.getElementById('grufamNombre').value.trim(),
+    zona:document.getElementById('grufamZona').value.trim(),
+    dia:document.getElementById('grufamDia').value.trim(),
+    direccion:document.getElementById('grufamDireccion').value.trim(),
+    lider:document.getElementById('grufamLider').value.trim(),
+    telefono:document.getElementById('grufamWA').value.trim(),
+    notas:document.getElementById('grufamNotas').value.trim(),
+    lat,lng,
+    actualizadoEn:serverTimestamp()
+  };
+  if(!data.nombre){ showToast('Escribe el nombre del grupo','error'); return; }
+  try{
+    if(id) await updateDoc(doc(db,'grufam',id),data);
+    else await addDoc(collection(db,'grufam'),{...data,creadoEn:serverTimestamp()});
+    clearGrufamForm();
+    showToast('✅ Grupo guardado','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.editGrufam = async function(id){
+  const snap=await getDoc(doc(db,'grufam',id));
+  if(!snap.exists()) return;
+  const d=snap.data();
+  document.getElementById('grufamId').value=id;
+  document.getElementById('grufamNombre').value=d.nombre||'';
+  document.getElementById('grufamZona').value=d.zona||'';
+  document.getElementById('grufamDia').value=d.dia||'';
+  document.getElementById('grufamDireccion').value=d.direccion||'';
+  document.getElementById('grufamLider').value=d.lider||'';
+  document.getElementById('grufamWA').value=d.telefono||'';
+  document.getElementById('grufamLat').value=d.lat||'';
+  document.getElementById('grufamLng').value=d.lng||'';
+  document.getElementById('grufamNotas').value=d.notas||'';
+};
+window.delGrufam = async function(id){
+  if(!confirm('¿Eliminar este grupo?')) return;
+  try{ await deleteDoc(doc(db,'grufam',id)); showToast('Grupo eliminado','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.clearGrufamForm = function(){
+  ['grufamId','grufamNombre','grufamZona','grufamDia','grufamDireccion','grufamLider','grufamWA','grufamLat','grufamLng','grufamNotas'].forEach(id=>{ document.getElementById(id).value=''; });
+};
+
+// ══════════════════════════════════════════════════════
+// JÓVENES
+// ══════════════════════════════════════════════════════
+function loadJovenes(){
+  const el=document.getElementById('jovenesList');
+  const unsub=onSnapshot(collection(db,'jovenes'),snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-fire"></i><p>No hay publicaciones de jóvenes todavía</p></div>'; return; }
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>Título</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="jovTbody"></tbody></table></div>';
+    const tbody=document.getElementById('jovTbody');
+    snap.forEach(d=>{
+      const dat=d.data();
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><strong style="color:var(--text)">${esc(dat.titulo||'')}</strong></td>
+        <td>${esc(dat.fecha||'')}</td>
+        <td><button class="btn btn-danger" style="padding:5px 10px" onclick="delJoven('${d.id}')"><i class="fa-solid fa-trash"></i></button></td>`;
+      tbody.appendChild(tr);
+    });
+  },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveJovenes = async function(){
+  const data={
+    titulo:document.getElementById('jovTitulo').value.trim(),
+    fecha:document.getElementById('jovFecha').value.trim(),
+    descripcion:document.getElementById('jovDesc').value.trim(),
+    link:document.getElementById('jovLink').value.trim(),
+    creadoEn:serverTimestamp()
+  };
+  if(!data.titulo){ showToast('Escribe un título','error'); return; }
+  try{
+    await addDoc(collection(db,'jovenes'),data);
+    ['jovTitulo','jovFecha','jovDesc','jovLink'].forEach(id=>{ document.getElementById(id).value=''; });
+    showToast('✅ Publicación de jóvenes guardada','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.delJoven = async function(id){
+  if(!confirm('¿Eliminar?')) return;
+  try{ await deleteDoc(doc(db,'jovenes',id)); showToast('Eliminado','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+
+// ══════════════════════════════════════════════════════
+// GALERÍA
+// ══════════════════════════════════════════════════════
+function loadGaleria(){
+  const grid=document.getElementById('galeriaGrid');
+  const unsub=onSnapshot(collection(db,'galeria'),snap=>{
+    if(snap.empty){ grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-images"></i><p>No hay fotos todavía</p></div>'; return; }
+    grid.innerHTML='';
+    snap.forEach(d=>{
+      const dat=d.data();
+      const div=document.createElement('div');
+      div.className='photo-thumb';
+      div.innerHTML=`<img src="${esc(dat.url||'')}" alt="${esc(dat.descripcion||'')}" onerror="this.style.display='none'">
+        <button class="del-photo" onclick="delFoto('${d.id}')">✕</button>`;
+      div.title=dat.descripcion||dat.categoria||'';
+      grid.appendChild(div);
+    });
+  },e=>{ grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
+  unsubs.push(unsub);
+}
+window.saveGaleria = async function(){
+  const url=document.getElementById('galeriaUrl').value.trim();
+  if(!url){ showToast('Pega la URL de la imagen','error'); return; }
+  const data={
+    url,
+    categoria:document.getElementById('galeriaCategoria').value.trim(),
+    descripcion:document.getElementById('galeriaDesc').value.trim(),
+    creadoEn:serverTimestamp()
+  };
+  try{
+    await addDoc(collection(db,'galeria'),data);
+    ['galeriaUrl','galeriaCategoria','galeriaDesc'].forEach(id=>{ document.getElementById(id).value=''; });
+    showToast('✅ Foto agregada a la galería','success');
+  }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.delFoto = async function(id){
+  if(!confirm('¿Eliminar esta foto?')) return;
+  try{ await deleteDoc(doc(db,'galeria',id)); showToast('Foto eliminada','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+
+// ══════════════════════════════════════════════════════
+// PETICIONES
+// ══════════════════════════════════════════════════════
+function loadPeticiones(){
+  const el=document.getElementById('peticionesList');
+  const unsub=onSnapshot(query(collection(db,'peticiones'),orderBy('creadoEn','desc')),snap=>{
+    if(snap.empty){ el.innerHTML='<div class="empty-state"><i class="fa-solid fa-hands-praying"></i><p>No hay peticiones todavía</p></div>'; return; }
+    el.innerHTML='';
+    snap.forEach(d=>{
+      const dat=d.data();
+      const fecha=dat.fecha||'';
+      const div=document.createElement('div');
+      div.className='pet-card';
+      div.innerHTML=`<div class="pet-header">
+          <span class="pet-name">${esc(dat.nombre||'Anónimo')}</span>
+          <span class="pet-date">${esc(fecha)}</span>
+        </div>
+        <div class="pet-tipo"><span class="badge badge-blue">${esc(dat.tipo||'')}</span></div>
+        <div class="pet-texto">${esc(dat.peticion||'')}</div>
+        <div class="pet-actions">
+          <span class="badge ${dat.orado?'badge-green':'badge-gold'}">${dat.orado?'✅ Orado':'⏳ Pendiente'}</span>
+          <button class="btn btn-ghost" style="padding:4px 10px;font-size:.75rem" onclick="marcarOrado('${d.id}',${!dat.orado})">
+            ${dat.orado?'Marcar pendiente':'✅ Marcar como orado'}
+          </button>
+          <button class="btn btn-danger" style="padding:4px 10px;font-size:.75rem" onclick="delPeticion('${d.id}')">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>`;
+      el.appendChild(div);
+    });
+  },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error al cargar: ${e.message}<br><small>Puede requerir permiso de lectura en Firestore</small></p></div>`; });
+  unsubs.push(unsub);
+}
+window.marcarOrado = async function(id,val){
+  try{ await updateDoc(doc(db,'peticiones',id),{orado:val}); showToast(val?'✅ Marcada como orada':'Marcada como pendiente','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.delPeticion = async function(id){
+  if(!confirm('¿Eliminar esta petición?')) return;
+  try{ await deleteDoc(doc(db,'peticiones',id)); showToast('Petición eliminada','success'); }
+  catch(e){ showToast('Error: '+e.message,'error'); }
+};
+</script>
+</body>
+</html>
