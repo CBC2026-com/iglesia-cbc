@@ -261,51 +261,14 @@
       <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 9:00 AM.</p>
     </div>
 
-    <div class="video-wrapper" id="livePlayerWrapper">
-      <!-- ══ EN VIVO — Comunidad Bíblica Cristiana ══
-           Carga automáticamente el directo del canal.
-           Si no hay transmisión activa muestra el último video publicado.
-           Sin clic, sin proxies, sin Error 153. ══ -->
-      <iframe id="livePlayer"
-        src="https://www.youtube.com/embed/live_stream?channel=UCA_dlOwtkTyg9VdtudhXEXQ&autoplay=1&rel=0&modestbranding=1"
-        allowfullscreen
-        allow="autoplay; encrypted-media"
-        loading="lazy"
-        title="Transmisión en Vivo — Comunidad Bíblica Cristiana"
-        style="width:100%;aspect-ratio:16/9;border:0;display:block;border-radius:inherit;"
-        onerror="this.parentElement.innerHTML=fallbackPlayer()">
-      </iframe>
+        <div class="video-wrapper">
+      <!-- Canal oficial de YouTube: @comunidadbiblicacristiana (UCA_dlOwtkTyg9VdtudhXEXQ) -->
+      <div class="video-fallback" id="livePlayer" onclick="loadLive()">
+        <i class="fa-brands fa-youtube"></i>
+        <p>Haz clic para ver la transmisión en vivo</p>
+        <small style="color:rgba(255,255,255,.5)">Canal: Comunidad Bíblica Cristiana</small>
+      </div>
     </div>
-
-    <script>
-    // Si el embed del directo falla, muestra botón de acceso directo al canal
-    function fallbackPlayer(){
-      return '<div class="video-fallback" style="cursor:pointer" onclick="window.open(\'https://youtube.com/@comunidadbiblicacristiana/live\',\'_blank\')">'+
-        '<i class="fa-brands fa-youtube"></i>'+
-        '<p>Ver Transmisión en Vivo</p>'+
-        '<small style="color:rgba(255,255,255,.5)">Toca para abrir en YouTube</small>'+
-        '</div>';
-    }
-    // Detectar Error 153 monitoreando el iframe
-    (function(){
-      var checked = false;
-      window.addEventListener('load', function(){
-        var iframe = document.getElementById('livePlayer');
-        if(!iframe) return;
-        setTimeout(function(){
-          if(checked) return;
-          checked = true;
-          // Si el iframe no cargó contenido válido, mostrar fallback con enlace
-          try{
-            var w = iframe.contentWindow;
-            // Si podemos acceder → está en el mismo origen, poco probable
-          } catch(e){
-            // Cross-origin = YouTube cargó algo (normal). No hacer nada.
-          }
-        }, 4000);
-      });
-    })();
-    </script>
 
     <div class="video-tabs">
       <button class="video-tab active" onclick="setTab(this,'live')">🔴 En Vivo</button>
