@@ -279,8 +279,8 @@
     // Estado de carga
     player.innerHTML = `
       <i class="fa-solid fa-circle-notch fa-spin" style="font-size:3rem;color:var(--rose);opacity:.8;"></i>
-      <p>Buscando la transmisión en vivo…</p>
-      <small style="color:rgba(255,255,255,.5)">Canal: Comunidad Bíblica Cristiana</small>
+      <p>Conectando con YouTube…</p>
+      <small style="color:rgba(255,255,255,.5)">Buscando transmisión activa del canal CBC</small>
     `;
 
     // 1) Si ya hay un ID guardado manualmente para hoy, úsalo directamente
@@ -411,40 +411,109 @@
     }
   }
 
-  // Intenta obtener el videoId de la transmisión en vivo activa del canal
-  // leyendo el HTML de su página /live mediante proxies CORS públicos.
+  // ══════════════════════════════════════════════════════════════════════
+  // findLiveVideoId — Detecta el video activo sin API Key oficial
+  //
+  // Estrategia en cascada (4 métodos, se prueba en orden hasta obtener ID):
+  //
+  // 1) Piped API  — API alternativa de YouTube, sin CORS, sin API key.
+  //    Retorna JSON con los streams del canal. Múltiples instancias públicas.
+  //    Docs: https://docs.piped.video/
+  //
+  // 2) Invidious API — Otra API alternativa de YouTube, misma filosofía.
+  //    Múltiples instancias disponibles globalmente.
+  //
+  // 3) RSS feed del canal — YouTube expone un feed XML público por canal.
+  //    Lo leemos vía un proxy RSS-to-JSON que sí tiene CORS abierto.
+  //    Si el primer video del feed es "en vivo" extraemos el ID.
+  //
+  // 4) Si todo falla → null → el formulario manual permite al equipo pegar
+  //    el link directamente. El ID se guarda en localStorage para el día.
+  // ══════════════════════════════════════════════════════════════════════
+  const YT_CHANNEL_ID = 'UCA_dlOwtkTyg9VdtudhXEXQ';
+
   async function findLiveVideoId(){
-    const targetUrl = encodeURIComponent(YT_LIVE_URL);
-    const proxies = [
-      `https://r.jina.ai/${YT_LIVE_URL}`,
-      `https://corsproxy.io/?url=${targetUrl}`,
-      `https://api.allorigins.win/raw?url=${targetUrl}`
+
+    // ── Método 1: Piped API (múltiples instancias) ──────────────────────
+    const pipedInstances = [
+      'https://pipedapi.kavin.rocks',
+      'https://piped-api.garudalinux.org',
+      'https://api.piped.projectsegfau.lt',
+      'https://piped.syncit.fr/api',
+      'https://pipedapi.adminforge.de'
     ];
-
-    for (const proxyUrl of proxies) {
+    for (const base of pipedInstances) {
       try {
-        const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+        const res = await fetch(
+          `${base}/channel/${YT_CHANNEL_ID}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
         if (!res.ok) continue;
-        const html = await res.text();
-
-        // Solo aceptamos el ID si la página confirma que hay un directo activo
-        if (!/"isLive(Now)?":\s*true|LIVE NOW|En directo|videoDetails.*?isLiveContent":true/i.test(html)) {
-          continue;
+        const data = await res.json();
+        // relatedStreams: busca el primer stream marcado como live
+        const streams = data.relatedStreams || [];
+        const live = streams.find(s =>
+          s.type === 'stream' &&
+          (s.isLive === true || s.live === true || s.duration === -1)
+        );
+        if (live && live.url) {
+          const m = live.url.match(/[?&]v=([\w-]{11})|\/v\/([\w-]{11})|youtu\.be\/([\w-]{11})/);
+          if (m) return m[1] || m[2] || m[3];
         }
-
-        const patterns = [
-          /"videoId":"([\w-]{11})"/,
-          /\/watch\?v=([\w-]{11})/,
-          /watch\?v=([\w-]{11})/
-        ];
-        for (const re of patterns) {
-          const m = html.match(re);
-          if (m && m[1]) return m[1];
-        }
-      } catch (e) {
-        // probar el siguiente proxy
-      }
+      } catch (e) { /* siguiente instancia */ }
     }
+
+    // ── Método 2: Invidious API (múltiples instancias) ──────────────────
+    const invidiousInstances = [
+      'https://invidious.snopyta.org',
+      'https://yewtu.be',
+      'https://invidious.namazso.eu',
+      'https://inv.riverside.rocks',
+      'https://invidious.slipfox.xyz'
+    ];
+    for (const base of invidiousInstances) {
+      try {
+        const res = await fetch(
+          `${base}/api/v1/channels/${YT_CHANNEL_ID}/streams`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (!res.ok) continue;
+        const data = await res.json();
+        const videos = Array.isArray(data) ? data : (data.videos || []);
+        const live = videos.find(v =>
+          v.liveNow === true || v.type === 'stream'
+        );
+        if (live && live.videoId) return live.videoId;
+      } catch (e) { /* siguiente instancia */ }
+    }
+
+    // ── Método 3: RSS feed vía rss2json ─────────────────────────────────
+    try {
+      const rssUrl = encodeURIComponent(
+        `https://www.youtube.com/feeds/videos.xml?channel_id=${YT_CHANNEL_ID}`
+      );
+      const res = await fetch(
+        `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`,
+        { signal: AbortSignal.timeout(6000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.items || [];
+        // El primer item puede ser el live si está activo ahora
+        if (items.length > 0) {
+          const first = items[0];
+          // Verificar si tiene "live" en el título/descripción o fue publicado hace < 12 horas
+          const pubDate = new Date(first.pubDate);
+          const hoursOld = (Date.now() - pubDate) / 3600000;
+          const looksLive = /live|en vivo|directo|culto|servicio/i.test(first.title || '');
+          if (hoursOld < 12 || looksLive) {
+            const m = (first.link || '').match(/[?&]v=([\w-]{11})/);
+            if (m) return m[1];
+          }
+        }
+      }
+    } catch (e) { /* método 3 falló */ }
+
     return null;
   }
 
