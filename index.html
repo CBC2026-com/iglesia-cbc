@@ -215,11 +215,11 @@
       <div class="dash-widget">
         <h3><i class="fa-solid fa-calendar-check"></i>Próximas Actividades</h3>
         <ul class="event-list">
-          <li><span class="event-dot"></span><div class="event-text"><strong>Visitas casa por casa · Caminata de Oración · Ungimiento de Territorio</strong>Jue 25 Jun · Evangelización</div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong>Evangelismo casa por casa · Entrega de Fichas de Oración · Héroes Kids</strong>Vie 26 Jun · Todo el día</div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong>Entrega de Fichas de Oración · Actividades Deportivas · Héroes Kids</strong>Sáb 27 Jun · Todo el día</div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong>Adoración · Predicación · Sketch · Obras de Teatro · Oración por Fichas · Héroes Kids</strong>Dom 28 Jun · Todo el día</div></li>
-          <li><span class="event-dot"></span><div class="event-text"><strong>Visitar personas · Invitar al Grupo Familiar · Confirmar decisión</strong>Lun 29 Jun · Cierre</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Visitas casa por casa · Caminata de Oración · Ungimiento de Territorio</strong>Jue 26 Jun · Evangelización</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Evangelismo casa por casa · Entrega de Fichas de Oración · Héroes Kids</strong>Vie 27 Jun · Todo el día</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Entrega de Fichas de Oración · Actividades Deportivas · Héroes Kids</strong>Sáb 28 Jun · Todo el día</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Adoración · Predicación · Sketch · Obras de Teatro · Oración por Fichas · Héroes Kids</strong>Dom 29 Jun · Todo el día</div></li>
+          <li><span class="event-dot"></span><div class="event-text"><strong>Visitar personas · Invitar al Grupo Familiar · Confirmar decisión</strong>Lun 30 Jun · Cierre</div></li>
         </ul>
       </div>
 
@@ -261,17 +261,21 @@
       <p class="section-sub">Conéctate desde donde estés. Nuestros servicios se transmiten en vivo todos los domingos a las 9:00 AM.</p>
     </div>
 
-        <div class="video-wrapper">
-      <!-- Canal oficial de YouTube: @comunidadbiblicacristiana (UCA_dlOwtkTyg9VdtudhXEXQ) -->
-      <div class="video-fallback" id="livePlayer" onclick="loadLive()">
-        <i class="fa-brands fa-youtube"></i>
-        <p>Haz clic para ver la transmisión en vivo</p>
-        <small style="color:rgba(255,255,255,.5)">Canal: Comunidad Bíblica Cristiana</small>
-      </div>
+    <div class="video-wrapper">
+      <!-- Canal oficial: @comunidadbiblicacristiana -->
+      <iframe id="liveFrame"
+        src="https://www.youtube.com/embed/live_stream?channel=UCA_dlOwtkTyg9VdtudhXEXQ&autoplay=1&mute=1"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowfullscreen
+        style="width:100%;aspect-ratio:16/9;border:none;display:block">
+      </iframe>
     </div>
 
     <div class="video-tabs">
       <button class="video-tab active" onclick="setTab(this,'live')">🔴 En Vivo</button>
+      <button class="video-tab" onclick="setTab(this,'sermon')">📖 Sermones</button>
+      <button class="video-tab" onclick="setTab(this,'alabanza')">🎵 Alabanza</button>
+      <button class="video-tab" onclick="setTab(this,'ninos')">👶 Niños</button>
     </div>
   </div>
 </section>
@@ -379,7 +383,7 @@
       <div class="act-card">
         <div class="act-header bg1">🚶</div>
         <div class="act-body">
-          <div class="act-date">Jueves 25 Jun 2026</div>
+          <div class="act-date">Jueves 26 Jun 2026</div>
           <div class="act-title">Visitas · Caminata de Oración · Ungimiento de Territorio</div>
           <div class="act-desc">Saldremos a visitar casas, orar por el territorio y ungir la zona como inicio de la evangelización en Tapa de Piedra y Guacuy.</div>
           <span class="act-tag">Evangelización</span>
@@ -388,7 +392,7 @@
       <div class="act-card">
         <div class="act-header bg2">📋</div>
         <div class="act-body">
-          <div class="act-date">Viernes 26 Jun 2026</div>
+          <div class="act-date">Viernes 27 Jun 2026</div>
           <div class="act-title">Evangelismo Casa por Casa · Entrega de Fichas de Oración</div>
           <div class="act-desc">Equipos visitando hogares con el evangelio, entregando fichas de oración personalizadas para cada familia.</div>
           <span class="act-tag">Evangelización</span>
@@ -397,7 +401,7 @@
       <div class="act-card">
         <div class="act-header bg3">⚽</div>
         <div class="act-body">
-          <div class="act-date">Sábado 27 Jun 2026</div>
+          <div class="act-date">Sábado 28 Jun 2026</div>
           <div class="act-title">Fichas de Oración · Actividades Deportivas</div>
           <div class="act-desc">Continúa la entrega de fichas de oración en los hogares, más actividades deportivas como punto de conexión con la comunidad.</div>
           <span class="act-tag">Evangelización</span>
@@ -406,7 +410,7 @@
       <div class="act-card">
         <div class="act-header bg4">🎭</div>
         <div class="act-body">
-          <div class="act-date">Domingo 28 Jun 2026</div>
+          <div class="act-date">Domingo 29 Jun 2026</div>
           <div class="act-title">Adoración · Predicación · Sketch · Teatro · Oración por Fichas</div>
           <div class="act-desc">Noche de impacto: tiempo de adoración y predicación, presentaciones de Sketch y obras de teatro, y oración especial por cada petición recibida en las fichas.</div>
           <span class="act-tag">Evangelización</span>
@@ -415,7 +419,7 @@
       <div class="act-card">
         <div class="act-header bg5">🤝</div>
         <div class="act-body">
-          <div class="act-date">Lunes 29 Jun 2026</div>
+          <div class="act-date">Lunes 30 Jun 2026</div>
           <div class="act-title">Visitas · Invitar al GRUFAM · Confirmar Decisión</div>
           <div class="act-desc">Cierre de la semana: visitar a las personas contactadas, invitarlas a unirse a un Grupo Familiar y confirmar su decisión de fe.</div>
           <span class="act-tag">Evangelización</span>
@@ -424,7 +428,7 @@
       <div class="act-card">
         <div class="act-header bg6">🦸</div>
         <div class="act-body">
-          <div class="act-date">Vie 26 · Sáb 27 · Dom 28 Jun 2026</div>
+          <div class="act-date">Vie 27 · Sáb 28 · Dom 29 Jun 2026</div>
           <div class="act-title">Héroes Kids — Actividades para Niños</div>
           <div class="act-desc">Programa especial para niños durante los tres días centrales de la evangelización: juegos, enseñanza bíblica y actividades creativas pensadas para los más pequeños.</div>
           <span class="act-tag">Niños</span>
@@ -649,14 +653,46 @@
       <p class="section-sub">Recuerdos de nuestros momentos especiales juntos como familia de fe.</p>
     </div>
     <div class="gallery-grid">
-      <div class="gallery-item g1">🙏</div>
-      <div class="gallery-item g2">🎵</div>
-      <div class="gallery-item g3">✝️</div>
-      <div class="gallery-item g4">💒</div>
-      <div class="gallery-item g5">🌟</div>
-      <div class="gallery-item g6">📖</div>
-      <div class="gallery-item g2">👶</div>
-      <div class="gallery-item g3">🤝</div>
+      <div class="gallery-item g1" style="background:linear-gradient(135deg,var(--lavender),var(--blush));overflow:hidden">
+        <img src="fotos/galeria-1.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🙏'">
+      </div>
+      <div class="gallery-item g2" style="overflow:hidden">
+        <img src="fotos/galeria-2.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🎵'">
+      </div>
+      <div class="gallery-item g3" style="overflow:hidden">
+        <img src="fotos/galeria-3.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='✝️'">
+      </div>
+      <div class="gallery-item g4" style="overflow:hidden">
+        <img src="fotos/galeria-4.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='💒'">
+      </div>
+      <div class="gallery-item g5" style="overflow:hidden">
+        <img src="fotos/galeria-5.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🌟'">
+      </div>
+      <div class="gallery-item g6" style="overflow:hidden">
+        <img src="fotos/galeria-6.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='📖'">
+      </div>
+      <div class="gallery-item g2" style="overflow:hidden">
+        <img src="fotos/galeria-7.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='👶'">
+      </div>
+      <div class="gallery-item g3" style="overflow:hidden">
+        <img src="fotos/galeria-8.jpeg" alt="Momento comunidad"
+             style="width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none';this.parentElement.innerHTML='🤝'">
+      </div>
     </div>
     <div style="text-align:center; margin-top:32px;">
       <a href="https://youtube.com/@comunidadbiblicacristiana" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;">
