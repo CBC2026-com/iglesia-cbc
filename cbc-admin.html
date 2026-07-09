@@ -568,6 +568,12 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
                 </button>
                 <input type="file" id="liderFotoArchivo" accept="image/*" style="display:none">
                 <small id="liderFotoStatus" style="color:var(--text3);font-size:.72rem;display:block;margin-top:6px">Ninguna foto elegida</small>
+                <div id="liderFotoProgressWrap" style="display:none;margin-top:8px">
+                  <div style="background:var(--surface2);border-radius:50px;height:8px;overflow:hidden">
+                    <div id="liderFotoProgressBar" style="background:var(--accent);height:100%;width:0%;transition:.2s"></div>
+                  </div>
+                  <small id="liderFotoProgressText" style="color:var(--text2);font-size:.72rem;display:block;margin-top:4px">Subiendo… 0%</small>
+                </div>
               </div>
             </div>
           </div>
@@ -1146,21 +1152,43 @@ function loadLiderazgo(){
   unsubs.push(unsub);
 }
 // ── Subidor directo de foto de líder ──
-document.getElementById('liderFotoArchivo').addEventListener('change', async (e)=>{
+document.getElementById('liderFotoArchivo').addEventListener('change', (e)=>{
   const file = e.target.files[0];
   if(!file) return;
   if(!file.type.startsWith('image/')){ showToast('Solo se permiten imágenes','error'); return; }
   const status = document.getElementById('liderFotoStatus');
+  const progressWrap = document.getElementById('liderFotoProgressWrap');
+  const progressBar = document.getElementById('liderFotoProgressBar');
+  const progressText = document.getElementById('liderFotoProgressText');
   status.textContent = 'Subiendo…';
-  try{
-    const path = `lideres/${Date.now()}_${file.name}`;
-    const fileRef = ref(storage, path);
-    await uploadBytesResumable(fileRef, file);
-    const url = await getDownloadURL(fileRef);
-    document.getElementById('liderFotoUrl').value = url;
-    document.getElementById('liderFotoPreview').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
-    status.textContent = '✅ Foto lista';
-  }catch(err){ status.textContent='Error al subir'; showToast('Error: '+err.message,'error'); }
+  progressWrap.style.display = 'block';
+  progressBar.style.width = '0%';
+  progressText.textContent = 'Subiendo… 0%';
+
+  const path = `lideres/${Date.now()}_${file.name}`;
+  const fileRef = ref(storage, path);
+  const task = uploadBytesResumable(fileRef, file);
+
+  task.on('state_changed',
+    (snap)=>{
+      const pct = Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+      progressBar.style.width = pct+'%';
+      progressText.textContent = `Subiendo… ${pct}%`;
+    },
+    (err)=>{
+      progressWrap.style.display = 'none';
+      status.textContent = 'Error al subir';
+      showToast('Error: '+err.message,'error');
+    },
+    async ()=>{
+      const url = await getDownloadURL(fileRef);
+      document.getElementById('liderFotoUrl').value = url;
+      document.getElementById('liderFotoPreview').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+      status.textContent = '✅ Foto lista';
+      progressWrap.style.display = 'none';
+      progressBar.style.width = '0%';
+    }
+  );
 });
 
 window.saveLider = async function(){
