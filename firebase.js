@@ -53,6 +53,13 @@ window._savePrayer = async (nombre, correo, tipo, peticion) => {
 // ── GALERÍA — fotos y videos subidos desde el admin ──
 // Si hay contenido en Firestore, reemplaza la galería fija del HTML.
 // Si la colección está vacía (o falla), se deja la galería fija tal cual está.
+// Convierte la URL de un video de Cloudinary en una miniatura de imagen
+// para no forzar la descarga del video completo solo para mostrarlo en la cuadrícula
+function cloudinaryVideoThumb(url){
+  if(!url || !url.includes('res.cloudinary.com')) return null;
+  return url.replace(/\.(mp4|mov|webm|mkv|avi|m4v)(\?.*)?$/i, '.jpg$2');
+}
+
 function cargarGaleriaPublica(){
   const grid = document.getElementById('galeriaGrid');
   if(!grid) return;
@@ -68,14 +75,49 @@ function cargarGaleriaPublica(){
       const item = document.createElement('div');
       item.className = 'gallery-item ' + clase;
       item.style.overflow = 'hidden';
+
       if(dat.tipo === 'video'){
-        item.innerHTML = `<video src="${dat.url||''}" style="width:100%;height:100%;object-fit:cover"
-             muted playsinline controls onerror="this.parentElement.innerHTML='🎥'"></video>`;
+        const thumb = cloudinaryVideoThumb(dat.url);
+        if(thumb){
+          // Miniatura liviana con botón de reproducción; el video real
+          // solo se carga cuando alguien hace clic
+          const wrap = document.createElement('div');
+          wrap.style.cssText = 'position:relative;width:100%;height:100%;cursor:pointer';
+          const img = document.createElement('img');
+          img.src = thumb; img.loading = 'lazy';
+          img.alt = dat.descripcion || 'Momento comunidad';
+          img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+          img.onerror = ()=>{ img.style.display='none'; };
+          const play = document.createElement('span');
+          play.textContent = '▶';
+          play.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none';
+          wrap.appendChild(img); wrap.appendChild(play);
+          wrap.addEventListener('click', ()=>{
+            const video = document.createElement('video');
+            video.src = dat.url || ''; video.controls = true; video.autoplay = true;
+            video.muted = true; video.playsInline = true;
+            video.style.cssText = 'width:100%;height:100%;object-fit:cover';
+            video.onerror = ()=>{ item.innerHTML = '🎥'; };
+            item.innerHTML = ''; item.appendChild(video);
+          }, { once:true });
+          item.appendChild(wrap);
+        } else {
+          const video = document.createElement('video');
+          video.src = dat.url || ''; video.muted = true; video.playsInline = true;
+          video.controls = true; video.preload = 'none';
+          video.style.cssText = 'width:100%;height:100%;object-fit:cover';
+          video.onerror = ()=>{ item.innerHTML = '🎥'; };
+          item.appendChild(video);
+        }
       } else {
-        item.innerHTML = `<img src="${dat.url||''}" alt="${dat.descripcion||'Momento comunidad'}"
-             style="width:100%;height:100%;object-fit:cover"
-             onerror="this.style.display='none';this.parentElement.innerHTML='🙏'">`;
+        const img = document.createElement('img');
+        img.src = dat.url || ''; img.loading = 'lazy';
+        img.alt = dat.descripcion || 'Momento comunidad';
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover';
+        img.onerror = ()=>{ img.style.display='none'; item.innerHTML = '🙏'; };
+        item.appendChild(img);
       }
+
       grid.appendChild(item);
     });
   }, err => console.warn('Galería Firebase error:', err.message));
