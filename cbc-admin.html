@@ -387,6 +387,16 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
               <label>Playlist de YouTube</label>
               <input type="text" id="sermonPlaylist" placeholder="ID o link de playlist">
             </div>
+            <div style="text-align:center;color:var(--text3);font-size:.72rem;margin:10px 0">— o —</div>
+            <div class="form-row">
+              <input type="hidden" id="sermonVideoUrl">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('sermonVideoArchivo').click()">
+                <i class="fa-solid fa-upload"></i> Subir video propio
+              </button>
+              <input type="file" id="sermonVideoArchivo" accept="video/*" style="display:none">
+              <small id="sermonVideoStatus" style="color:var(--text3);font-size:.72rem;display:block;margin-top:6px">Ningún video subido</small>
+              <button type="button" onclick="quitarVideoTransmision('sermon')" style="background:none;border:none;color:var(--text3);font-size:.7rem;text-decoration:underline;cursor:pointer;margin-top:4px;padding:0">Quitar video y usar YouTube</button>
+            </div>
             <button class="btn btn-primary" onclick="saveTransmision('sermon')">
               <i class="fa-solid fa-floppy-disk"></i> Guardar
             </button>
@@ -397,6 +407,16 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
               <label>Playlist de YouTube</label>
               <input type="text" id="alabanzaPlaylist" placeholder="ID o link de playlist">
             </div>
+            <div style="text-align:center;color:var(--text3);font-size:.72rem;margin:10px 0">— o —</div>
+            <div class="form-row">
+              <input type="hidden" id="alabanzaVideoUrl">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('alabanzaVideoArchivo').click()">
+                <i class="fa-solid fa-upload"></i> Subir video propio
+              </button>
+              <input type="file" id="alabanzaVideoArchivo" accept="video/*" style="display:none">
+              <small id="alabanzaVideoStatus" style="color:var(--text3);font-size:.72rem;display:block;margin-top:6px">Ningún video subido</small>
+              <button type="button" onclick="quitarVideoTransmision('alabanza')" style="background:none;border:none;color:var(--text3);font-size:.7rem;text-decoration:underline;cursor:pointer;margin-top:4px;padding:0">Quitar video y usar YouTube</button>
+            </div>
             <button class="btn btn-primary" onclick="saveTransmision('alabanza')">
               <i class="fa-solid fa-floppy-disk"></i> Guardar
             </button>
@@ -406,6 +426,16 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
             <div class="form-row">
               <label>Playlist de YouTube</label>
               <input type="text" id="ninosPlaylist" placeholder="ID o link de playlist">
+            </div>
+            <div style="text-align:center;color:var(--text3);font-size:.72rem;margin:10px 0">— o —</div>
+            <div class="form-row">
+              <input type="hidden" id="ninosVideoUrl">
+              <button type="button" class="btn btn-ghost" onclick="document.getElementById('ninosVideoArchivo').click()">
+                <i class="fa-solid fa-upload"></i> Subir video propio
+              </button>
+              <input type="file" id="ninosVideoArchivo" accept="video/*" style="display:none">
+              <small id="ninosVideoStatus" style="color:var(--text3);font-size:.72rem;display:block;margin-top:6px">Ningún video subido</small>
+              <button type="button" onclick="quitarVideoTransmision('ninos')" style="background:none;border:none;color:var(--text3);font-size:.7rem;text-decoration:underline;cursor:pointer;margin-top:4px;padding:0">Quitar video y usar YouTube</button>
             </div>
             <button class="btn btn-primary" onclick="saveTransmision('ninos')">
               <i class="fa-solid fa-floppy-disk"></i> Guardar
@@ -528,8 +558,18 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
             <textarea id="liderBio" placeholder="Descripción breve del líder…"></textarea>
           </div>
           <div class="form-row">
-            <label>URL de foto (opcional)</label>
-            <input type="text" id="liderFoto" placeholder="https://… o dejar vacío para usar emoji">
+            <label>Foto (opcional — si no subes una, se usa el emoji)</label>
+            <input type="hidden" id="liderFotoUrl">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div id="liderFotoPreview" style="width:56px;height:56px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:1.4rem;color:var(--text3)"><i class="fa-solid fa-image"></i></div>
+              <div style="flex:1">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('liderFotoArchivo').click()">
+                  <i class="fa-solid fa-upload"></i> Elegir foto
+                </button>
+                <input type="file" id="liderFotoArchivo" accept="image/*" style="display:none">
+                <small id="liderFotoStatus" style="color:var(--text3);font-size:.72rem;display:block;margin-top:6px">Ninguna foto elegida</small>
+              </div>
+            </div>
           </div>
           <div style="display:flex;gap:10px">
             <button class="btn btn-success" onclick="saveLider()">
@@ -892,6 +932,10 @@ async function loadTransmision(){
           document.getElementById('liveActivo').checked=!!d.activo;
           document.getElementById('liveActivoLabel').textContent=d.activo?'🔴 Transmisión ACTIVA':'Transmisión inactiva';
         }
+        if(d.tipo==='video' && d.videoUrl){
+          document.getElementById(tab+'VideoUrl').value = d.videoUrl;
+          document.getElementById(tab+'VideoStatus').textContent = '✅ Usando video propio (elige otro para reemplazarlo)';
+        }
       }
     }catch(e){}
   }
@@ -899,16 +943,53 @@ async function loadTransmision(){
     document.getElementById('liveActivoLabel').textContent=this.checked?'🔴 Transmisión ACTIVA':'Transmisión inactiva';
   };
 }
+
+// ── Subidor directo de video propio para sermon/alabanza/ninos ──
+['sermon','alabanza','ninos'].forEach(tab=>{
+  document.getElementById(tab+'VideoArchivo').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('video/')){ showToast('Solo se permiten videos','error'); return; }
+    const status = document.getElementById(tab+'VideoStatus');
+    status.textContent = 'Subiendo…';
+    try{
+      const path = `transmision/${tab}_${Date.now()}_${file.name}`;
+      const fileRef = ref(storage, path);
+      await uploadBytesResumable(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+      document.getElementById(tab+'VideoUrl').value = url;
+      status.textContent = '✅ Video listo — pulsa Guardar para publicarlo';
+    }catch(err){ status.textContent='Error al subir'; showToast('Error: '+err.message,'error'); }
+  });
+});
+
 window.saveTransmision = async function(tab){
   const fields = {live:'livePlaylist', sermon:'sermonPlaylist', alabanza:'alabanzaPlaylist', ninos:'ninosPlaylist'};
   const playlistId = extractYTId(document.getElementById(fields[tab]).value);
   document.getElementById(fields[tab]).value = playlistId;
-  const data = {playlistId, actualizadoEn:serverTimestamp()};
+  const videoUrlEl = tab!=='live' ? document.getElementById(tab+'VideoUrl') : null;
+  const videoUrl = videoUrlEl ? videoUrlEl.value.trim() : '';
+
+  const data = { actualizadoEn:serverTimestamp() };
+  if(videoUrl){
+    data.tipo = 'video';
+    data.videoUrl = videoUrl;
+    data.playlistId = playlistId; // se conserva por si luego quitan el video
+  } else {
+    data.tipo = 'youtube';
+    data.playlistId = playlistId;
+  }
   if(tab==='live') data.activo = document.getElementById('liveActivo').checked;
+
   try{
     await setDoc(doc(db,'transmision',tab), data, {merge:true});
     showToast('✅ Transmisión guardada — visible para todos','success');
   }catch(e){ showToast('Error: '+e.message,'error'); }
+};
+window.quitarVideoTransmision = function(tab){
+  document.getElementById(tab+'VideoUrl').value = '';
+  document.getElementById(tab+'VideoStatus').textContent = 'Ningún video subido';
+  showToast('Video quitado — pulsa Guardar para usar el YouTube en su lugar','success');
 };
 
 // ══════════════════════════════════════════════════════
@@ -1064,6 +1145,24 @@ function loadLiderazgo(){
   },e=>{ el.innerHTML=`<div class="empty-state"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
   unsubs.push(unsub);
 }
+// ── Subidor directo de foto de líder ──
+document.getElementById('liderFotoArchivo').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){ showToast('Solo se permiten imágenes','error'); return; }
+  const status = document.getElementById('liderFotoStatus');
+  status.textContent = 'Subiendo…';
+  try{
+    const path = `lideres/${Date.now()}_${file.name}`;
+    const fileRef = ref(storage, path);
+    await uploadBytesResumable(fileRef, file);
+    const url = await getDownloadURL(fileRef);
+    document.getElementById('liderFotoUrl').value = url;
+    document.getElementById('liderFotoPreview').innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    status.textContent = '✅ Foto lista';
+  }catch(err){ status.textContent='Error al subir'; showToast('Error: '+err.message,'error'); }
+});
+
 window.saveLider = async function(){
   const id=document.getElementById('liderId').value;
   const data={
@@ -1071,7 +1170,7 @@ window.saveLider = async function(){
     nombre:document.getElementById('liderNombre').value.trim(),
     cargo:document.getElementById('liderCargo').value.trim(),
     bio:document.getElementById('liderBio').value.trim(),
-    foto:document.getElementById('liderFoto').value.trim(),
+    foto:document.getElementById('liderFotoUrl').value.trim(),
     orden:parseInt(document.getElementById('liderOrden').value)||99,
     actualizadoEn:serverTimestamp()
   };
@@ -1092,8 +1191,12 @@ window.editLider = async function(id){
   document.getElementById('liderNombre').value=d.nombre||'';
   document.getElementById('liderCargo').value=d.cargo||'';
   document.getElementById('liderBio').value=d.bio||'';
-  document.getElementById('liderFoto').value=d.foto||'';
+  document.getElementById('liderFotoUrl').value=d.foto||'';
   document.getElementById('liderOrden').value=d.orden||'';
+  const preview=document.getElementById('liderFotoPreview');
+  const status=document.getElementById('liderFotoStatus');
+  if(d.foto){ preview.innerHTML=`<img src="${d.foto}" style="width:100%;height:100%;object-fit:cover">`; status.textContent='Foto actual (elige otra para reemplazarla)'; }
+  else { preview.innerHTML='<i class="fa-solid fa-image"></i>'; status.textContent='Ninguna foto elegida'; }
 };
 window.delLider = async function(id){
   if(!confirm('¿Eliminar este líder?')) return;
@@ -1101,7 +1204,10 @@ window.delLider = async function(id){
   catch(e){ showToast('Error: '+e.message,'error'); }
 };
 window.clearLiderForm = function(){
-  ['liderId','liderEmoji','liderNombre','liderCargo','liderBio','liderFoto','liderOrden'].forEach(id=>{ document.getElementById(id).value=''; });
+  ['liderId','liderEmoji','liderNombre','liderCargo','liderBio','liderFotoUrl','liderOrden'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('liderFotoArchivo').value='';
+  document.getElementById('liderFotoPreview').innerHTML='<i class="fa-solid fa-image"></i>';
+  document.getElementById('liderFotoStatus').textContent='Ninguna foto elegida';
 };
 
 // ══════════════════════════════════════════════════════
