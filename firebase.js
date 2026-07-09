@@ -1,7 +1,7 @@
 // ══ FIREBASE — Peticiones de Oración ══
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp,
-         query, orderBy, onSnapshot }
+         query, orderBy, onSnapshot, doc }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -81,3 +81,82 @@ function cargarGaleriaPublica(){
   }, err => console.warn('Galería Firebase error:', err.message));
 }
 cargarGaleriaPublica();
+
+// ── TRANSMISIÓN — conecta las pestañas En Vivo / Sermones / Alabanza / Niños ──
+// Todo se hace por JavaScript; no se toca la estructura de index.html.
+const DEFAULT_LIVE_SRC = "https://www.youtube.com/embed/live_stream?channel=UCA_dlOwtkTyg9VdtudhXEXQ&autoplay=1&mute=1";
+const transmisionCache = {};
+let currentTab = 'live';
+let videoPropioEl = null;
+
+function ytEmbedUrl(playlistId, autoplay){
+  if(!playlistId) return null;
+  const idLimpio = playlistId.trim();
+  const esVideoSuelto = /^[\w-]{11}$/.test(idLimpio);
+  const auto = autoplay ? '&autoplay=1&mute=1' : '';
+  return esVideoSuelto
+    ? `https://www.youtube.com/embed/${idLimpio}?rel=0${auto}`
+    : `https://www.youtube.com/embed/videoseries?list=${idLimpio}${auto}`;
+}
+
+function obtenerVideoPropioEl(){
+  if(videoPropioEl) return videoPropioEl;
+  const iframe = document.getElementById('liveFrame');
+  if(!iframe) return null;
+  videoPropioEl = document.createElement('video');
+  videoPropioEl.id = 'liveFrameVideoPropio';
+  videoPropioEl.controls = true;
+  videoPropioEl.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:none;background:#000';
+  iframe.insertAdjacentElement('afterend', videoPropioEl);
+  return videoPropioEl;
+}
+
+function pintarTab(tab){
+  const iframe = document.getElementById('liveFrame');
+  if(!iframe) return;
+  const video = obtenerVideoPropioEl();
+  const data = transmisionCache[tab];
+
+  if(tab === 'live'){
+    if(video) video.style.display = 'none';
+    iframe.style.display = 'block';
+    iframe.src = (data && data.activo && data.playlistId)
+      ? (ytEmbedUrl(data.playlistId, true) || DEFAULT_LIVE_SRC)
+      : DEFAULT_LIVE_SRC;
+    return;
+  }
+
+  if(data && data.tipo === 'video' && data.videoUrl){
+    iframe.style.display = 'none';
+    if(video){
+      video.src = data.videoUrl;
+      video.style.display = 'block';
+      video.play().catch(()=>{});
+    }
+  } else if(data && data.playlistId){
+    if(video) video.style.display = 'none';
+    iframe.style.display = 'block';
+    iframe.src = ytEmbedUrl(data.playlistId, false);
+  } else {
+    if(video) video.style.display = 'none';
+    iframe.style.display = 'block';
+    iframe.src = DEFAULT_LIVE_SRC;
+  }
+}
+
+window.setTab = function(btn, tab){
+  const tabsWrap = btn.parentElement;
+  Array.from(tabsWrap.children).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTab = tab;
+  pintarTab(tab);
+};
+
+// Escucha en vivo los 4 documentos; si el admin guarda algo, se actualiza
+// automáticamente la pestaña que esté abierta en ese momento.
+['live','sermon','alabanza','ninos'].forEach(tab=>{
+  onSnapshot(doc(db,'transmision',tab), snap=>{
+    transmisionCache[tab] = snap.exists() ? snap.data() : null;
+    if(currentTab === tab) pintarTab(tab);
+  }, err => console.warn('Transmisión Firebase error ('+tab+'):', err.message));
+});
