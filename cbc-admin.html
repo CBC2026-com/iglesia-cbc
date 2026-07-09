@@ -249,6 +249,7 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
   background:var(--surface2);position:relative;
 }
 .photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-thumb video{width:100%;height:100%;object-fit:cover}
 .photo-thumb .del-photo{
   position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);
   color:#fff;border:none;border-radius:50%;width:22px;height:22px;
@@ -647,11 +648,18 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
             <input type="text" id="galeriaCategoria" placeholder="Evangelización 2026, Bautismos, Retiro…">
           </div>
           <div class="form-row">
-            <label>URL de la imagen</label>
-            <input type="text" id="galeriaUrl" placeholder="https://…">
-            <small style="color:var(--text3);font-size:.72rem;margin-top:4px;display:block">
-              Sube la foto a <a href="https://imgbb.com" target="_blank" style="color:var(--accent2)">ImgBB</a> (gratuito) y pega aquí el link directo a la imagen.
-            </small>
+            <label>Foto o Video</label>
+            <div class="photo-drop" id="galeriaDrop">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span id="galeriaDropText">Toca para elegir una foto o video, o arrástralo aquí</span>
+              <input type="file" id="galeriaArchivo" accept="image/*,video/*" style="display:none">
+            </div>
+            <div id="galeriaProgressWrap" style="display:none;margin-top:10px">
+              <div style="background:var(--surface2);border-radius:50px;height:8px;overflow:hidden">
+                <div id="galeriaProgressBar" style="background:var(--accent);height:100%;width:0%;transition:.2s"></div>
+              </div>
+              <small id="galeriaProgressText" style="color:var(--text2);font-size:.72rem;display:block;margin-top:4px">Subiendo… 0%</small>
+            </div>
           </div>
           <div class="form-row">
             <label>Descripción (opcional)</label>
@@ -690,6 +698,8 @@ import { getFirestore, doc, collection, getDocs, getDoc, setDoc,
          addDoc, updateDoc, deleteDoc, onSnapshot, query,
          orderBy, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const FC = {
   apiKey:"AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
@@ -701,6 +711,7 @@ const FC = {
 };
 const app = getApps().length ? getApp() : initializeApp(FC);
 const db  = getFirestore(app);
+const storage = getStorage(app);
 
 // ══════════════════════════════════════════════════════
 // ROLES Y PERMISOS
@@ -1219,28 +1230,87 @@ function loadGaleria(){
       const dat=d.data();
       const div=document.createElement('div');
       div.className='photo-thumb';
-      div.innerHTML=`<img src="${esc(dat.url||'')}" alt="${esc(dat.descripcion||'')}" onerror="this.style.display='none'">
-        <button class="del-photo" onclick="delFoto('${d.id}')">✕</button>`;
+      const esVideo = dat.tipo==='video';
+      div.innerHTML = esVideo
+        ? `<video src="${esc(dat.url||'')}" muted></video>
+           <span style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:50px"><i class="fa-solid fa-video"></i> Video</span>
+           <button class="del-photo" onclick="delFoto('${d.id}')">✕</button>`
+        : `<img src="${esc(dat.url||'')}" alt="${esc(dat.descripcion||'')}" onerror="this.style.display='none'">
+           <button class="del-photo" onclick="delFoto('${d.id}')">✕</button>`;
       div.title=dat.descripcion||dat.categoria||'';
       grid.appendChild(div);
     });
   },e=>{ grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><p style="color:var(--red)">Error: ${e.message}</p></div>`; });
   unsubs.push(unsub);
 }
+
+// ── Subidor directo de fotos/videos a Firebase Storage ──
+const galeriaDrop = document.getElementById('galeriaDrop');
+const galeriaArchivo = document.getElementById('galeriaArchivo');
+let archivoSeleccionado = null;
+
+galeriaDrop.addEventListener('click', ()=> galeriaArchivo.click());
+galeriaDrop.addEventListener('dragover', (e)=>{ e.preventDefault(); galeriaDrop.style.borderColor='var(--accent)'; });
+galeriaDrop.addEventListener('dragleave', ()=>{ galeriaDrop.style.borderColor=''; });
+galeriaDrop.addEventListener('drop', (e)=>{
+  e.preventDefault(); galeriaDrop.style.borderColor='';
+  if(e.dataTransfer.files[0]) setArchivoSeleccionado(e.dataTransfer.files[0]);
+});
+galeriaArchivo.addEventListener('change', ()=>{
+  if(galeriaArchivo.files[0]) setArchivoSeleccionado(galeriaArchivo.files[0]);
+});
+function setArchivoSeleccionado(file){
+  if(!file.type.startsWith('image/') && !file.type.startsWith('video/')){
+    showToast('Solo se permiten fotos o videos','error'); return;
+  }
+  archivoSeleccionado = file;
+  document.getElementById('galeriaDropText').textContent = '✅ '+file.name;
+}
+
 window.saveGaleria = async function(){
-  const url=document.getElementById('galeriaUrl').value.trim();
-  if(!url){ showToast('Pega la URL de la imagen','error'); return; }
-  const data={
-    url,
-    categoria:document.getElementById('galeriaCategoria').value.trim(),
-    descripcion:document.getElementById('galeriaDesc').value.trim(),
-    creadoEn:serverTimestamp()
-  };
-  try{
-    await addDoc(collection(db,'galeria'),data);
-    ['galeriaUrl','galeriaCategoria','galeriaDesc'].forEach(id=>{ document.getElementById(id).value=''; });
-    showToast('✅ Foto agregada a la galería','success');
-  }catch(e){ showToast('Error: '+e.message,'error'); }
+  if(!archivoSeleccionado){ showToast('Elige una foto o video primero','error'); return; }
+  const file = archivoSeleccionado;
+  const esVideo = file.type.startsWith('video/');
+  const progressWrap = document.getElementById('galeriaProgressWrap');
+  const progressBar = document.getElementById('galeriaProgressBar');
+  const progressText = document.getElementById('galeriaProgressText');
+  progressWrap.style.display='block';
+
+  const path = `galeria/${Date.now()}_${file.name}`;
+  const fileRef = ref(storage, path);
+  const task = uploadBytesResumable(fileRef, file);
+
+  task.on('state_changed',
+    (snap)=>{
+      const pct = Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+      progressBar.style.width = pct+'%';
+      progressText.textContent = `Subiendo… ${pct}%`;
+    },
+    (err)=>{
+      progressWrap.style.display='none';
+      showToast('Error al subir: '+err.message,'error');
+    },
+    async ()=>{
+      const url = await getDownloadURL(fileRef);
+      const data={
+        url,
+        tipo: esVideo ? 'video' : 'imagen',
+        categoria:document.getElementById('galeriaCategoria').value.trim(),
+        descripcion:document.getElementById('galeriaDesc').value.trim(),
+        creadoEn:serverTimestamp()
+      };
+      try{
+        await addDoc(collection(db,'galeria'),data);
+        ['galeriaCategoria','galeriaDesc'].forEach(id=>{ document.getElementById(id).value=''; });
+        archivoSeleccionado = null;
+        galeriaArchivo.value = '';
+        document.getElementById('galeriaDropText').textContent = 'Toca para elegir una foto o video, o arrástralo aquí';
+        progressWrap.style.display='none';
+        progressBar.style.width='0%';
+        showToast(esVideo ? '✅ Video agregado a la galería' : '✅ Foto agregada a la galería','success');
+      }catch(e){ showToast('Error: '+e.message,'error'); progressWrap.style.display='none'; }
+    }
+  );
 };
 window.delFoto = async function(id){
   if(!confirm('¿Eliminar esta foto?')) return;
