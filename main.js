@@ -1067,18 +1067,32 @@
     setVersiculoBanner(VS_BANCO[fallKey], fallRef, fallKey);
   }
 
-  // Cargar al iniciar y refrescar a medianoche
-  document.addEventListener('DOMContentLoaded', loadVersiculoDelDia);
-  const _msMidnight = (() => {
-    const m = new Date();
-    m.setDate(m.getDate() + 1);
-    m.setHours(0, 0, 15, 0);
-    return m - new Date();
-  })();
-  setTimeout(() => {
-    loadVersiculoDelDia();
-    setInterval(loadVersiculoDelDia, 86400000);
-  }, _msMidnight);
+  // Cargar al iniciar, y refrescar de forma robusta cuando cambie el día.
+  // (No dependemos de un solo setTimeout/setInterval de 24h: los navegadores
+  // pausan esos temporizadores en pestañas inactivas/en segundo plano, lo que
+  // hacía que el versículo se quedara "congelado" si la página se dejaba abierta.)
+  let _ultimoDiaVersiculo = null;
+
+  function _revisarYActualizarVersiculo() {
+    const diaActual = getDayOfYear();
+    if (diaActual !== _ultimoDiaVersiculo) {
+      _ultimoDiaVersiculo = diaActual;
+      loadVersiculoDelDia();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', _revisarYActualizarVersiculo);
+
+  // Cuando la pestaña vuelve a estar visible o gana foco (usuario regresa,
+  // enciende la pantalla, etc.), revisamos si ya cambió el día.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') _revisarYActualizarVersiculo();
+  });
+  window.addEventListener('focus', _revisarYActualizarVersiculo);
+
+  // Respaldo: revisar cada 5 minutos por si la pestaña se queda abierta
+  // fija (pantalla/kiosco) sin eventos de foco/visibilidad.
+  setInterval(_revisarYActualizarVersiculo, 5 * 60 * 1000);
 
 
 
