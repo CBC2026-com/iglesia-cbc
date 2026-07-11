@@ -743,14 +743,32 @@
     }, 300);
   }
 
-  async function fetchWithTimeout(url, ms) {
+  async function fetchWithTimeout(url, ms, headers) {
     const ctrl = new AbortController();
     const t    = setTimeout(() => ctrl.abort(), ms);
     try {
-      const r = await fetch(url, { signal: ctrl.signal });
+      const r = await fetch(url, { signal: ctrl.signal, headers: headers || {} });
       clearTimeout(t);
       return r;
     } catch(e) { clearTimeout(t); throw e; }
+  }
+
+  // ── YouVersion Platform API — passage_id oficial del versículo del día ──
+  const YOUVERSION_APP_KEY = '7wG61JgutrDS6O0N2OnVd9gbWAjXfO2Q7Hv47RbfGWaqtuJs';
+
+  async function obtenerPidYouVersion(day) {
+    try {
+      const r = await fetchWithTimeout(
+        `https://api.youversion.com/v1/verse_of_the_days/${day}`,
+        5000,
+        { 'X-YVP-App-Key': YOUVERSION_APP_KEY }
+      );
+      if (r.ok) {
+        const d = await r.json();
+        if (d && d.passage_id) return d.passage_id;
+      }
+    } catch(_) {}
+    return null; // si falla, devolvemos null y el llamador usa el calendario de respaldo
   }
 
   // ══ Banco local RVR1960 completo — cubre TODOS los días del calendario ════
@@ -1023,7 +1041,14 @@
 
   async function loadVersiculoDelDia() {
     const day = getDayOfYear();
-    const pid = YV_CALENDAR[day] || YV_CALENDAR[((day-1)%365)+1] || 'JHN.3.16';
+
+    // Intento 1: passage_id oficial y exacto de YouVersion (sincronía 1:1 con la app)
+    let pid = await obtenerPidYouVersion(day);
+    if (!pid) {
+      // Respaldo: calendario aproximado local, por si la API de YouVersion falla
+      pid = YV_CALENDAR[day] || YV_CALENDAR[((day-1)%365)+1] || 'JHN.3.16';
+    }
+
     const { book, chapter, verse } = parsePid(pid);
     const ref = pidToRef(pid);
 
