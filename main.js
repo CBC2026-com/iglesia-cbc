@@ -766,8 +766,15 @@
       if (r.ok) {
         const d = await r.json();
         if (d && d.passage_id) return d.passage_id;
+        console.warn('[YouVersion] Respuesta OK pero sin passage_id:', d);
+      } else {
+        // Mostramos el cuerpo real del error para poder diagnosticarlo
+        const cuerpo = await r.text().catch(()=> '(sin cuerpo)');
+        console.warn(`[YouVersion] Error ${r.status} ${r.statusText}:`, cuerpo);
       }
-    } catch(_) {}
+    } catch(e) {
+      console.warn('[YouVersion] Falló la petición (red, CORS o timeout):', e.message);
+    }
     return null; // si falla, devolvemos null y el llamador usa el calendario de respaldo
   }
 
