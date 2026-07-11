@@ -1081,7 +1081,10 @@
     }
   }
 
-  document.addEventListener('DOMContentLoaded', _revisarYActualizarVersiculo);
+  // Este bloque ya se ejecuta dentro del DOMContentLoaded principal de la página,
+  // así que llamamos directamente en vez de registrar otro listener (ese evento
+  // ya se disparó y nunca volvería a hacerlo).
+  _revisarYActualizarVersiculo();
 
   // Cuando la pestaña vuelve a estar visible o gana foco (usuario regresa,
   // enciende la pantalla, etc.), revisamos si ya cambió el día.
