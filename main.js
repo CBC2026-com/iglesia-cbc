@@ -760,7 +760,7 @@
     try {
       const r = await fetchWithTimeout(
         `https://api.youversion.com/v1/verse_of_the_days/${day}`,
-        5000,
+        1500,
         { 'X-YVP-App-Key': YOUVERSION_APP_KEY }
       );
       if (r.ok) {
