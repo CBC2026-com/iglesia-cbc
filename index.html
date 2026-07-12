@@ -4,6 +4,10 @@
   <link rel="icon" type="image/png" href="logo.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Evita el "Error 153" en los embeds de YouTube: YouTube exige que el
+       navegador envíe el header Referer al cargar el iframe. Sin esta
+       etiqueta, algunos navegadores/CDNs lo bloquean. -->
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>Comunidad Bíblica Cristiana | Iglesia Evangélica en Araure, Portuguesa</title>
 
   <!-- ══ SEO básico ══ -->
@@ -868,7 +872,6 @@
 <!-- Firebase: módulo ES, carga diferida y no bloqueante -->
 <script type="module" src="firebase.js"></script>
 <!-- Contenido de YouTube en tiempo real (En Vivo / Sermones / Alabanza / Niños) -->
-<script type="module" src="transmision-live.js"></script>
 <!-- Dashboard dinámico: anuncios, actividades, ministerios y peticiones en tiempo real -->
 <script type="module" src="dashboard-live.js"></script>
 <!-- Lógica principal del sitio: cargada al final, después del HTML -->

@@ -126,10 +126,124 @@ cargarGaleriaPublica();
 
 // ── TRANSMISIÓN — conecta las pestañas En Vivo / Sermones / Alabanza / Niños ──
 // Todo se hace por JavaScript; no se toca la estructura de index.html.
-const DEFAULT_LIVE_SRC = "https://www.youtube.com/embed/live_stream?channel=UCA_dlOwtkTyg9VdtudhXEXQ&autoplay=1&mute=1";
+const YT_CHANNEL_ID   = 'UCA_dlOwtkTyg9VdtudhXEXQ';
+const DEFAULT_LIVE_SRC = `https://www.youtube.com/embed/live_stream?channel=${YT_CHANNEL_ID}&autoplay=1&mute=1`;
 const transmisionCache = {};
 let currentTab = 'live';
 let videoPropioEl = null;
+
+// ══════════════════════════════════════════════════════════════════════════
+// DETECCIÓN AUTOMÁTICA DEL VIDEO EN VIVO — sin API Key
+//
+// El embed "embed/live_stream?channel=ID" (DEFAULT_LIVE_SRC) es el formato
+// oficial de YouTube para mostrar el directo activo de un canal, y se
+// actualiza solo en el momento en que el canal empieza a transmitir — no
+// requiere ninguna acción manual. Se usa como primera opción por ser
+// instantáneo (no depende de proxies externos).
+//
+// Como respaldo — por si ese formato falla en algún navegador/región —
+// detectamos también el ID exacto del video en vivo (si existe) a través
+// de APIs alternativas sin API Key, y si lo encontramos, sustituimos el
+// iframe por el embed directo "embed/VIDEO_ID", que es el más confiable.
+// Esto se revisa cada 90s mientras la pestaña "En Vivo" esté abierta, así
+// que en cuanto el pastor inicia el directo, el sitio lo refleja solo.
+// ══════════════════════════════════════════════════════════════════════════
+let liveVideoIdDetectado = null;
+
+async function findLiveVideoId(){
+  // ── Método 1: Piped API (múltiples instancias) ──────────────────────
+  const pipedInstances = [
+    'https://pipedapi.kavin.rocks',
+    'https://piped-api.garudalinux.org',
+    'https://api.piped.projectsegfau.lt',
+    'https://piped.syncit.fr/api',
+    'https://pipedapi.adminforge.de'
+  ];
+  for (const base of pipedInstances) {
+    try {
+      const res = await fetch(`${base}/channel/${YT_CHANNEL_ID}`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const streams = data.relatedStreams || [];
+      const live = streams.find(s => s.type === 'stream' && (s.isLive === true || s.live === true || s.duration === -1));
+      if (live && live.url) {
+        const m = live.url.match(/[?&]v=([\w-]{11})|\/v\/([\w-]{11})|youtu\.be\/([\w-]{11})/);
+        if (m) return m[1] || m[2] || m[3];
+      }
+    } catch (e) { /* siguiente instancia */ }
+  }
+
+  // ── Método 2: Invidious API (múltiples instancias) ──────────────────
+  const invidiousInstances = [
+    'https://invidious.snopyta.org',
+    'https://yewtu.be',
+    'https://invidious.namazso.eu',
+    'https://inv.riverside.rocks',
+    'https://invidious.slipfox.xyz'
+  ];
+  for (const base of invidiousInstances) {
+    try {
+      const res = await fetch(`${base}/api/v1/channels/${YT_CHANNEL_ID}/streams`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const videos = Array.isArray(data) ? data : (data.videos || []);
+      const live = videos.find(v => v.liveNow === true || v.type === 'stream');
+      if (live && live.videoId) return live.videoId;
+    } catch (e) { /* siguiente instancia */ }
+  }
+
+  // ── Método 3: RSS feed del canal vía rss2json ───────────────────────
+  try {
+    const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${YT_CHANNEL_ID}`);
+    const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`, { signal: AbortSignal.timeout(6000) });
+    if (res.ok) {
+      const data = await res.json();
+      const items = data.items || [];
+      if (items.length > 0) {
+        const first = items[0];
+        const pubDate = new Date(first.pubDate);
+        const hoursOld = (Date.now() - pubDate) / 3600000;
+        const looksLive = /live|en vivo|directo|culto|servicio/i.test(first.title || '');
+        if (hoursOld < 12 || looksLive) {
+          const m = (first.link || '').match(/[?&]v=([\w-]{11})/);
+          if (m) return m[1];
+        }
+      }
+    }
+  } catch (e) { /* método 3 falló */ }
+
+  return null;
+}
+
+// Revisa si hay un directo activo y, si lo encuentra, sustituye el iframe
+// por el embed directo del video (más confiable que el embed por canal).
+// Solo actúa si seguimos en la pestaña "live" y no hay una playlist manual
+// activa desde el panel de líderes (esa siempre tiene prioridad).
+async function actualizarLiveDetectado(){
+  if (currentTab !== 'live') return;
+  const dataAdmin = transmisionCache['live'];
+  if (dataAdmin && dataAdmin.activo && dataAdmin.playlistId) return; // override manual activo
+
+  const id = await findLiveVideoId();
+  if (id === liveVideoIdDetectado) return; // sin cambios
+  liveVideoIdDetectado = id;
+
+  if (currentTab !== 'live') return; // pudo cambiar mientras esperábamos la respuesta
+  const dataAdmin2 = transmisionCache['live'];
+  if (dataAdmin2 && dataAdmin2.activo && dataAdmin2.playlistId) return;
+
+  const iframe = document.getElementById('liveFrame');
+  if (!iframe) return;
+  iframe.style.display = 'block';
+  iframe.src = id
+    ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`
+    : DEFAULT_LIVE_SRC;
+}
+
+// Primera revisión al cargar, y luego cada 90s mientras el sitio esté abierto
+// (así el video aparece solo, sin recargar la página, apenas se inicia el directo).
+actualizarLiveDetectado();
+setInterval(actualizarLiveDetectado, 90 * 1000);
 
 function ytEmbedUrl(playlistId, autoplay){
   if(!playlistId) return null;
@@ -192,6 +306,7 @@ window.setTab = function(btn, tab){
   btn.classList.add('active');
   currentTab = tab;
   pintarTab(tab);
+  if (tab === 'live') actualizarLiveDetectado();
 };
 
 // Escucha en vivo los 4 documentos; si el admin guarda algo, se actualiza
