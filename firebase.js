@@ -1,9 +1,12 @@
-// ══ FIREBASE — Peticiones de Oración ══
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, serverTimestamp,
-         query, orderBy, onSnapshot, doc }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+// ══════════════════════════════════════════════════════════════════════════
+// FIREBASE — Peticiones de Oración, Galería y Panel de Transmisión (admin)
+//
+// Carga RESISTENTE: si Google/Firebase está lento o bloqueado en la red del
+// visitante, esto ya NO puede colgar ni romper el resto del sitio. Se
+// intenta con un límite de 8s; si falla, el resto de la página (horarios,
+// ministerios, formulario que igual abre WhatsApp, video en vivo con
+// detección propia, etc.) sigue funcionando con total normalidad.
+// ══════════════════════════════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey:            "AIzaSyCvanvEBZC8Pr9S2Vp3GhMx7uIHz4aZnxo",
   authDomain:        "iglesia-cbc.firebaseapp.com",
@@ -13,8 +16,31 @@ const firebaseConfig = {
   appId:             "1:365457083043:web:b12ecdd14e17fa2a864d16"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+let db = null;
+let fs = null; // { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc }
+
+function conTiempoLimite(promesa, ms){
+  return Promise.race([
+    promesa,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('tiempo agotado')), ms))
+  ]);
+}
+
+async function initFirebase(){
+  try {
+    const [{ initializeApp }, fsMod] = await conTiempoLimite(Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")
+    ]), 8000);
+    fs = fsMod;
+    const app = initializeApp(firebaseConfig);
+    db = fs.getFirestore(app);
+    return true;
+  } catch (e) {
+    console.warn('Firebase no disponible (red lenta o bloqueada); el sitio sigue funcionando sin las funciones en vivo:', e.message);
+    return false;
+  }
+}
 
 // ── NÚMERO WHATSAPP DEL PASTOR ──
 // Cambia este número por el real (solo dígitos, con código de país)
@@ -26,19 +52,22 @@ window._savePrayer = async (nombre, correo, tipo, peticion) => {
     hour:'2-digit', minute:'2-digit'
   });
 
-  // 1️⃣ Guardar en Firebase Firestore
-  try {
-    await addDoc(collection(db, "peticiones"), {
-      nombre, correo, tipo, peticion,
-      fecha, orado: false,
-      origen: "Sitio Web",
-      creadoEn: serverTimestamp()
-    });
-  } catch(e) {
-    console.warn("Firebase error:", e.message);
+  // 1️⃣ Guardar en Firebase Firestore (si está disponible)
+  if (db && fs) {
+    try {
+      await fs.addDoc(fs.collection(db, "peticiones"), {
+        nombre, correo, tipo, peticion,
+        fecha, orado: false,
+        origen: "Sitio Web",
+        creadoEn: fs.serverTimestamp()
+      });
+    } catch(e) {
+      console.warn("Firebase error:", e.message);
+    }
   }
 
-  // 2️⃣ Notificar al pastor por WhatsApp
+  // 2️⃣ Notificar al pastor por WhatsApp (esto SIEMPRE funciona,
+  //     incluso si Firebase no cargó)
   const msg = encodeURIComponent(
     `🙏 *NUEVA PETICIÓN DE ORACIÓN*\n\n` +
     `👤 *Nombre:* ${nombre}\n` +
@@ -52,7 +81,8 @@ window._savePrayer = async (nombre, correo, tipo, peticion) => {
 
 // ── GALERÍA — fotos y videos subidos desde el admin ──
 // Si hay contenido en Firestore, reemplaza la galería fija del HTML.
-// Si la colección está vacía (o falla), se deja la galería fija tal cual está.
+// Si la colección está vacía (o Firebase no cargó), se deja la galería
+// fija del HTML tal cual está — nunca se queda en blanco.
 // Convierte la URL de un video de Cloudinary en una miniatura de imagen
 // para no forzar la descarga del video completo solo para mostrarlo en la cuadrícula
 function cloudinaryVideoThumb(url){
@@ -62,9 +92,9 @@ function cloudinaryVideoThumb(url){
 
 function cargarGaleriaPublica(){
   const grid = document.getElementById('galeriaGrid');
-  if(!grid) return;
-  const q = query(collection(db,'galeria'), orderBy('creadoEn','desc'));
-  onSnapshot(q, snap => {
+  if(!grid || !db || !fs) return;
+  const q = fs.query(fs.collection(db,'galeria'), fs.orderBy('creadoEn','desc'));
+  fs.onSnapshot(q, snap => {
     if(snap.empty) return; // sin fotos en Firebase: se conserva la galería fija
     const clases = ['g1','g2','g3','g4','g5','g6'];
     grid.innerHTML = '';
@@ -122,36 +152,131 @@ function cargarGaleriaPublica(){
     });
   }, err => console.warn('Galería Firebase error:', err.message));
 }
-cargarGaleriaPublica();
 
-// ── TRANSMISIÓN — conecta las pestañas En Vivo / Sermones / Alabanza / Niños ──
-// Todo se hace por JavaScript; no se toca la estructura de index.html.
-const YT_CHANNEL_ID   = 'UCA_dlOwtkTyg9VdtudhXEXQ';
-const DEFAULT_LIVE_SRC = `https://www.youtube.com/embed/live_stream?channel=${YT_CHANNEL_ID}&autoplay=1&mute=1`;
+// ══════════════════════════════════════════════════════════════════════════
+// TRANSMISIÓN — pestañas En Vivo / Sermones / Alabanza / Niños
+//
+// MODELO: "fachada" (click-to-play). El elemento #liveFrame empieza como un
+// simple div con un botón de reproducir — NUNCA se crea el iframe de YouTube
+// hasta que la persona hace clic. Así, si YouTube devuelve algún error de
+// embed (Error 153, restricciones de referrer, etc.), NUNCA aparece solo al
+// cargar la página — como mucho, al hacer clic, y con un clic real del
+// usuario YouTube permite mucho más (autoplay incluido) que al cargar en
+// automático.
+//
+// Aun así, el video se "auto-actualiza" apenas el pastor inicia el directo:
+// cada 90s (y al abrir la pestaña "En Vivo") revisamos en segundo plano si
+// el canal está transmitiendo. Si lo está, el texto de la fachada cambia a
+// "🔴 EN VIVO — toca para ver" — no hace falta que nadie haga nada del lado
+// del admin para que esto ocurra.
+// ══════════════════════════════════════════════════════════════════════════
+
+const YT_CHANNEL_ID    = 'UCA_dlOwtkTyg9VdtudhXEXQ';
+const DEFAULT_LIVE_SRC = `https://www.youtube.com/embed/live_stream?channel=${YT_CHANNEL_ID}`;
 const transmisionCache = {};
-let currentTab = 'live';
-let videoPropioEl = null;
+let currentTab   = 'live';
+let liveVideoId  = null;   // ID detectado automáticamente del directo activo
+let iframeCreado = false;  // si ya se creó el iframe real (tras el primer clic)
+
+const LABELS = {
+  live:     { icon:'fa-circle-play', text:'Toca para ver la transmisión en vivo', textLive:'🔴 EN VIVO — Toca para ver', note:'Domingos 9:00 AM' },
+  sermon:   { icon:'fa-book-open',   text:'Toca para ver Sermones y Predicaciones', note:'Archivo de mensajes' },
+  alabanza: { icon:'fa-music',       text:'Toca para ver Videos de Alabanza', note:'Playlist de adoración' },
+  ninos:    { icon:'fa-child',       text:'Toca para ver Contenido para Niños', note:'Escuela dominical virtual' }
+};
+
+function escapeHTML(str){
+  return String(str ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── Arma la URL de embed correcta para la pestaña activa ────────────────
+function resolverSrcPestana(tab){
+  const data = transmisionCache[tab];
+
+  if(tab === 'live'){
+    if(data && data.activo && data.playlistId) return ytEmbedUrl(data.playlistId, true); // override manual del admin
+    if(liveVideoId) return `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1`;
+    return `${DEFAULT_LIVE_SRC}&autoplay=1&mute=1`;
+  }
+  if(data && data.playlistId) return ytEmbedUrl(data.playlistId, true);
+  return null; // sin contenido configurado para esta pestaña todavía
+}
+
+function ytEmbedUrl(playlistId, autoplay){
+  if(!playlistId) return null;
+  const idLimpio = playlistId.trim();
+  const esVideoSuelto = /^[\w-]{11}$/.test(idLimpio);
+  const auto = autoplay ? '&autoplay=1&mute=1' : '';
+  return esVideoSuelto
+    ? `https://www.youtube.com/embed/${idLimpio}?rel=0${auto}`
+    : `https://www.youtube.com/embed/videoseries?list=${idLimpio}${auto}`;
+}
+
+// ── Dibuja la fachada (miniatura + botón) con el texto correcto ─────────
+function pintarFachada(tab){
+  const el = document.getElementById('liveFrame');
+  if(!el || el.tagName === 'IFRAME') return; // ya se convirtió en iframe real
+  const l = LABELS[tab];
+  const esVivoActivo = tab === 'live' &&
+    ((transmisionCache.live && transmisionCache.live.activo && transmisionCache.live.playlistId) || liveVideoId);
+
+  el.innerHTML = `
+    <i class="fa-solid ${l.icon}" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+    <p>${escapeHTML(esVivoActivo ? l.textLive : l.text)}</p>
+    <small style="color:rgba(255,255,255,.5)">${escapeHTML(l.note)}</small>
+  `;
+}
+
+// ── Crea el iframe real (solo se llama desde un clic del usuario) ───────
+window._cbcPlayLive = function(){
+  const src = resolverSrcPestana(currentTab);
+  const el = document.getElementById('liveFrame');
+  if(!el) return;
+
+  if(!src){
+    // Pestaña sin contenido configurado todavía: no hacemos nada más que
+    // dejar el mensaje de "aún no hay contenido" (ya está en la fachada).
+    return;
+  }
+
+  el.outerHTML = `
+    <iframe id="liveFrame"
+      src="${src}"
+      allow="autoplay; encrypted-media; picture-in-picture"
+      allowfullscreen
+      style="width:100%;aspect-ratio:16/9;border:none;display:block">
+    </iframe>`;
+  iframeCreado = true;
+};
+
+// ── Cambia de pestaña ─────────────────────────────────────────────────
+window.setTab = function(btn, tab){
+  const tabsWrap = btn.parentElement;
+  Array.from(tabsWrap.children).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentTab = tab;
+
+  const el = document.getElementById('liveFrame');
+  if(el && el.tagName === 'IFRAME'){
+    // El usuario ya interactuó antes (el iframe existe): cambiamos el
+    // src directamente, ya no hace falta otro clic.
+    const src = resolverSrcPestana(tab);
+    if(src) el.src = src;
+  } else {
+    pintarFachada(tab);
+  }
+
+  if (tab === 'live') revisarLiveActivo();
+};
 
 // ══════════════════════════════════════════════════════════════════════════
-// DETECCIÓN AUTOMÁTICA DEL VIDEO EN VIVO — sin API Key
-//
-// El embed "embed/live_stream?channel=ID" (DEFAULT_LIVE_SRC) es el formato
-// oficial de YouTube para mostrar el directo activo de un canal, y se
-// actualiza solo en el momento en que el canal empieza a transmitir — no
-// requiere ninguna acción manual. Se usa como primera opción por ser
-// instantáneo (no depende de proxies externos).
-//
-// Como respaldo — por si ese formato falla en algún navegador/región —
-// detectamos también el ID exacto del video en vivo (si existe) a través
-// de APIs alternativas sin API Key, y si lo encontramos, sustituimos el
-// iframe por el embed directo "embed/VIDEO_ID", que es el más confiable.
-// Esto se revisa cada 90s mientras la pestaña "En Vivo" esté abierta, así
-// que en cuanto el pastor inicia el directo, el sitio lo refleja solo.
+// DETECCIÓN AUTOMÁTICA DEL DIRECTO — sin API Key
+// Revisa si el canal está transmitiendo ahora mismo, usando APIs públicas
+// alternativas (sin necesidad de que nadie del equipo configure nada).
+// Solo actualiza el TEXTO de la fachada (nunca crea el iframe solo) —
+// el iframe solo se crea con un clic real del usuario.
 // ══════════════════════════════════════════════════════════════════════════
-let liveVideoIdDetectado = null;
-
 async function findLiveVideoId(){
-  // ── Método 1: Piped API (múltiples instancias) ──────────────────────
   const pipedInstances = [
     'https://pipedapi.kavin.rocks',
     'https://piped-api.garudalinux.org',
@@ -173,7 +298,6 @@ async function findLiveVideoId(){
     } catch (e) { /* siguiente instancia */ }
   }
 
-  // ── Método 2: Invidious API (múltiples instancias) ──────────────────
   const invidiousInstances = [
     'https://invidious.snopyta.org',
     'https://yewtu.be',
@@ -192,7 +316,6 @@ async function findLiveVideoId(){
     } catch (e) { /* siguiente instancia */ }
   }
 
-  // ── Método 3: RSS feed del canal vía rss2json ───────────────────────
   try {
     const rssUrl = encodeURIComponent(`https://www.youtube.com/feeds/videos.xml?channel_id=${YT_CHANNEL_ID}`);
     const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`, { signal: AbortSignal.timeout(6000) });
@@ -215,105 +338,62 @@ async function findLiveVideoId(){
   return null;
 }
 
-// Revisa si hay un directo activo y, si lo encuentra, sustituye el iframe
-// por el embed directo del video (más confiable que el embed por canal).
-// Solo actúa si seguimos en la pestaña "live" y no hay una playlist manual
-// activa desde el panel de líderes (esa siempre tiene prioridad).
-async function actualizarLiveDetectado(){
-  if (currentTab !== 'live') return;
-  const dataAdmin = transmisionCache['live'];
-  if (dataAdmin && dataAdmin.activo && dataAdmin.playlistId) return; // override manual activo
-
+async function revisarLiveActivo(){
   const id = await findLiveVideoId();
-  if (id === liveVideoIdDetectado) return; // sin cambios
-  liveVideoIdDetectado = id;
+  if (id === liveVideoId) return; // sin cambios
+  liveVideoId = id;
 
-  if (currentTab !== 'live') return; // pudo cambiar mientras esperábamos la respuesta
-  const dataAdmin2 = transmisionCache['live'];
-  if (dataAdmin2 && dataAdmin2.activo && dataAdmin2.playlistId) return;
+  const el = document.getElementById('liveFrame');
+  if (!el) return;
 
-  const iframe = document.getElementById('liveFrame');
-  if (!iframe) return;
-  iframe.style.display = 'block';
-  iframe.src = id
-    ? `https://www.youtube.com/embed/${id}?autoplay=1&mute=1`
-    : DEFAULT_LIVE_SRC;
-}
-
-// Primera revisión al cargar, y luego cada 90s mientras el sitio esté abierto
-// (así el video aparece solo, sin recargar la página, apenas se inicia el directo).
-actualizarLiveDetectado();
-setInterval(actualizarLiveDetectado, 90 * 1000);
-
-function ytEmbedUrl(playlistId, autoplay){
-  if(!playlistId) return null;
-  const idLimpio = playlistId.trim();
-  const esVideoSuelto = /^[\w-]{11}$/.test(idLimpio);
-  const auto = autoplay ? '&autoplay=1&mute=1' : '';
-  return esVideoSuelto
-    ? `https://www.youtube.com/embed/${idLimpio}?rel=0${auto}`
-    : `https://www.youtube.com/embed/videoseries?list=${idLimpio}${auto}`;
-}
-
-function obtenerVideoPropioEl(){
-  if(videoPropioEl) return videoPropioEl;
-  const iframe = document.getElementById('liveFrame');
-  if(!iframe) return null;
-  videoPropioEl = document.createElement('video');
-  videoPropioEl.id = 'liveFrameVideoPropio';
-  videoPropioEl.controls = true;
-  videoPropioEl.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;display:none;background:#000';
-  iframe.insertAdjacentElement('afterend', videoPropioEl);
-  return videoPropioEl;
-}
-
-function pintarTab(tab){
-  const iframe = document.getElementById('liveFrame');
-  if(!iframe) return;
-  const video = obtenerVideoPropioEl();
-  const data = transmisionCache[tab];
-
-  if(tab === 'live'){
-    if(video) video.style.display = 'none';
-    iframe.style.display = 'block';
-    iframe.src = (data && data.activo && data.playlistId)
-      ? (ytEmbedUrl(data.playlistId, true) || DEFAULT_LIVE_SRC)
-      : DEFAULT_LIVE_SRC;
-    return;
-  }
-
-  if(data && data.tipo === 'video' && data.videoUrl){
-    iframe.style.display = 'none';
-    if(video){
-      video.src = data.videoUrl;
-      video.style.display = 'block';
-      video.play().catch(()=>{});
+  if (el.tagName === 'IFRAME') {
+    // Ya se estaba reproduciendo algo: si aparece un nuevo directo y no hay
+    // override manual del admin, lo actualizamos sin que el usuario haga nada.
+    if (currentTab === 'live') {
+      const data = transmisionCache.live;
+      if (!(data && data.activo && data.playlistId) && liveVideoId) {
+        el.src = `https://www.youtube.com/embed/${liveVideoId}?autoplay=1&mute=1`;
+      }
     }
-  } else if(data && data.playlistId){
-    if(video) video.style.display = 'none';
-    iframe.style.display = 'block';
-    iframe.src = ytEmbedUrl(data.playlistId, false);
-  } else {
-    if(video) video.style.display = 'none';
-    iframe.style.display = 'block';
-    iframe.src = DEFAULT_LIVE_SRC;
+  } else if (currentTab === 'live') {
+    pintarFachada('live'); // solo actualiza el texto de la fachada
   }
 }
 
-window.setTab = function(btn, tab){
-  const tabsWrap = btn.parentElement;
-  Array.from(tabsWrap.children).forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTab = tab;
-  pintarTab(tab);
-  if (tab === 'live') actualizarLiveDetectado();
-};
+// Primera revisión al cargar, y luego cada 90s (así el aviso "EN VIVO"
+// aparece solo, sin recargar la página, apenas se inicia el directo).
+revisarLiveActivo();
+setInterval(revisarLiveActivo, 90 * 1000);
 
-// Escucha en vivo los 4 documentos; si el admin guarda algo, se actualiza
-// automáticamente la pestaña que esté abierta en ese momento.
-['live','sermon','alabanza','ninos'].forEach(tab=>{
-  onSnapshot(doc(db,'transmision',tab), snap=>{
-    transmisionCache[tab] = snap.exists() ? snap.data() : null;
-    if(currentTab === tab) pintarTab(tab);
-  }, err => console.warn('Transmisión Firebase error ('+tab+'):', err.message));
+// ── Escucha en vivo los 4 documentos administrables desde el panel ──────
+// (solo si Firebase cargó correctamente; si no, las pestañas siguen
+// funcionando igual con el sistema de detección automática de más arriba)
+function escucharPanelTransmision(){
+  if(!db || !fs) return;
+  ['live','sermon','alabanza','ninos'].forEach(tab=>{
+    fs.onSnapshot(fs.doc(db,'transmision',tab), snap=>{
+      transmisionCache[tab] = snap.exists() ? snap.data() : null;
+      if(currentTab !== tab) return;
+      const el = document.getElementById('liveFrame');
+      if(el && el.tagName === 'IFRAME'){
+        const src = resolverSrcPestana(tab);
+        if(src) el.src = src;
+      } else {
+        pintarFachada(tab);
+      }
+    }, err => console.warn('Transmisión Firebase error ('+tab+'):', err.message));
+  });
+}
+
+// ══ ARRANQUE ══
+// Todo lo que NO depende de Firebase (fachada del video, detección
+// automática del directo) ya se ejecutó arriba y funciona sin esperar
+// nada. Firebase se conecta en paralelo, con límite de tiempo, y si
+// falla, simplemente no se activan sus funciones — el resto del sitio
+// nunca se ve afectado.
+initFirebase().then(ok => {
+  if(ok){
+    cargarGaleriaPublica();
+    escucharPanelTransmision();
+  }
 });

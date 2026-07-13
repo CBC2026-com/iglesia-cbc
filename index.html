@@ -37,11 +37,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-  <!-- Fuentes (con display=swap para evitar bloqueo de render) -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Fuentes y Font Awesome cargados de forma NO bloqueante: si el CDN está
+       lento o inaccesible en la red del visitante, la página se sigue
+       viendo y usando con normalidad (solo se pierden fuentes/íconos
+       decorativos) en vez de quedarse "cargando" indefinidamente. -->
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap"
+        media="print" onload="this.media='all'">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Nunito:wght@300;400;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  </noscript>
 
   <!-- Hoja de estilos propia -->
   <link rel="stylesheet" href="styles.css">
@@ -268,12 +277,15 @@
 
     <div class="video-wrapper">
       <!-- Canal oficial: @comunidadbiblicacristiana -->
-      <iframe id="liveFrame"
-        src="https://www.youtube.com/embed/live_stream?channel=UCA_dlOwtkTyg9VdtudhXEXQ&autoplay=1&mute=1"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-        style="width:100%;aspect-ratio:16/9;border:none;display:block">
-      </iframe>
+      <!-- El reproductor real solo se crea cuando el usuario hace clic
+           (evita cualquier error de YouTube al cargar la página). -->
+      <div id="liveFrame" class="video-fallback" role="button" tabindex="0"
+           aria-label="Ver transmisión en vivo" onclick="window._cbcPlayLive && window._cbcPlayLive()"
+           onkeydown="if(event.key==='Enter'){window._cbcPlayLive && window._cbcPlayLive()}">
+        <i class="fa-solid fa-circle-play"></i>
+        <p id="liveFrameLabel">Toca para ver la transmisión en vivo</p>
+        <small id="liveFrameSub" style="color:rgba(255,255,255,.5)">Domingos 9:00 AM</small>
+      </div>
     </div>
 
     <div class="video-tabs">
