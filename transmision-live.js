@@ -65,7 +65,7 @@ const LABELS = {
 
 // ── Renderiza el reproductor según la pestaña activa y los datos disponibles ──
 function renderPlayer(){
-  const player = document.getElementById('livePlayer');
+  const player = document.getElementById('liveFrame');
   if (!player) return;
 
   const data = transmisionData[currentTab];
@@ -79,7 +79,7 @@ function renderPlayer(){
 
   if (disponible) {
     player.outerHTML = `
-      <div id="livePlayer" style="position:relative;">
+      <div id="liveFrame" style="position:relative;">
         <iframe src="https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=0"
           allowfullscreen allow="autoplay; encrypted-media" loading="lazy"
           title="${escapeHTML(l.text)} - Comunidad Bíblica Cristiana"
@@ -165,3 +165,82 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Si Firestore ya tiene un directo activo, el primer onSnapshot (arriba)
   // llegará casi de inmediato y reemplazará ese placeholder automáticamente.
 });
+
+// ══════════════════════════════════════════════════════════════════════════
+// setTab / _cbcPlayLive — expuestas globalmente para los onclick de index.html
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── setTab: cambia de pestaña usando SOLO la caché ya recibida por onSnapshot.
+// Nunca hace una petición nueva ni entra en bucle: solo lee transmisionData.
+window.setTab = function (btnEl, tab) {
+  document.querySelectorAll('.video-tab').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+
+  const disponible = window._transmision.render(tab);
+  if (!disponible) {
+    const frame = document.getElementById('liveFrame');
+    if (!frame) return;
+    const l = LABELS[tab] || LABELS.live;
+    frame.innerHTML = `
+      <i class="fa-solid ${l.icon}" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+      <p>${escapeHTML(l.emptyTitle)}</p>
+      <small style="color:rgba(255,255,255,.5)">${escapeHTML(l.emptyNote)}</small>`;
+  }
+};
+
+// ── _cbcPlayLive: clic manual en "Toca para ver la transmisión en vivo".
+// 1) Timeout de seguridad a 5s   2) try/catch para errores de red/Firestore
+// 3) Bandera _cbcPlayLiveBusy evita disparos superpuestos si el usuario
+//    hace varios clics seguidos (la causa típica de un "bucle" percibido)
+window._cbcPlayLive = async function () {
+  if (window._cbcPlayLiveBusy) return;
+  window._cbcPlayLiveBusy = true;
+
+  const frame = document.getElementById('liveFrame');
+  if (frame) {
+    frame.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+      <p>Verificando transmisión…</p>`;
+  }
+
+  try {
+    const data = await esperarDatosConTimeout('live', 5000);
+    if (data && data.activo && data.playlistId) {
+      currentTab = 'live';
+      renderPlayer();
+    } else if (frame) {
+      frame.innerHTML = `<i class="fa-solid fa-circle-play" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+        <p>No hay transmisión en vivo en este momento</p>
+        <small style="color:rgba(255,255,255,.5)">Vuelve el domingo a las 10:00 AM</small>`;
+    }
+  } catch (err) {
+    console.warn('_cbcPlayLive:', err.message);
+    if (frame) {
+      frame.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="font-size:4rem;color:var(--rose);opacity:.8;"></i>
+        <p>No se pudo verificar la transmisión. Intenta de nuevo.</p>`;
+    }
+  } finally {
+    window._cbcPlayLiveBusy = false;
+  }
+};
+
+// Resuelve con los datos de "live" en cuanto Firestore los entregue (o con lo
+// que ya esté en caché), o rechaza si tarda más de `ms` — así el clic nunca
+// se queda esperando para siempre.
+function esperarDatosConTimeout(tab, ms) {
+  return new Promise((resolve, reject) => {
+    if (transmisionData[tab] && transmisionData[tab].playlistId) {
+      resolve(transmisionData[tab]);
+      return;
+    }
+    const timer = setTimeout(() => reject(new Error('Tiempo de espera agotado')), ms);
+    const unsub = onSnapshot(doc(db, 'transmision', tab), (snap) => {
+      clearTimeout(timer);
+      unsub();
+      resolve(snap.exists() ? snap.data() : null);
+    }, (err) => {
+      clearTimeout(timer);
+      unsub();
+      reject(err);
+    });
+  });
+}
