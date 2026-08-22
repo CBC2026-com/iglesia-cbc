@@ -172,14 +172,30 @@
 
     // MutationObserver: si alguien modifica el HTML en vivo (ej. CMS),
     // los contadores se recalculan solos sin recargar la página.
+    //
+    // IMPORTANTE: actualizarMomentos() escribe dentro de #galeria (cambia
+    // el textContent de .section-sub), y #galeria es uno de los elementos
+    // observados. Sin protección, ese cambio dispara el observer de nuevo,
+    // que vuelve a llamar a actualizarMomentos(), que vuelve a disparar el
+    // observer... un bucle infinito que congela la pestaña. Por eso
+    // desconectamos el observer justo antes de tocar el DOM y lo
+    // reconectamos apenas termina, para no perder cambios reales del CMS.
+    const watchSelectors = ['#actividades','#ministerios','#horarios','#galeria','#liderazgo'];
+
+    function reconectarObserver(){
+      watchSelectors.forEach(sel=>{
+        const el = document.querySelector(sel);
+        if(el) mo.observe(el, { childList:true, subtree:true });
+      });
+    }
+
     const mo = new MutationObserver(()=>{
+      mo.disconnect();
       actualizarEventosWidget();
       actualizarMomentos();
+      reconectarObserver();
     });
-    ['#actividades','#ministerios','#horarios','#galeria','#liderazgo'].forEach(sel=>{
-      const el = document.querySelector(sel);
-      if(el) mo.observe(el, { childList:true, subtree:true });
-    });
+    reconectarObserver();
   });
 
   // Toast
